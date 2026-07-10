@@ -100,8 +100,12 @@ export default function PostBox() {
           ></textarea>
 
           {imagePreview && (
-            <div className="relative mt-4 mb-2 w-full max-h-80 overflow-hidden rounded-sm border border-zinc-100 bg-zinc-50">
-              <img src={imagePreview} alt="Preview" className="w-full h-full object-contain mx-auto" />
+            <div className="relative mt-4 mb-2 w-full bg-zinc-50 border border-zinc-100 rounded-sm overflow-hidden">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full h-auto max-h-[500px] object-contain mx-auto"
+              />
               <button
                 onClick={removeImage}
                 className="absolute top-2 right-2 bg-white/90 p-1 rounded-full text-zinc-900 hover:text-red-800 transition-colors shadow-sm"

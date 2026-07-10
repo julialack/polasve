@@ -167,7 +167,12 @@ export default function FeedList() {
             <p className="text-zinc-600 font-light leading-relaxed mb-4">{post.content}</p>
             {post.image_url && (
               <div className="mb-6 rounded-sm overflow-hidden border border-zinc-100 shadow-sm bg-zinc-50">
-                <img src={post.image_url} alt="Content" className="w-full max-h-[500px] object-contain mx-auto" />
+                <img
+                  src={post.image_url}
+                  alt="Content"
+                  className="w-full h-auto max-h-[600px] object-contain mx-auto"
+                  onError={(e) => (e.currentTarget.style.display = 'none')}
+                />
               </div>
             )}
 

@@ -8,7 +8,10 @@ export async function createClient() {
 
   if (!url || !key) {
     return createServerClient('https://placeholder.supabase.co', 'placeholder', {
-      cookies: { getAll: () => [], setAll: () => {} }
+      cookies: {
+        getAll: () => [],
+        setAll: () => {}
+      }
     })
   }
 
@@ -17,7 +20,6 @@ export async function createClient() {
     key,
     {
       cookies: {
-// ... rest as before
         getAll() {
           return cookieStore.getAll()
         },

@@ -80,13 +80,12 @@ export default function Navbar() {
   return (
     <header className="border-b border-zinc-100 bg-white/80 backdrop-blur-md px-4 md:px-6 py-4 md:py-5 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto flex justify-between items-center">
-        <Link href="/" className="text-xl md:text-2xl font-bold tracking-tight text-red-800 flex items-center gap-2 md:gap-3">
+        <Link href="/" className="flex items-center gap-2 md:gap-3">
           <img
             src="/logo.png"
             alt="Polasve"
-            className="h-8 md:h-10 w-auto object-contain"
+            className="h-10 md:h-14 w-auto object-contain"
           />
-          <span className="tracking-widest font-light">POLA</span><span className="font-bold">SVE</span>
         </Link>
 
         <nav className="flex gap-4 md:gap-8 items-center">
