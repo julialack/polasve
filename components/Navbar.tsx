@@ -81,10 +81,11 @@ export default function Navbar() {
     <header className="border-b border-zinc-100 bg-white/80 backdrop-blur-md px-4 md:px-6 py-4 md:py-5 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto flex justify-between items-center">
         <Link href="/" className="text-xl md:text-2xl font-bold tracking-tight text-red-800 flex items-center gap-2 md:gap-3">
-          <div className="w-8 h-5 md:w-10 md:h-6 bg-white border border-zinc-200 flex flex-col overflow-hidden rounded-sm shadow-sm">
-            <div className="h-1/2 bg-white"></div>
-            <div className="h-1/2 bg-red-800"></div>
-          </div>
+          <img
+            src="/logo.png"
+            alt="Polasve"
+            className="h-8 md:h-10 w-auto object-contain"
+          />
           <span className="tracking-widest font-light">POLA</span><span className="font-bold">SVE</span>
         </Link>
 
