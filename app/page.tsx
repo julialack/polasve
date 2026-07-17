@@ -106,21 +106,21 @@ export default async function Home() {
               <div className="p-4">
                 <div className="grid md:grid-cols-2 gap-6">
                   <Link href="/nyheter" className="group">
-                    <div className="aspect-video bg-zinc-100 mb-3 overflow-hidden rounded-sm">
-                      <img src="https://images.unsplash.com/photo-1590424600305-674393608226?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="News" />
+                    <div className="aspect-video bg-zinc-100 mb-3 overflow-hidden rounded-sm border border-zinc-100">
+                      <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="News" />
                     </div>
-                    <h3 className="font-bold text-sm text-[#003366] leading-tight group-hover:underline italic">Polsk kulturvecka i Sverige 2026</h3>
-                    <p className="text-[10px] text-zinc-500 mt-2 line-clamp-2">Läs mer om årets största händelse för polska nätverk i hela landet...</p>
+                    <h3 className="font-bold text-sm text-[#003366] group-hover:underline italic leading-snug">Polsk kulturvecka i Sverige 2026</h3>
+                    <p className="text-[10px] text-zinc-500 mt-2 line-clamp-2 leading-relaxed">Upplev konst, musik och film i Stockholm. Läs mer om årets största händelse för communityt...</p>
                   </Link>
                   <div className="space-y-4">
                     {[
-                      { title: "Nya jobbmöjligheter inom IT", img: "5" },
-                      { title: "Utställning i Göteborg nästa vecka", img: "6" },
-                      { title: "Tips för dig som söker bostad", img: "7" },
+                      { title: "Nya jobbmöjligheter inom IT-sektorn", img: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=200&auto=format&fit=crop" },
+                      { title: "Utställning i Göteborg nästa vecka", img: "https://images.unsplash.com/photo-1531050171651-61afc2836520?q=80&w=200&auto=format&fit=crop" },
+                      { title: "Tips för dig som söker bostad i Malmö", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=200&auto=format&fit=crop" },
                     ].map((news, i) => (
                       <Link key={i} href="/nyheter" className="flex gap-3 group border-b border-zinc-50 pb-2 last:border-0 last:pb-0">
-                        <div className="w-12 h-12 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden">
-                           <img src={`https://images.unsplash.com/photo-15${news.img}0000000000?q=80&w=100&auto=format&fit=crop`} className="w-full h-full object-cover" alt="" />
+                        <div className="w-12 h-12 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border border-zinc-100">
+                           <img src={news.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                         </div>
                         <h4 className="text-[11px] font-bold text-zinc-800 leading-tight group-hover:text-blue-800 transition-colors italic">{news.title}</h4>
                       </Link>
@@ -166,10 +166,25 @@ export default async function Home() {
                     </Link>
                   ))
                 ) : (
-                  <p className="text-[10px] text-zinc-400 font-serif italic text-center py-4">Inga premium-annonser just nu.</p>
+                   /* Fallback Bazar items */
+                  [
+                    { title: "Hantverkstjänster", img: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=200&auto=format&fit=crop", price: "Fast pris" },
+                    { title: "Bostad i Warszawa", img: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=200&auto=format&fit=crop", price: "7500 kr" },
+                    { title: "Transport SE-PL", img: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=200&auto=format&fit=crop", price: "Från 500 kr" }
+                  ].map((item, i) => (
+                    <div key={i} className="flex gap-4 border-b border-zinc-50 last:border-0 pb-4 last:pb-0 opacity-80">
+                      <div className="w-16 h-16 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden">
+                        <img src={item.img} className="w-full h-full object-cover" alt="" />
+                      </div>
+                      <div>
+                        <h4 className="text-[11px] font-bold text-[#003366] leading-tight italic">{item.title}</h4>
+                        <p className="text-[10px] text-[#a11a2d] font-bold mt-1">{item.price}</p>
+                      </div>
+                    </div>
+                  ))
                 )}
               </div>
-              <Link href="/annonser" className="block text-center py-3 bg-zinc-50 text-[10px] font-black text-zinc-500 hover:text-[#a11a2d] uppercase tracking-[0.2em] border-t border-zinc-100 transition-colors">
+              <Link href="/annonser" className="block text-center py-3 bg-zinc-50 text-[10px] font-black text-zinc-500 hover:text-red-800 uppercase tracking-[0.2em] border-t border-zinc-100 transition-colors">
                 Visa Bazar &gt;&gt;
               </Link>
             </section>
@@ -178,7 +193,7 @@ export default async function Home() {
                 <div className="bg-[#003366] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider">Sverigekartan</div>
                <div className="aspect-[3/4] bg-zinc-50 border border-zinc-200 relative overflow-hidden">
                   <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2035.123!2d18.0649!3d59.3293!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x465f9d60995703f5%3A0x1d374463428d000!2sStockholm!5e0!3m2!1ssv!2sse!4v123456789"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4070.245!2d17.91!3d59.32!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x465f763200b25555%3A0x7d0a2862d23977e!2sSverige!5e0!3m2!1ssv!2sse!4v123456789"
                     className="w-full h-full border-0 grayscale opacity-80"
                     allowFullScreen={false}
                     loading="lazy"
@@ -189,13 +204,6 @@ export default async function Home() {
                   </div>
                </div>
             </section>
-
-            {/* Right Side Ad Banner Placeholders */}
-            <div className="space-y-4 pt-4">
-              <div className="aspect-video bg-zinc-100 flex items-center justify-center text-zinc-400 text-[10px] font-bold uppercase border border-dashed border-zinc-300 text-center px-6">
-                 Annonsplats höger
-              </div>
-            </div>
           </aside>
 
         </div>
@@ -207,7 +215,7 @@ export default async function Home() {
             <h4 className="text-white font-bold mb-4 uppercase tracking-widest text-xs italic">Polacker i Sverige</h4>
             <p className="text-[11px] leading-relaxed">Din officiella portal för nyheter, karriär och gemenskap. Vi sammanför det polska communityt i Sverige sedan 2026.</p>
           </div>
-          <div className="flex gap-16 mx-auto md:mx-0">
+          <div className="flex gap-16 mx-auto md:mx-0 text-left">
             <div>
               <h4 className="text-white font-bold mb-4 uppercase tracking-widest text-[10px]">Länkar</h4>
               <ul className="space-y-2 text-[10px]">
@@ -219,7 +227,7 @@ export default async function Home() {
           </div>
           <div className="text-right hidden md:block">
             <p className="text-white text-[11px] font-bold">© {new Date().getFullYear()} POLASVE</p>
-            <p className="text-[10px] mt-2">Skapad för communityt</p>
+            <p className="text-[10px] mt-2 uppercase tracking-widest">Gemenskap • Förtroende • Kvalitet</p>
           </div>
         </div>
       </footer>
