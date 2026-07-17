@@ -1,7 +1,9 @@
 import Link from "next/link";
 import PostBox from "@/components/feed/PostBox";
 import FeedList from "@/components/feed/FeedList";
+import SearchBar from "@/components/search/SearchBar";
 import { createClient } from "@/utils/supabase/server";
+import { Newspaper, Calendar, Box, Info, Users, ArrowRight, MapPin } from "lucide-react";
 
 async function getFeaturedAds() {
   const supabase = await createClient()
@@ -16,183 +18,208 @@ async function getFeaturedAds() {
 
 export default async function Home() {
   const featuredAds = await getFeaturedAds();
+  const today = new Date().toLocaleDateString('sv-SE', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative min-h-[70vh] md:min-h-[85vh] flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <img
-              src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2000&auto=format&fit=crop"
-              alt="Premium Architecture"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-white/90 md:bg-white/85 backdrop-blur-[1px]"></div>
+    <div className="flex flex-col min-h-screen bg-[#f8f9fa]">
+      {/* Top Portal Info Bar */}
+      <div className="bg-white border-b border-zinc-200 py-2 px-6">
+        <div className="max-w-6xl mx-auto flex justify-between items-center text-[10px] md:text-xs text-zinc-500 font-medium">
+          <div className="capitalize font-bold text-[#003366]">{today}</div>
+          <div className="flex gap-4">
+            <span className="flex items-center gap-1"><Users size={12} /> 142 online</span>
+            <span className="hidden sm:inline border-l pl-4">Besökare idag: 4 021</span>
           </div>
+        </div>
+      </div>
 
-          <div className="max-w-6xl mx-auto px-6 relative z-10 text-center py-12 md:py-20">
-            <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-zinc-200 bg-white/50 text-zinc-500 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] mb-6 md:mb-10 shadow-sm">
-              Lorem ipsum dolor sit amet
-            </div>
-            <h1 className="text-4xl md:text-8xl font-light tracking-tight text-zinc-900 mb-6 md:mb-8 leading-tight">
-              Lorem ipsum <br />
-              <span className="font-serif italic text-red-800">dolor</span> & <span className="font-serif italic text-red-800">sit amet.</span>
-            </h1>
-            <p className="text-base md:text-xl text-zinc-600 mb-8 md:mb-12 leading-relaxed max-w-2xl mx-auto font-light">
-              Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4 md:gap-6">
-              <Link href="/skapa-annons" className="bg-red-800 text-white px-8 md:px-10 py-3.5 md:py-4 rounded-full font-bold uppercase tracking-widest hover:bg-red-900 transition-all shadow-2xl shadow-red-900/20 active:scale-95 text-[10px] md:text-xs text-center">
-                Publicera Annons
-              </Link>
-              <Link href="/annonser" className="bg-white border border-zinc-200 text-zinc-900 px-8 md:px-10 py-3.5 md:py-4 rounded-full font-bold uppercase tracking-widest hover:bg-zinc-50 transition-all active:scale-95 text-[10px] md:text-xs shadow-sm text-center">
-                Utforska Marknad
-              </Link>
-            </div>
-          </div>
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px h-16 md:h-24 bg-gradient-to-b from-zinc-300 to-transparent"></div>
-        </section>
+      {/* Global Search Bar Section */}
+      <div className="bg-zinc-50 border-b border-zinc-100 py-6 px-6">
+        <div className="max-w-4xl mx-auto">
+          <SearchBar />
+        </div>
+      </div>
 
-        {/* Latest Ads */}
-        <section className="bg-zinc-50 py-16 md:py-32 border-y border-zinc-100">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-10 md:mb-16 text-center md:text-left gap-6">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-light tracking-tight text-zinc-900 uppercase tracking-[0.1em]">Utvalda <span className="font-bold">Annonser</span></h2>
-                <p className="text-zinc-500 mt-2 font-serif italic text-sm md:text-base">Kurerade för ditt intresse</p>
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-8">
+        <div className="grid lg:grid-cols-4 gap-6">
+
+          {/* LEFT SIDEBAR: Professional Links */}
+          <aside className="lg:col-span-1 space-y-6">
+            {/* Section 1: Information */}
+            <section className="bg-white shadow-sm overflow-hidden border border-zinc-200 rounded-sm">
+              <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">
+                Information
               </div>
-              <Link href="/annonser" className="text-red-800 font-bold uppercase tracking-widest text-[10px] border-b border-red-800 pb-1 hover:text-red-600 hover:border-red-600 transition-colors">
-                Se hela marknaden
-              </Link>
-            </div>
+              <div className="p-5">
+                <p className="text-[11px] text-zinc-600 leading-relaxed italic font-serif">
+                  "Samlingsplatsen för polska nätverk i Sverige. Upptäck möjligheter och gemenskap."
+                </p>
+              </div>
+            </section>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {featuredAds.length > 0 ? (
-                featuredAds.map((ad) => (
-                  <Link href={`/annonser/${ad.id}`} key={ad.id} className="group bg-white rounded-sm overflow-hidden transition-all duration-500 hover:shadow-2xl">
-                    <div className="h-64 bg-zinc-100 relative overflow-hidden">
-                       <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-sm px-3 py-1 text-[9px] font-bold uppercase tracking-widest shadow-sm z-10">Premium</div>
-                       <img
-                        src={ad.image_url || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop"}
-                        alt={ad.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
-                       />
+            {/* Section 2: Huvudmeny */}
+            <section className="bg-white p-5 border border-zinc-200 shadow-sm relative overflow-hidden rounded-sm">
+               <div className="absolute top-0 left-0 w-1 h-full bg-[#003366]"></div>
+               <h4 className="text-[10px] font-black uppercase text-[#003366] mb-4 tracking-widest">Huvudmeny</h4>
+               <nav className="flex flex-col space-y-1">
+                {[
+                  { name: "Forum / Bazar", href: "/annonser", icon: <Box size={14} /> },
+                  { name: "Senaste Nyheterna", href: "/nyheter", icon: <Newspaper size={14} /> },
+                  { name: "Event & Kultur", href: "/evenemang", icon: <Calendar size={14} /> },
+                  { name: "Om oss / Kontakt", href: "/om-oss", icon: <Info size={14} /> },
+                ].map((item) => (
+                  <Link key={item.name} href={item.href} className="flex items-center justify-between py-2.5 hover:text-red-800 text-[11px] font-bold text-[#003366] border-b border-zinc-50 last:border-0 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      {item.icon}
+                      {item.name}
                     </div>
-                    <div className="p-8">
-                      <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.2em] mb-3">{ad.category} • Just nu</p>
-                      <h4 className="font-bold text-lg mb-4 text-zinc-900 group-hover:text-red-800 transition-colors line-clamp-1">{ad.title}</h4>
-                      <div className="font-serif italic text-red-800 border-t border-zinc-100 pt-4">{ad.price || 'Pris på förfrågan'}</div>
-                    </div>
+                    <ArrowRight size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
-                ))
-              ) : (
-                /* Fallback if no premium ads exist yet */
-                [1, 2, 3, 4].map((i) => (
-                  <div key={i} className="group bg-white rounded-sm overflow-hidden opacity-40">
-                    <div className="h-64 bg-zinc-100 relative overflow-hidden flex items-center justify-center">
-                      <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-zinc-300 italic">Väntar på premium</span>
+                ))}
+              </nav>
+            </section>
+
+            {/* Ad Banner Placeholders */}
+            <div className="space-y-4">
+              <div className="aspect-[3/4] bg-zinc-100 flex items-center justify-center text-zinc-400 text-[10px] font-bold uppercase border border-dashed border-zinc-300 text-center px-6">
+                 Här kan ni annonsera ert företag
+              </div>
+              <div className="aspect-[3/4] bg-zinc-100 flex items-center justify-center text-zinc-400 text-[10px] font-bold uppercase border border-dashed border-zinc-300 text-center px-6">
+                 Ledig annonsplats
+              </div>
+            </div>
+          </aside>
+
+          {/* MAIN CONTENT: News integrated with Feed */}
+          <div className="lg:col-span-2 space-y-6">
+
+            {/* Top Featured News */}
+            <section className="bg-white border border-zinc-200 shadow-sm">
+              <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">
+                Toppnyheter
+              </div>
+              <div className="p-4">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Link href="/nyheter" className="group">
+                    <div className="aspect-video bg-zinc-100 mb-3 overflow-hidden rounded-sm">
+                      <img src="https://images.unsplash.com/photo-1590424600305-674393608226?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="News" />
                     </div>
-                    <div className="p-8">
-                      <div className="h-2 w-20 bg-zinc-100 mb-4"></div>
-                      <div className="h-4 w-full bg-zinc-100 mb-4"></div>
-                      <div className="h-4 w-24 bg-zinc-50 border-t border-zinc-100 pt-4 mt-4"></div>
-                    </div>
+                    <h3 className="font-bold text-sm text-[#003366] leading-tight group-hover:underline italic">Polsk kulturvecka i Sverige 2026</h3>
+                    <p className="text-[10px] text-zinc-500 mt-2 line-clamp-2">Läs mer om årets största händelse för polska nätverk i hela landet...</p>
+                  </Link>
+                  <div className="space-y-4">
+                    {[
+                      { title: "Nya jobbmöjligheter inom IT", img: "5" },
+                      { title: "Utställning i Göteborg nästa vecka", img: "6" },
+                      { title: "Tips för dig som söker bostad", img: "7" },
+                    ].map((news, i) => (
+                      <Link key={i} href="/nyheter" className="flex gap-3 group border-b border-zinc-50 pb-2 last:border-0 last:pb-0">
+                        <div className="w-12 h-12 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden">
+                           <img src={`https://images.unsplash.com/photo-15${news.img}0000000000?q=80&w=100&auto=format&fit=crop`} className="w-full h-full object-cover" alt="" />
+                        </div>
+                        <h4 className="text-[11px] font-bold text-zinc-800 leading-tight group-hover:text-blue-800 transition-colors italic">{news.title}</h4>
+                      </Link>
+                    ))}
                   </div>
-                ))
-              )}
-            </div>
-          </div>
-        </section>
+                </div>
+              </div>
+            </section>
 
-        {/* Feed & Sidebar Section */}
-        <section className="bg-white py-16 md:py-32">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="text-center mb-10 md:mb-16">
-              <h2 className="text-2xl md:text-3xl font-light tracking-widest uppercase mb-4 text-zinc-900">Community <span className="font-bold">Flöde</span></h2>
-              <div className="w-12 h-px bg-red-800 mx-auto mb-6"></div>
-              <p className="text-zinc-500 font-serif italic text-sm md:text-base">Dela tankar och idéer med andra medlemmar.</p>
-            </div>
-
-            <div className="grid lg:grid-cols-3 gap-16">
-              <div className="lg:col-span-2">
+            {/* Community Feed */}
+            <section className="bg-white border border-zinc-200 shadow-sm overflow-hidden">
+              <div className="bg-[#003366] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider flex justify-between items-center">
+                <span>Community Flöde - Realtid</span>
+                <span className="flex h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
+              </div>
+              <div className="p-4 md:p-6">
                 <PostBox />
                 <FeedList />
               </div>
+            </section>
+          </div>
 
-              {/* Sidebar Ads Column */}
-              <div className="lg:col-span-1 space-y-12">
-                <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300 mb-6">Utvalt för dig</h3>
+          {/* RIGHT SIDEBAR: Marketplace & Cards */}
+          <aside className="lg:col-span-1 space-y-6">
+            <section className="bg-white shadow-sm overflow-hidden border border-zinc-200">
+              <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">
+                Bazar - Premium
+              </div>
+              <div className="p-4 space-y-5">
+                {featuredAds.length > 0 ? (
+                  featuredAds.map((ad) => (
+                    <Link href={`/annonser/${ad.id}`} key={ad.id} className="block group border-b border-zinc-100 last:border-0 pb-4 last:pb-0">
+                      <div className="flex gap-4">
+                        <div className="w-16 h-16 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border border-zinc-100">
+                          <img src={ad.image_url || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                        </div>
+                        <div>
+                          <h4 className="text-[11px] font-bold text-[#003366] group-hover:underline leading-tight italic">{ad.title}</h4>
+                          <p className="text-[10px] text-[#a11a2d] font-bold mt-1">{ad.price || 'Diskuteras'}</p>
+                          <p className="text-[9px] text-zinc-400 uppercase tracking-tighter mt-0.5 font-bold">📍 {ad.location}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-[10px] text-zinc-400 font-serif italic text-center py-4">Inga premium-annonser just nu.</p>
+                )}
+              </div>
+              <Link href="/annonser" className="block text-center py-3 bg-zinc-50 text-[10px] font-black text-zinc-500 hover:text-[#a11a2d] uppercase tracking-[0.2em] border-t border-zinc-100 transition-colors">
+                Visa Bazar &gt;&gt;
+              </Link>
+            </section>
 
-                <div className="group cursor-pointer">
-                  <div className="relative h-96 w-full overflow-hidden mb-6">
-                    <img
-                      src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=800&auto=format&fit=crop"
-                      alt="Snickarjobb"
-                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500"></div>
-                    <div className="absolute top-6 right-6 bg-white px-4 py-1.5 text-[9px] font-bold uppercase tracking-widest shadow-xl text-red-800">
-                      Karriär
-                    </div>
+            <section className="bg-white border border-zinc-200 p-0 overflow-hidden shadow-sm">
+                <div className="bg-[#003366] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider">Sverigekartan</div>
+               <div className="aspect-[3/4] bg-zinc-50 border border-zinc-200 relative overflow-hidden">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2035.123!2d18.0649!3d59.3293!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x465f9d60995703f5%3A0x1d374463428d000!2sStockholm!5e0!3m2!1ssv!2sse!4v123456789"
+                    className="w-full h-full border-0 grayscale opacity-80"
+                    allowFullScreen={false}
+                    loading="lazy"
+                  ></iframe>
+                  <div className="absolute bottom-4 left-4 right-4 bg-white/90 p-3 shadow-lg border border-zinc-200 text-center">
+                    <p className="text-[10px] text-[#003366] font-bold uppercase">Hitta Annonser på kartan</p>
+                    <button className="mt-2 text-[9px] font-black uppercase tracking-widest text-red-800 border-b border-red-800">Öppna Karta</button>
                   </div>
-                  <h4 className="font-bold text-sm uppercase tracking-[0.2em] text-zinc-900 mb-2">Snickarjobb under semestertider</h4>
-                  <p className="text-zinc-500 text-xs font-serif italic leading-relaxed mb-6">
-                    Säkra ditt nästa projekt inför sommaren. Vi matchar erfarna hantverkare med exklusiva renoveringsuppdrag i hela landet.
-                  </p>
-                  <button className="text-[9px] font-bold uppercase tracking-widest text-red-800 border-b border-red-800 pb-1 hover:text-red-600 hover:border-red-600 transition-colors">
-                    Visa uppdrag
-                  </button>
-                </div>
+               </div>
+            </section>
 
-                <div className="bg-zinc-950 p-10 text-white shadow-2xl">
-                  <span className="text-[8px] font-bold uppercase tracking-[0.4em] text-red-500 mb-6 block">Kultur</span>
-                  <h4 className="text-2xl font-light tracking-tight mb-6 italic font-serif leading-tight">Polsk konstvisning <br />i Malmö</h4>
-                  <p className="text-zinc-400 text-xs font-light leading-relaxed mb-8">
-                    En unik möjlighet att uppleva samtida polsk konst i hjärtat av Malmö. Exklusiv vernissage för POLASVE-medlemmar.
-                  </p>
-                  <button className="w-full py-4 border border-white/10 hover:border-white/40 transition-all text-[9px] font-bold uppercase tracking-widest">
-                    Boka plats
-                  </button>
-                </div>
-
-                <div className="pt-10">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest mb-6 border-b border-zinc-100 pb-4 text-zinc-300">Rekommenderade Tjänster</h4>
-                  <ul className="space-y-6">
-                    <li className="group cursor-pointer">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-bold uppercase tracking-widest text-zinc-800 group-hover:text-red-800 transition-colors">Polska Affärsjurister</span>
-                        <span className="font-serif italic text-[10px] text-zinc-300">Premium</span>
-                      </div>
-                      <p className="text-[10px] text-zinc-400 font-light">Specialister på internationell rätt.</p>
-                    </li>
-                    <li className="group cursor-pointer border-t border-zinc-50 pt-6">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-bold uppercase tracking-widest text-zinc-800 group-hover:text-red-800 transition-colors">Logistik SE - PL</span>
-                        <span className="font-serif italic text-[10px] text-zinc-300">Veckovis</span>
-                      </div>
-                      <p className="text-[10px] text-zinc-400 font-light">Säkra transporter med full försäkring.</p>
-                    </li>
-                  </ul>
-                </div>
+            {/* Right Side Ad Banner Placeholders */}
+            <div className="space-y-4 pt-4">
+              <div className="aspect-video bg-zinc-100 flex items-center justify-center text-zinc-400 text-[10px] font-bold uppercase border border-dashed border-zinc-300 text-center px-6">
+                 Annonsplats höger
               </div>
             </div>
-          </div>
-        </section>
+          </aside>
+
+        </div>
       </main>
 
-      <footer className="bg-zinc-50 border-t border-zinc-100 py-20 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
-          <div className="text-2xl font-light tracking-widest uppercase">
-            POLA<span className="font-bold text-red-800">SVE</span>
+      <footer className="bg-zinc-900 text-zinc-400 py-12 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12 text-center md:text-left">
+          <div className="max-w-xs">
+            <h4 className="text-white font-bold mb-4 uppercase tracking-widest text-xs italic">Polacker i Sverige</h4>
+            <p className="text-[11px] leading-relaxed">Din officiella portal för nyheter, karriär och gemenskap. Vi sammanför det polska communityt i Sverige sedan 2026.</p>
           </div>
-          <div className="flex gap-10 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">
-            <Link href="#" className="hover:text-red-800 transition-colors">Lorem ipsum</Link>
-            <Link href="#" className="hover:text-red-800 transition-colors">Dolor sit</Link>
-            <Link href="#" className="hover:text-red-800 transition-colors">Consectetur</Link>
+          <div className="flex gap-16 mx-auto md:mx-0">
+            <div>
+              <h4 className="text-white font-bold mb-4 uppercase tracking-widest text-[10px]">Länkar</h4>
+              <ul className="space-y-2 text-[10px]">
+                <li><Link href="/nyheter" className="hover:text-white transition-colors">Nyhetsarkiv</Link></li>
+                <li><Link href="/evenemang" className="hover:text-white transition-colors">Evenemang</Link></li>
+                <li><Link href="/annonser" className="hover:text-white transition-colors">Bazar</Link></li>
+              </ul>
+            </div>
           </div>
-          <div className="text-zinc-300 text-[10px] font-medium tracking-widest">
-            &copy; {new Date().getFullYear()} POLASVE. ALL RIGHTS RESERVED.
+          <div className="text-right hidden md:block">
+            <p className="text-white text-[11px] font-bold">© {new Date().getFullYear()} POLASVE</p>
+            <p className="text-[10px] mt-2">Skapad för communityt</p>
           </div>
         </div>
       </footer>

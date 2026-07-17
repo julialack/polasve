@@ -117,14 +117,31 @@ export default function ProfilPage() {
               ) : (
                 <div className="space-y-6">
                   {ads.map((ad) => (
-                    <div key={ad.id} className="group flex justify-between items-center p-6 border border-zinc-100 rounded-sm hover:shadow-xl hover:shadow-zinc-100 transition-all">
-                      <div>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-red-800 border border-red-800/20 px-3 py-1 rounded-full mb-2 inline-block">
-                          {ad.category}
-                        </span>
-                        <h3 className="text-lg font-light text-zinc-900 group-hover:text-red-800 transition-colors tracking-tight">
-                          {ad.title}
-                        </h3>
+                    <div key={ad.id} className="group flex flex-col md:flex-row md:items-center justify-between p-6 border border-zinc-100 rounded-sm hover:shadow-xl hover:shadow-zinc-100 transition-all gap-6">
+                      <div className="flex items-center gap-6">
+                        {/* Ad Thumbnail */}
+                        <div className="w-16 h-16 md:w-20 md:h-20 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0 border border-zinc-50">
+                          {ad.image_url ? (
+                            <img
+                              src={ad.image_url}
+                              alt={ad.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[8px] font-bold uppercase tracking-widest text-center px-1">
+                              Ingen bild
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-red-800 border border-red-800/20 px-3 py-1 rounded-full mb-2 inline-block">
+                            {ad.category}
+                          </span>
+                          <h3 className="text-lg font-light text-zinc-900 group-hover:text-red-800 transition-colors tracking-tight">
+                            {ad.title}
+                          </h3>
+                        </div>
                       </div>
                       <div className="flex gap-4">
                         <Link href={`/annonser/${ad.id}`} className="text-[9px] font-bold uppercase tracking-widest border border-zinc-200 px-4 py-2 hover:bg-zinc-900 hover:text-white transition-all">

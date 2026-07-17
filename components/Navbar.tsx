@@ -3,123 +3,113 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
-  const [unreadCount, setUnreadCount] = useState(0);
   const supabase = createClient();
-  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
-      if (user) {
-        fetchUnreadCount(user.id);
-      }
     };
-
     getUser();
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUnreadCount(session.user.id);
-      } else {
-        setUnreadCount(0);
-      }
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUnreadCount = async (userId: string) => {
-    const { count, error } = await supabase
-      .from('messages')
-      .select('*', { count: 'exact', head: true })
-      .eq('receiver_id', userId)
-      .eq('is_read', false);
-
-    if (!error && count !== null) {
-      setUnreadCount(count);
-    }
-  };
-
-  // Real-time subscription for new messages
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel('unread_messages')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'messages',
-          filter: `receiver_id=eq.${user.id}`,
-        },
-        () => {
-          fetchUnreadCount(user.id);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
-  };
+  const navLinks = [
+    { name: "Hem", href: "/" },
+    { name: "Forum", href: "/annonser" },
+    { name: "Nyheter", href: "/nyheter" },
+    { name: "Event", href: "/evenemang" },
+    { name: "Om Oss", href: "/om-oss" },
+  ];
 
   return (
-    <header className="border-b border-zinc-100 bg-white/80 backdrop-blur-md px-4 md:px-6 py-4 md:py-5 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto flex justify-between items-center">
-        <Link href="/" className="flex items-center gap-2 md:gap-3">
-          <img
-            src="/logo.png"
-            alt="Polasve"
-            className="h-10 md:h-14 w-auto object-contain"
-          />
+    <header className="bg-white">
+      {/* Top Part: Centered Wavy Flag */}
+      <div className="py-6 md:py-8 flex justify-center">
+        <Link href="/" className="inline-block">
+          <div className="w-24 md:w-40 h-auto">
+            <svg viewBox="0 0 120 60" className="w-full h-full drop-shadow-[0_4px_6px_rgba(0,0,0,0.1)]">
+              <defs>
+                <clipPath id="wave-path">
+                  <path d="M0 15 C 20 5, 40 25, 60 15 C 80 5, 100 25, 120 15 V 45 C 100 55, 80 35, 60 45 C 40 55, 20 35, 0 45 Z" />
+                </clipPath>
+                <linearGradient id="flag-shade" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="black" stopOpacity="0.1" />
+                  <stop offset="25%" stopColor="white" stopOpacity="0.1" />
+                  <stop offset="50%" stopColor="black" stopOpacity="0.1" />
+                  <stop offset="75%" stopColor="white" stopOpacity="0.1" />
+                  <stop offset="100%" stopColor="black" stopOpacity="0.1" />
+                </linearGradient>
+              </defs>
+              <g clipPath="url(#wave-path)">
+                <rect x="0" y="0" width="60" height="30" fill="white" />
+                <rect x="0" y="30" width="60" height="30" fill="#a11a2d" />
+                <rect x="60" y="0" width="60" height="60" fill="#006aa7" />
+                <rect x="60" y="24" width="60" height="12" fill="#fecc00" />
+                <rect x="78" y="0" width="12" height="60" fill="#fecc00" />
+                <rect x="0" y="0" width="120" height="60" fill="url(#flag-shade)" />
+              </g>
+            </svg>
+          </div>
         </Link>
-
-        <nav className="flex gap-4 md:gap-8 items-center">
-          <Link href="/annonser" className="text-[10px] md:text-xs font-semibold text-zinc-500 hover:text-red-800 transition-colors uppercase tracking-[0.1em] md:tracking-[0.2em]">
-            Annonser
-          </Link>
-
-          {user ? (
-            <>
-              <Link href="/meddelanden" className="relative text-[10px] md:text-xs font-semibold text-zinc-500 hover:text-red-800 transition-colors uppercase tracking-[0.2em]">
-                Meddelanden
-                {unreadCount > 0 && (
-                  <span className="absolute -top-2 -right-3 bg-red-600 text-white text-[8px] w-4 h-4 flex items-center justify-center rounded-full font-bold animate-pulse">
-                    {unreadCount}
-                  </span>
-                )}
-              </Link>
-              <Link href="/profil" className="text-[10px] md:text-xs font-bold border-2 border-zinc-900 text-zinc-900 px-4 md:px-6 py-2 md:py-2.5 rounded-full hover:bg-zinc-900 hover:text-white transition-all active:scale-95 uppercase tracking-widest">
-                Min Profil
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="hidden sm:block text-[10px] md:text-xs font-bold text-red-800 uppercase tracking-widest hover:underline"
-              >
-                Logga ut
-              </button>
-            </>
-          ) : (
-            <Link href="/logga-in" className="text-[10px] md:text-xs font-bold border-2 border-red-800 text-red-800 px-4 md:px-6 py-2 md:py-2.5 rounded-full hover:bg-red-800 hover:text-white transition-all active:scale-95 uppercase tracking-widest">
-              Logga in
-            </Link>
-          )}
-        </nav>
       </div>
+
+      {/* Bottom Part: Centered Links */}
+      <nav className="border-t border-zinc-100">
+        <div className="max-w-4xl mx-auto px-4">
+          <ul className="flex justify-center items-center gap-8 md:gap-16">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <li key={link.name} className="relative">
+                  <Link
+                    href={link.href}
+                    className={`block py-4 text-sm font-medium transition-colors ${
+                      isActive ? "text-[#003366]" : "text-zinc-600 hover:text-[#003366]"
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                  {isActive && (
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#003366]"></div>
+                  )}
+                </li>
+              );
+            })}
+
+            {/* Conditional Auth Links at the end */}
+            {user ? (
+              <li className="relative">
+                <Link
+                  href="/profil"
+                  className={`block py-4 text-sm font-bold transition-colors ${
+                    pathname === "/profil" ? "text-zinc-900" : "text-zinc-600 hover:text-[#003366]"
+                  }`}
+                >
+                  Profil
+                </Link>
+                {pathname === "/profil" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-zinc-900"></div>
+                )}
+              </li>
+            ) : (
+              <li>
+                <Link href="/logga-in" className="block py-4 text-sm font-bold text-[#003366] hover:underline">
+                  Logga in
+                </Link>
+              </li>
+            )}
+          </ul>
+        </div>
+      </nav>
     </header>
   );
 }

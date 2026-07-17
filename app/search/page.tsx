@@ -29,18 +29,24 @@ function SearchResultsContent() {
     setError(null)
 
     try {
-      const { data: adsData } = await supabase
+      // 1. Search in Ads - Sorted by Premium first
+      const { data: adsData, error: adsError } = await supabase
         .from('ads')
         .select('*')
         .or(`title.ilike.%${query}%,description.ilike.%${query}%,location.ilike.%${query}%`)
         .order('is_premium', { ascending: false })
         .order('created_at', { ascending: false })
 
-      const { data: postsData } = await supabase
+      if (adsError) throw adsError
+
+      // 2. Search in Posts
+      const { data: postsData, error: postsError } = await supabase
         .from('posts')
         .select('*')
         .ilike('content', `%${query}%`)
         .order('created_at', { ascending: false })
+
+      if (postsError) throw postsError
 
       setAds(adsData || [])
       setPosts(postsData || [])
@@ -61,7 +67,7 @@ function SearchResultsContent() {
   }, [query])
 
   const handleDeletePost = async (id: string) => {
-    if(confirm('Ta bort?')) {
+    if(confirm('Ta bort inlägget?')) {
       await supabase.from('posts').delete().eq('id', id)
       performSearch()
     }
@@ -80,21 +86,25 @@ function SearchResultsContent() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 space-y-4">
             <Loader2 className="w-12 h-12 text-[#003366] animate-spin" />
-            <p className="font-serif italic text-zinc-400 text-lg">Söker...</p>
+            <p className="font-serif italic text-zinc-400 text-lg">Söker igenom portalen...</p>
           </div>
         ) : (ads.length === 0 && posts.length === 0) ? (
           <div className="text-center py-20 bg-white border border-zinc-200 rounded-sm shadow-sm px-10">
             <Search className="mx-auto text-zinc-200 mb-6" size={48} />
             <h2 className="text-xl font-bold text-[#003366] mb-2">Inga träffar</h2>
-            <Link href="/" className="inline-block mt-4 text-[#003366] font-bold border-b border-[#003366]">Gå tillbaka</Link>
+            <p className="text-zinc-500 font-serif italic mb-8">Vi hittade inget som matchade din sökning.</p>
+            <Link href="/" className="inline-block bg-[#003366] text-white px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-[#a11a2d] transition-all shadow-lg">
+              Tillbaka till start
+            </Link>
           </div>
         ) : (
           <div className="space-y-16 text-left">
+            {/* Ads Results */}
             {ads.length > 0 && (
               <section>
                 <div className="flex items-center gap-4 mb-8">
                   <div className="bg-[#a11a2d] text-white px-5 py-2 text-[11px] font-bold uppercase tracking-[0.2em] shadow-sm flex items-center gap-2">
-                    <Box size={16} /> Bazar ({ads.length})
+                    <Box size={16} /> Bazar / Annonser ({ads.length})
                   </div>
                   <div className="h-px flex-1 bg-zinc-200"></div>
                 </div>
@@ -105,7 +115,7 @@ function SearchResultsContent() {
                         {ad.image_url ? (
                           <img src={ad.image_url} className="w-full h-full object-cover" alt="" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[8px] font-bold uppercase">Ingen bild</div>
+                          <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[8px] font-bold uppercase text-center px-1">Ingen bild</div>
                         )}
                         {ad.is_premium && <div className="absolute top-0 left-0 bg-[#a11a2d] text-white text-[6px] px-1 font-bold uppercase">Premium</div>}
                       </div>
@@ -121,11 +131,12 @@ function SearchResultsContent() {
               </section>
             )}
 
+            {/* Posts Results */}
             {posts.length > 0 && (
               <section>
                 <div className="flex items-center gap-4 mb-8">
                   <div className="bg-[#003366] text-white px-5 py-2 text-[11px] font-bold uppercase tracking-[0.2em] shadow-sm flex items-center gap-2">
-                    <MessageSquare size={16} /> Community ({posts.length})
+                    <MessageSquare size={16} /> Community Flöde ({posts.length})
                   </div>
                   <div className="h-px flex-1 bg-zinc-200"></div>
                 </div>
@@ -151,7 +162,7 @@ function SearchResultsContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center italic text-zinc-400">Laddar...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center italic text-zinc-400">Laddar sökresultat...</div>}>
       <SearchResultsContent />
     </Suspense>
   )

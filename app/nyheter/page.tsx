@@ -1,87 +1,67 @@
 import Link from "next/link";
 
-const MAIN_NEWS = {
-  id: 1,
-  title: "Aktuella Nyheter",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-  img: "https://images.unsplash.com/photo-1590424600305-674393608226?q=80&w=1200&auto=format&fit=crop",
-};
-
-const SIDE_NEWS = [
-  { id: 2, title: "Svensk-Polska nyheter", img: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=400&auto=format&fit=crop" },
-  { id: 3, title: "Tips för Edra Evenemang", img: "https://images.unsplash.com/photo-1511795409834-432f7b172836?q=80&w=400&auto=format&fit=crop" },
-  { id: 4, title: "Svensk-Polska evenemang nätverk", img: "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=400&auto=format&fit=crop" },
-  { id: 5, title: "Tips för Utlandssvenskar", img: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=400&auto=format&fit=crop" },
-];
-
-const GRID_NEWS = [
-  { id: 6, title: "Kultur i Stockholm", img: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=400&auto=format&fit=crop" },
-  { id: 7, title: "Mötet i Malmö", img: "https://images.unsplash.com/photo-1577495508048-b635879837f1?q=80&w=400&auto=format&fit=crop" },
-  { id: 8, title: "Gemenskap i Göteborg", img: "https://images.unsplash.com/photo-1590424600305-674393608226?q=80&w=400&auto=format&fit=crop" },
+const NEWS_ARTICLES = [
+  {
+    id: 1,
+    title: "Polsk kulturvecka i Stockholm",
+    category: "Kultur",
+    description: "Upplev det bästa av polsk konst, musik och film under en hel vecka i huvudstaden. Vernissage och konserter väntar.",
+    img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop",
+    date: "12 Juli 2026"
+  },
+  {
+    id: 2,
+    title: "Stort sug efter polska hantverkare",
+    category: "Karriär",
+    description: "Byggbranschen i Sverige rapporterar rekordhögt intresse för polsk kompetens inför sommarens alla renoveringar.",
+    img: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1000&auto=format&fit=crop",
+    date: "11 Juli 2026"
+  },
+  {
+    id: 3,
+    title: "Nya direktlinjer till Warszawa",
+    category: "Resor",
+    description: "Flygbolagen utökar antalet turer mellan Sverige och Polen för att möta den ökande efterfrågan från pendlare.",
+    img: "https://images.unsplash.com/photo-1436491865332-7a61a109c0f2?q=80&w=1000&auto=format&fit=crop",
+    date: "10 Juli 2026"
+  }
 ];
 
 export default function NyheterPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-12">
-        {/* Top Feature Section */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-16">
-          {/* Main Large Article */}
-          <div className="lg:col-span-2">
-            <Link href={`/nyheter/${MAIN_NEWS.id}`} className="group block">
-              <div className="aspect-[16/9] overflow-hidden rounded-sm mb-6 border border-zinc-100 shadow-sm">
-                <img
-                  src={MAIN_NEWS.img}
-                  alt={MAIN_NEWS.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-[#003366] mb-4 group-hover:text-blue-700 transition-colors">
-                {MAIN_NEWS.title}
-              </h2>
-              <p className="text-zinc-500 leading-relaxed max-w-2xl italic font-serif">
-                {MAIN_NEWS.description}
-              </p>
-              <div className="h-px w-full bg-zinc-100 mt-8"></div>
-            </Link>
-          </div>
-
-          {/* Right 2x2 Grid */}
-          <div className="grid grid-cols-2 gap-4 h-full">
-            {SIDE_NEWS.map((news) => (
-              <Link href={`/nyheter/${news.id}`} key={news.id} className="group block flex flex-col">
-                <div className="aspect-[4/3] overflow-hidden rounded-sm mb-3 border border-zinc-50 shadow-sm">
-                  <img
-                    src={news.img}
-                    alt={news.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <h3 className="text-sm font-bold text-[#003366] leading-tight group-hover:underline">
-                  {news.title}
-                </h3>
-                <p className="text-[10px] text-zinc-400 mt-1 italic line-clamp-1">Lorem ipsum dolor sit amet...</p>
-              </Link>
-            ))}
-          </div>
+    <div className="min-h-screen bg-[#f8f9fa] py-12">
+      <main className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold text-[#003366] uppercase tracking-tight">Senaste <span className="text-[#a11a2d]">Nyheterna</span></h1>
+          <div className="h-1 w-20 bg-[#a11a2d] mt-4"></div>
         </div>
 
-        {/* Bottom 3-column Grid */}
-        <div className="grid md:grid-cols-3 gap-8">
-          {GRID_NEWS.map((news) => (
-            <Link href={`/nyheter/${news.id}`} key={news.id} className="group block">
-              <div className="aspect-[16/10] overflow-hidden rounded-sm mb-4 border border-zinc-100 shadow-sm">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {NEWS_ARTICLES.map((article) => (
+            <div key={article.id} className="bg-white border border-zinc-200 rounded-sm overflow-hidden shadow-sm hover:shadow-md transition-all group">
+              <div className="aspect-video relative overflow-hidden">
                 <img
-                  src={news.img}
-                  alt={news.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  src={article.img}
+                  alt={article.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
+                <div className="absolute top-4 left-4 bg-[#003366] text-white text-[9px] font-bold px-3 py-1 uppercase tracking-widest">
+                  {article.category}
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-[#003366] group-hover:text-blue-700 transition-colors">
-                {news.title}
-              </h3>
-              <p className="text-sm text-zinc-500 mt-2 line-clamp-2">Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-            </Link>
+              <div className="p-6">
+                <p className="text-[10px] text-zinc-400 font-bold mb-2 uppercase tracking-widest">{article.date}</p>
+                <h2 className="text-xl font-bold text-[#003366] mb-3 group-hover:text-[#a11a2d] transition-colors line-clamp-2 italic">
+                  {article.title}
+                </h2>
+                <p className="text-sm text-zinc-600 font-light leading-relaxed line-clamp-3">
+                  {article.description}
+                </p>
+                <div className="mt-6 pt-6 border-t border-zinc-50 flex justify-end">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#003366] group-hover:gap-2 transition-all">Läs hela artikeln →</span>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </main>
