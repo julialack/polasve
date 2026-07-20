@@ -46,10 +46,10 @@ export default async function Home() {
       </div>
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-8">
-        <div className="grid lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
           {/* LEFT SIDEBAR: Professional Links */}
-          <aside className="lg:col-span-1 space-y-6">
+          <aside className="hidden lg:block lg:col-span-1 space-y-6">
             {/* Section 1: Information */}
             <section className="bg-white shadow-sm overflow-hidden border border-zinc-200 rounded-sm">
               <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">
@@ -144,7 +144,7 @@ export default async function Home() {
           </div>
 
           {/* RIGHT SIDEBAR: Marketplace & Cards */}
-          <aside className="lg:col-span-1 space-y-6">
+          <aside className="hidden lg:block lg:col-span-1 space-y-6">
             <section className="bg-white shadow-sm overflow-hidden border border-zinc-200">
               <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">
                 Bazar - Premium
