@@ -99,7 +99,34 @@ export default async function Home() {
           <div className="lg:col-span-2 space-y-6">
 
             {/* Top Featured News */}
-            <section className="bg-white border border-zinc-200 shadow-sm">
+              {/* Mobile: show premium ads instead of Toppnyheter */}
+              <section className="md:hidden bg-white border border-zinc-200 shadow-sm">
+                <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">
+                  Premiumannonser
+                </div>
+                <div className="p-4">
+                  <div className="space-y-3">
+                    {featuredAds.length > 0 ? (
+                      featuredAds.map((ad) => (
+                        <Link key={ad.id} href={`/annonser/${ad.id}`} className="flex items-center gap-3 p-2 border rounded-sm hover:shadow-sm">
+                          <div className="w-20 h-12 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden">
+                            <img loading="lazy" src={ad.image_url || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"} className="w-full h-full object-cover" alt="" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-sm font-bold text-[#003366] leading-tight truncate">{ad.title}</h4>
+                            <p className="text-[11px] text-zinc-500 mt-1 truncate">{ad.price || 'Diskuteras'}</p>
+                          </div>
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="text-[12px] text-zinc-500">Inga premiumannonser tillgängliga.</div>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              {/* Top Featured News (desktop only) */}
+              <section className="hidden md:block bg-white border border-zinc-200 shadow-sm">
               <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">
                 Toppnyheter
               </div>
