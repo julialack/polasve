@@ -107,7 +107,7 @@ export default async function Home() {
                 <div className="grid md:grid-cols-2 gap-6">
                   <Link href="/nyheter" className="group">
                     <div className="aspect-video bg-zinc-100 mb-3 overflow-hidden rounded-sm border border-zinc-100">
-                      <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="News" />
+                      <img loading="lazy" src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="News" />
                     </div>
                     <h3 className="font-bold text-sm text-[#003366] group-hover:underline italic leading-snug">Polsk kulturvecka i Sverige 2026</h3>
                     <p className="text-[10px] text-zinc-500 mt-2 line-clamp-2 leading-relaxed">Upplev konst, musik och film i Stockholm. Läs mer om årets största händelse för communityt...</p>
@@ -120,7 +120,7 @@ export default async function Home() {
                     ].map((news, i) => (
                       <Link key={i} href="/nyheter" className="flex gap-3 group border-b border-zinc-50 pb-2 last:border-0 last:pb-0">
                         <div className="w-12 h-12 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border border-zinc-100">
-                           <img src={news.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                          <img loading="lazy" src={news.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                         </div>
                         <h4 className="text-[11px] font-bold text-zinc-800 leading-tight group-hover:text-blue-800 transition-colors italic">{news.title}</h4>
                       </Link>
@@ -155,7 +155,7 @@ export default async function Home() {
                     <Link href={`/annonser/${ad.id}`} key={ad.id} className="block group border-b border-zinc-100 last:border-0 pb-4 last:pb-0">
                       <div className="flex gap-4">
                         <div className="w-16 h-16 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border border-zinc-100">
-                          <img src={ad.image_url || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                          <img loading="lazy" src={ad.image_url || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                         </div>
                         <div>
                           <h4 className="text-[11px] font-bold text-[#003366] group-hover:underline leading-tight italic">{ad.title}</h4>
@@ -173,8 +173,8 @@ export default async function Home() {
                     { title: "Transport SE-PL", img: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=200&auto=format&fit=crop", price: "Från 500 kr" }
                   ].map((item, i) => (
                     <div key={i} className="flex gap-4 border-b border-zinc-50 last:border-0 pb-4 last:pb-0 opacity-80">
-                      <div className="w-16 h-16 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden">
-                        <img src={item.img} className="w-full h-full object-cover" alt="" />
+                        <div className="w-16 h-16 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden">
+                        <img loading="lazy" src={item.img} className="w-full h-full object-cover" alt="" />
                       </div>
                       <div>
                         <h4 className="text-[11px] font-bold text-[#003366] leading-tight italic">{item.title}</h4>
@@ -198,10 +198,10 @@ export default async function Home() {
                     allowFullScreen={false}
                     loading="lazy"
                   ></iframe>
-                  <div className="absolute bottom-4 left-4 right-4 bg-white/90 p-3 shadow-lg border border-zinc-200 text-center">
-                    <p className="text-[10px] text-[#003366] font-bold uppercase">Hitta Annonser på kartan</p>
-                    <button className="mt-2 text-[9px] font-black uppercase tracking-widest text-red-800 border-b border-red-800">Öppna Karta</button>
-                  </div>
+                   <div className="absolute bottom-4 left-4 right-4 bg-white/90 p-3 shadow-lg border border-zinc-200 text-center">
+                        <p className="text-[10px] text-[#003366] font-bold uppercase">Hitta Annonser på kartan</p>
+                        <button className="mt-2 block md:inline-block w-full md:w-auto text-[11px] py-3 md:py-2 font-black uppercase tracking-widest text-red-800 border-b border-red-800">Öppna Karta</button>
+                      </div>
                </div>
             </section>
           </aside>
