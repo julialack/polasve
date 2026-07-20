@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { ChevronRight, MapPin, Tag } from 'lucide-react'
+import SearchBar from '@/components/search/SearchBar'
 
 const CATEGORIES = ["Alla", "Jobb", "Bostad", "Event", "Tjänster", "Övrigt"]
 
 export default function AnnonserPage() {
+// ...
   const [ads, setAds] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('Alla')
@@ -51,6 +53,13 @@ export default function AnnonserPage() {
           >
             + Skapa ny annons
           </Link>
+        </div>
+      </div>
+
+      {/* Global Search Bar Section */}
+      <div className="bg-zinc-50 border-b border-zinc-100 py-6 px-6">
+        <div className="max-w-4xl mx-auto">
+          <SearchBar />
         </div>
       </div>
 

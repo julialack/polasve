@@ -57,10 +57,10 @@ export default function ContactForm({ receiverId, adId, adTitle }: ContactFormPr
 
   if (sent) {
     return (
-      <div className="bg-zinc-900 p-8 rounded-sm text-center border border-red-800/30">
-        <div className="text-red-800 text-3xl mb-4 font-serif italic">✓</div>
+      <div className="bg-zinc-900 p-8 rounded-sm text-center border border-[#a11a2d]/30 shadow-2xl">
+        <div className="text-[#a11a2d] text-3xl mb-4 font-serif italic">✓</div>
         <h3 className="text-xl font-light italic font-serif mb-2 text-white">Meddelande skickat</h3>
-        <p className="text-zinc-500 text-xs font-light tracking-widest uppercase">
+        <p className="text-zinc-500 text-[10px] font-bold tracking-[0.2em] uppercase">
           Annonsören har fått ditt meddelande.
         </p>
       </div>
@@ -68,21 +68,21 @@ export default function ContactForm({ receiverId, adId, adTitle }: ContactFormPr
   }
 
   return (
-    <div className="bg-zinc-950 p-10 text-white shadow-2xl rounded-sm relative overflow-hidden">
+    <div className="bg-zinc-950 p-10 text-white shadow-2xl rounded-sm relative overflow-hidden border border-zinc-900">
       <div className="relative z-10">
-        <h3 className="text-xl font-light italic font-serif mb-6 text-white/90">Intresserad?</h3>
+        <h3 className="text-xl font-bold italic text-white/90 mb-6 uppercase tracking-tight">Intresserad?</h3>
         <form onSubmit={handleSendMessage} className="space-y-6">
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder={`Jag är intresserad av "${adTitle}"...`}
+            placeholder={`Skriv ditt meddelande här...`}
             required
-            className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-sm text-sm font-light text-zinc-300 focus:border-red-800 outline-none transition-colors min-h-[120px] resize-none"
+            className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-sm text-sm font-bold text-white focus:border-[#a11a2d] outline-none transition-colors min-h-[140px] resize-none placeholder:text-zinc-600 placeholder:font-normal"
           />
           <button
             type="submit"
             disabled={loading || !message.trim()}
-            className="w-full bg-red-800 text-white py-5 rounded-full font-bold uppercase tracking-[0.2em] hover:bg-red-900 transition-all text-[10px] shadow-xl shadow-red-900/20 disabled:bg-zinc-800 disabled:shadow-none"
+            className="w-full bg-[#a11a2d] text-white py-5 rounded-sm font-black uppercase tracking-[0.2em] hover:bg-[#8d1627] transition-all text-[11px] shadow-xl shadow-red-900/10 disabled:bg-zinc-800 disabled:shadow-none active:scale-95"
           >
             {loading ? 'Skickar...' : 'Skicka Meddelande'}
           </button>

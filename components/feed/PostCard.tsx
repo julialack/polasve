@@ -163,7 +163,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
           <span className="text-xs font-medium">{post.likes_count || 0}</span>
         </button>
         <button onClick={() => setActiveCommentPost(!activeCommentPost)} className={`flex items-center gap-1.5 transition-colors ${activeCommentPost ? 'text-[#003366]' : 'text-zinc-400 hover:text-black'}`}>
-          <MessageSquare size={14} />
+          <MessageSquare size={14} className="scale-x-[-1]" />
           <span className="text-xs font-medium">{commentCount}</span>
         </button>
       </div>

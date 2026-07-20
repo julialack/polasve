@@ -55,7 +55,7 @@ export default function SwedenMap() {
             />
             <span className="absolute left-5 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm border border-zinc-100 px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover/pin:opacity-100 transition-opacity shadow-sm text-[#003366]">
               {city.name}
-            </button>
+            </span>
           </div>
         </button>
       ))}

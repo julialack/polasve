@@ -1,6 +1,8 @@
 import Link from "next/link";
+import SearchBar from "@/components/search/SearchBar";
 
 const NEWS_ARTICLES = [
+// ...
   {
     id: 1,
     title: "Polsk kulturvecka i Stockholm",
@@ -29,8 +31,15 @@ const NEWS_ARTICLES = [
 
 export default function NyheterPage() {
   return (
-    <div className="min-h-screen bg-[#f8f9fa] py-12">
-      <main className="max-w-7xl mx-auto px-4 md:px-6">
+    <div className="min-h-screen bg-[#f8f9fa]">
+      {/* Global Search Bar Section */}
+      <div className="bg-white border-b border-zinc-100 py-6 px-6">
+        <div className="max-w-4xl mx-auto">
+          <SearchBar />
+        </div>
+      </div>
+
+      <main className="max-w-7xl mx-auto px-4 md:px-6 py-12">
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-[#003366] uppercase tracking-tight">Senaste <span className="text-[#a11a2d]">Nyheterna</span></h1>
           <div className="h-1 w-20 bg-[#a11a2d] mt-4"></div>
