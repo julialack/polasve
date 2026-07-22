@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { User, MessageSquare, ShieldCheck } from 'lucide-react'
 
@@ -16,13 +16,21 @@ export default function HomeHero() {
 
   const ADMIN_EMAIL = 'julia.lackchristensen@gmail.com'
 
+  const fetchUnreadCount = useCallback(async (userId: string) => {
+    const { count } = await supabase
+      .from('messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('receiver_id', userId)
+      .eq('is_read', false)
+    if (count !== null) setUnreadCount(count)
+  }, [supabase])
+
   useEffect(() => {
     const getUser = async () => {
       const { data: { user: currentUser } } = await supabase.auth.getUser()
       setUser(currentUser)
       if (currentUser) {
         fetchUnreadCount(currentUser.id)
-        // Set avatar from metadata primarily
         setAvatarUrl(currentUser.user_metadata?.avatar_url || null)
       }
     }
@@ -36,20 +44,12 @@ export default function HomeHero() {
         setAvatarUrl(currentUser.user_metadata?.avatar_url || null)
       } else {
         setAvatarUrl(null)
+        setUnreadCount(0)
       }
     })
 
     return () => subscription.unsubscribe()
-  }, [])
-
-  const fetchUnreadCount = async (userId: string) => {
-    const { count } = await supabase
-      .from('messages')
-      .select('*', { count: 'exact', head: true })
-      .eq('receiver_id', userId)
-      .eq('is_read', false)
-    if (count !== null) setUnreadCount(count)
-  }
+  }, [supabase, fetchUnreadCount])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -82,21 +82,13 @@ export default function HomeHero() {
           <div className="w-24 md:w-56 h-auto drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)] transform md:rotate-[-5deg]">
             <svg viewBox="0 0 120 80" className="w-full h-full">
               <defs>
-                <clipPath id="wave-final-p">
+                <clipPath id="wave-hero-p">
                   <path d="M0 15 C 20 5, 40 25, 60 15 C 80 5, 100 25, 120 15 V 65 C 100 75, 80 35, 60 45 C 40 55, 20 35, 0 45 Z" />
                 </clipPath>
-                <linearGradient id="shade-final-p" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="black" stopOpacity="0.4" />
-                  <stop offset="25%" stopColor="white" stopOpacity="0.1" />
-                  <stop offset="50%" stopColor="black" stopOpacity="0.3" />
-                  <stop offset="75%" stopColor="white" stopOpacity="0.1" />
-                  <stop offset="100%" stopColor="black" stopOpacity="0.2" />
-                </linearGradient>
               </defs>
-              <g clipPath="url(#wave-final-p)">
+              <g clipPath="url(#wave-hero-p)">
                 <rect width="120" height="40" fill="white" />
                 <rect y="40" width="120" height="40" fill="#dc143c" />
-                <rect width="120" height="80" fill="url(#shade-final-p)" style={{ mixBlendMode: 'multiply' }} />
               </g>
             </svg>
           </div>
@@ -109,11 +101,10 @@ export default function HomeHero() {
           {/* Swedish Flag */}
           <div className="w-24 md:w-56 h-auto drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)] transform md:rotate-[5deg] scale-x-[-1]">
             <svg viewBox="0 0 120 80" className="w-full h-full">
-              <g clipPath="url(#wave-final-p)">
+              <g clipPath="url(#wave-hero-p)">
                 <rect width="120" height="80" fill="#006aa7" />
                 <rect y="32" width="120" height="16" fill="#fecc00" />
                 <rect x="30" width="16" height="80" fill="#fecc00" />
-                <rect width="120" height="80" fill="url(#shade-final-p)" style={{ mixBlendMode: 'multiply' }} />
               </g>
             </svg>
           </div>
@@ -132,8 +123,8 @@ export default function HomeHero() {
               <>
                 <Link href="/profil" className="hover:opacity-70 transition-opacity">
                   {avatarUrl ? (
-                    <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden shadow-md">
-                      <img src={avatarUrl} alt="" className="w-full h-full object-cover bg-white" />
+                    <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden shadow-md bg-white flex items-center justify-center">
+                      <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
                     </div>
                   ) : (
                     <User size={22} />
