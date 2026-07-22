@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Mail, Phone, MapPin, ShieldCheck, Calendar } from 'lucide-react'
+import { Mail, Phone, MapPin, ShieldCheck, Calendar, User } from 'lucide-react'
 import ContactForm from '@/components/ads/ContactForm'
 import HomeHero from '@/components/HomeHero'
 
