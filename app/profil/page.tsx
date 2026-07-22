@@ -5,6 +5,8 @@ import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { formatDisplayName } from '@/utils/formatName'
+import { User, Package, MessageSquare, ChevronRight, PlusCircle, Settings } from 'lucide-react'
+import HomeHero from '@/components/HomeHero'
 
 export default function ProfilPage() {
   const [user, setUser] = useState<any>(null)
@@ -53,146 +55,158 @@ export default function ProfilPage() {
     fetchUserData()
   }, [])
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-serif italic text-zinc-400">Laddar profil...</div>
+  if (loading) return (
+    <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center italic text-zinc-400">
+      Öppnar profil...
+    </div>
+  )
 
   return (
-    <div className="min-h-screen bg-white py-20">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="grid lg:grid-cols-3 gap-16">
-          {/* Left: User Info */}
-          <div className="lg:col-span-1 space-y-8">
-            <div className="bg-zinc-50 p-10 rounded-sm border border-zinc-100">
-              <div className="w-20 h-20 bg-red-800 rounded-full flex items-center justify-center text-2xl font-bold text-white mb-6 shadow-xl shadow-red-900/20">
-                {user?.email?.[0].toUpperCase()}
-              </div>
-              <h1 className="text-2xl font-bold text-zinc-900 mb-2 uppercase tracking-tight">
-                {formatDisplayName(user?.user_metadata?.full_name)}
-              </h1>
-              <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-8">{user?.email}</p>
+    <div className="min-h-screen bg-[#f8f9fa] flex flex-col">
+      <HomeHero />
+      <div className="flex-1 py-12 px-4 md:px-6">
+        <div className="max-w-6xl mx-auto">
 
-              <div className="pt-8 border-t border-zinc-200">
-                <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300 mb-4">Statistik</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-2xl font-light text-zinc-900">{ads.length}</p>
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">Annonser</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Link to Messages */}
-              <div className="mt-8 pt-8 border-t border-zinc-200">
-                <Link
-                  href="/meddelanden"
-                  className="w-full flex items-center justify-between group"
-                >
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-900 group-hover:text-red-800 transition-colors">Gå till alla meddelanden</span>
-                  <span className="text-red-800 group-hover:translate-x-1 transition-transform">→</span>
-                </Link>
-              </div>
+          {/* Header Section */}
+          <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-200 pb-8">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-[#003366] uppercase tracking-tight italic">Min <span className="text-[#a11a2d]">Profil</span></h1>
+              <p className="text-zinc-500 mt-2 font-medium">Hantera dina annonser och läs dina meddelanden.</p>
             </div>
+            <Link
+              href="/skapa-annons"
+              className="flex items-center gap-2 bg-[#003366] text-white px-6 py-3 rounded-sm font-bold text-xs uppercase tracking-widest hover:bg-[#a11a2d] transition-all shadow-lg active:scale-95 w-fit"
+            >
+              <PlusCircle size={16} /> Ny Annons
+            </Link>
           </div>
 
-          {/* Right: User's Content */}
-          <div className="lg:col-span-2 space-y-20">
-            {/* Ads Section */}
-            <section>
-              <div className="mb-12 flex justify-between items-end">
-                <div>
-                  <h2 className="text-3xl font-light uppercase tracking-widest text-zinc-900">Mina <span className="font-bold">Annonser</span></h2>
-                  <div className="h-px w-16 bg-red-800 mt-4"></div>
-                </div>
-                <Link href="/skapa-annons" className="text-[10px] font-bold uppercase tracking-widest text-red-800 border-b border-red-800 pb-1">
-                  + Ny Annons
-                </Link>
-              </div>
+          <div className="grid lg:grid-cols-12 gap-8">
 
-              {ads.length === 0 ? (
-                <div className="text-center py-20 bg-zinc-50 border border-zinc-100 rounded-sm">
-                  <p className="text-zinc-500 font-serif italic mb-6">Du har inte skapat några annonser ännu.</p>
-                  <Link href="/skapa-annons" className="bg-zinc-900 text-white px-8 py-3 rounded-full font-bold uppercase tracking-widest text-[10px]">
-                    Skapa din första annons
-                  </Link>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {ads.map((ad) => (
-                    <div key={ad.id} className="group flex flex-col md:flex-row md:items-center justify-between p-6 border border-zinc-100 rounded-sm hover:shadow-xl hover:shadow-zinc-100 transition-all gap-6">
-                      <div className="flex items-center gap-6">
-                        {/* Ad Thumbnail */}
-                        <div className="w-16 h-16 md:w-20 md:h-20 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0 border border-zinc-50">
-                          {ad.image_url ? (
-                            <img
-                              src={ad.image_url}
-                              alt={ad.title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[8px] font-bold uppercase tracking-widest text-center px-1">
-                              Ingen bild
-                            </div>
-                          )}
+            {/* LEFT: User Profile Card */}
+            <div className="lg:col-span-4 space-y-6">
+              <div className="bg-white border border-zinc-200 rounded-sm shadow-sm overflow-hidden">
+                <div className="bg-[#003366] h-24 relative">
+                  <div className="absolute -bottom-10 left-8">
+                    <div className="w-20 h-20 bg-white p-1 rounded-full shadow-lg overflow-hidden">
+                      {user?.user_metadata?.avatar_url ? (
+                        <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover rounded-full" />
+                      ) : (
+                        <div className="w-full h-full bg-zinc-100 rounded-full flex items-center justify-center text-2xl font-black text-[#003366]">
+                          {user?.email?.[0].toUpperCase()}
                         </div>
-
-                        <div>
-                          <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-red-800 border border-red-800/20 px-3 py-1 rounded-full mb-2 inline-block">
-                            {ad.category}
-                          </span>
-                          <h3 className="text-lg font-light text-zinc-900 group-hover:text-red-800 transition-colors tracking-tight">
-                            {ad.title}
-                          </h3>
-                        </div>
-                      </div>
-                      <div className="flex gap-4">
-                        <Link href={`/annonser/${ad.id}`} className="text-[9px] font-bold uppercase tracking-widest border border-zinc-200 px-4 py-2 hover:bg-zinc-900 hover:text-white transition-all">
-                          Visa
-                        </Link>
-                      </div>
+                      )}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              )}
-            </section>
+                <div className="pt-14 pb-8 px-8">
+                  <h2 className="text-xl font-bold text-zinc-900 truncate uppercase tracking-tight">
+                    {formatDisplayName(user?.user_metadata?.full_name || user?.email?.split('@')[0])}
+                  </h2>
+                  <p className="text-zinc-400 text-xs font-bold truncate mt-1">{user?.email}</p>
 
-            {/* Messages Preview Section */}
-            <section>
-              <div className="mb-12 flex justify-between items-end">
-                <div>
-                  <h2 className="text-3xl font-light uppercase tracking-widest text-zinc-900">Senaste <span className="font-bold">Meddelanden</span></h2>
-                  <div className="h-px w-16 bg-red-800 mt-4"></div>
-                </div>
-              </div>
-
-              {messages.length === 0 ? (
-                <div className="text-center py-20 bg-zinc-50 border border-zinc-100 rounded-sm">
-                  <p className="text-zinc-500 font-serif italic">Inga meddelanden ännu.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {messages.map((msg) => (
-                    <div key={msg.id} className={`p-6 border rounded-sm transition-all ${msg.is_read ? 'border-zinc-100' : 'border-red-100 bg-red-50/10'}`}>
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-red-800">
-                          {msg.ads?.title || 'Allmänt'}
-                        </span>
-                        <span className="text-[8px] text-zinc-300 font-bold uppercase tracking-widest">
-                          {new Date(msg.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <p className="text-sm text-zinc-600 font-light line-clamp-1 italic">
-                        "{msg.content}"
-                      </p>
+                  <div className="mt-8 pt-8 border-t border-zinc-50 grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 bg-zinc-50 rounded-sm">
+                      <p className="text-xl font-black text-[#003366]">{ads.length}</p>
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">Annonser</p>
                     </div>
-                  ))}
+                    <div className="text-center p-3 bg-zinc-50 rounded-sm">
+                      <p className="text-xl font-black text-[#003366]">{messages.length}</p>
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">Trådar</p>
+                    </div>
+                  </div>
+
                   <Link
-                    href="/meddelanden"
-                    className="block text-center py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-red-800 transition-colors"
+                    href="/profil/installningar"
+                    className="w-full mt-6 py-3 border border-zinc-100 hover:border-[#003366] text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-[#003366] transition-all flex items-center justify-center gap-2 rounded-sm"
                   >
-                    Se alla meddelanden
+                    <Settings size={14} /> Inställningar
                   </Link>
                 </div>
-              )}
-            </section>
+              </div>
+            </div>
+
+            {/* RIGHT: Main Content Tabs */}
+            <div className="lg:col-span-8 space-y-8">
+
+              {/* My Ads Section */}
+              <section className="bg-white border border-zinc-200 rounded-sm shadow-sm overflow-hidden">
+                <div className="bg-[#a11a2d] text-white px-6 py-3 flex items-center gap-2">
+                  <Package size={16} />
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Mina Aktiva Annonser</h3>
+                </div>
+
+                <div className="p-2 md:p-6">
+                  {ads.length === 0 ? (
+                    <div className="py-12 text-center">
+                      <p className="text-zinc-400 italic font-serif">Du har inga aktiva annonser just nu.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {ads.map((ad) => (
+                        <div key={ad.id} className="group flex items-center gap-4 p-3 border border-zinc-50 hover:border-zinc-200 rounded-sm transition-all">
+                          <div className="w-16 h-16 md:w-20 md:h-20 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border border-zinc-100">
+                            {ad.image_url ? (
+                              <img src={ad.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[8px] font-bold uppercase">Ingen bild</div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[8px] font-bold text-[#a11a2d] uppercase tracking-widest">{ad.category}</span>
+                            <h4 className="font-bold text-sm text-[#003366] truncate italic group-hover:underline">{ad.title}</h4>
+                            <p className="text-xs font-bold text-zinc-900 mt-1">{ad.price || 'Pris på förfrågan'}</p>
+                          </div>
+                          <Link href={`/annonser/${ad.id}`} className="p-3 text-zinc-300 hover:text-[#003366] transition-colors">
+                            <ChevronRight size={20} />
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* Messages Preview Section */}
+              <section className="bg-white border border-zinc-200 rounded-sm shadow-sm overflow-hidden">
+                <div className="bg-[#003366] text-white px-6 py-3 flex items-center gap-2">
+                  <MessageSquare size={16} />
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Senaste Meddelanden</h3>
+                </div>
+
+                <div className="p-2 md:p-6">
+                  {messages.length === 0 ? (
+                    <div className="py-12 text-center">
+                      <p className="text-zinc-400 italic font-serif">Inga nya meddelanden.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {messages.map((msg) => (
+                        <Link
+                          key={msg.id}
+                          href="/meddelanden"
+                          className={`block p-4 border rounded-sm transition-all hover:shadow-md ${!msg.is_read ? 'bg-red-50/20 border-red-100' : 'bg-zinc-50/30 border-zinc-50 hover:bg-white'}`}
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="text-[9px] font-bold text-[#003366] uppercase tracking-widest truncate max-w-[200px]">
+                              {msg.ads?.title || 'Bazar-kontakt'}
+                            </span>
+                            <span className="text-[8px] text-zinc-400 font-bold uppercase">{new Date(msg.created_at).toLocaleDateString()}</span>
+                          </div>
+                          <p className="text-xs text-zinc-600 font-medium italic line-clamp-1">"{msg.content}"</p>
+                        </Link>
+                      ))}
+                      <Link
+                        href="/meddelanden"
+                        className="block text-center py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-[#003366] transition-colors mt-4 border-t border-zinc-50"
+                      >
+                        Öppna hela chatten &gt;&gt;
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </section>
+            </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { Mail, Phone, MapPin, ShieldCheck, Calendar } from 'lucide-react'
 import ContactForm from '@/components/ads/ContactForm'
+import HomeHero from '@/components/HomeHero'
 
 export default async function AnnonsDetaljPage({
   params,
@@ -11,9 +13,10 @@ export default async function AnnonsDetaljPage({
   const { id } = await params
   const supabase = await createClient()
 
+  // Fetch ad with seller profile info
   const { data: ad, error } = await supabase
     .from('ads')
-    .select('*')
+    .select('*, profiles:user_id (*)')
     .eq('id', id)
     .single()
 
@@ -21,90 +24,117 @@ export default async function AnnonsDetaljPage({
     notFound()
   }
 
+  const seller = ad.profiles;
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header / Breadcrumbs */}
-      <div className="bg-zinc-50/50 border-b border-zinc-100 py-8">
-        <div className="max-w-6xl mx-auto px-6">
-          <nav className="flex text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 gap-4">
-            <Link href="/" className="hover:text-red-800 transition-colors">Hem</Link>
-            <span>/</span>
-            <Link href="/annonser" className="hover:text-red-800 transition-colors">Marknadsplats</Link>
-            <span>/</span>
-            <span className="text-zinc-900">{ad.category}</span>
-          </nav>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#f8f9fa] flex flex-col text-left">
+      <HomeHero />
 
-      <main className="max-w-6xl mx-auto px-6 py-20">
-        {/* Main Ad Image - Big & Elegant */}
-        {ad.image_url && (
-          <div className="mb-20 w-full aspect-[21/9] bg-zinc-100 overflow-hidden rounded-sm shadow-2xl shadow-zinc-100">
-            <img
-              src={ad.image_url}
-              alt={ad.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
+      <main className="max-w-7xl mx-auto w-full px-4 md:px-6 py-12">
+        <div className="bg-white border border-zinc-200 rounded-sm shadow-xl overflow-hidden">
 
-        <div className="grid lg:grid-cols-2 gap-20">
-          {/* Left: Content */}
-          <div className="space-y-12">
-            <div>
-              <div className="flex items-center gap-4 mb-6">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-800 border border-red-800/20 px-4 py-1.5 rounded-full">
+          {/* Ad Image Header */}
+          {ad.image_url && (
+            <div className="w-full h-[300px] md:h-[500px] relative bg-zinc-100 border-b border-zinc-100">
+              <img
+                src={ad.image_url}
+                alt={ad.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute top-6 left-6 flex gap-3">
+                <span className="bg-[#a11a2d] text-white px-4 py-1.5 rounded-sm text-[10px] font-black uppercase tracking-widest shadow-xl">
                   {ad.category}
                 </span>
                 {ad.is_premium && (
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] bg-red-800 text-white px-4 py-1.5 rounded-full shadow-lg shadow-red-900/10">
-                    Premium
+                  <span className="bg-[#003366] text-white px-4 py-1.5 rounded-sm text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-2">
+                    <ShieldCheck size={12} /> Premium
                   </span>
                 )}
-                <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">
-                  Publicerad {new Date(ad.created_at).toLocaleDateString()}
-                </span>
-              </div>
-              <h1 className="text-4xl md:text-6xl font-light tracking-tight text-zinc-900 mb-6 leading-tight">
-                {ad.title}
-              </h1>
-              <div className="flex items-center gap-6 text-zinc-500 font-serif italic text-lg">
-                <span>📍 {ad.location}</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-red-800"></span>
-                <span className="text-zinc-900 font-sans font-bold not-italic">{ad.price || 'Pris på förfrågan'}</span>
               </div>
             </div>
+          )}
 
-            <div className="prose prose-zinc max-w-none">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300 mb-6 border-b border-zinc-100 pb-4">Beskrivning</h3>
-              <p className="text-zinc-600 font-light text-lg leading-relaxed whitespace-pre-wrap">
-                {ad.description}
-              </p>
-            </div>
-          </div>
+          <div className="p-6 md:p-12">
+            <div className="grid lg:grid-cols-12 gap-12">
 
-          {/* Right: Actions & Sidebar */}
-          <div className="space-y-12">
-            {/* Contact Box Component */}
-            <ContactForm
-              receiverId={ad.user_id}
-              adId={ad.id}
-              adTitle={ad.title}
-            />
+              {/* LEFT: Ad Content */}
+              <div className="lg:col-span-8 space-y-10 text-left">
+                <div className="text-left">
+                  <div className="flex items-center gap-3 text-zinc-400 text-[10px] font-bold uppercase tracking-widest mb-4">
+                    <Calendar size={14} className="text-[#a11a2d]" /> Publicerad {new Date(ad.created_at).toLocaleDateString()}
+                  </div>
+                  <h1 className="text-3xl md:text-5xl font-black text-[#003366] uppercase tracking-tighter italic mb-6 leading-tight">
+                    {ad.title}
+                  </h1>
+                  <div className="flex flex-wrap items-center gap-8 border-y border-zinc-50 py-6">
+                    <div className="flex items-center gap-2">
+                      <MapPin size={18} className="text-[#a11a2d]" />
+                      <span className="text-zinc-500 font-bold uppercase tracking-widest text-xs">{ad.location}</span>
+                    </div>
+                    <div className="text-2xl font-black text-zinc-900">{ad.price || 'Bud'}</div>
+                  </div>
+                </div>
 
-            {/* Safety Tips */}
-            <div className="p-8 border border-zinc-100 rounded-sm">
-              <h4 className="text-[10px] font-bold uppercase tracking-widest mb-6 text-zinc-900">Säkerhetstips</h4>
-              <ul className="space-y-4">
-                <li className="flex gap-4 items-start text-xs text-zinc-500 font-light">
-                  <span className="text-red-800 font-serif italic">01.</span>
-                  Träffas alltid på en offentlig plats vid affärer.
-                </li>
-                <li className="flex gap-4 items-start text-xs text-zinc-500 font-light">
-                  <span className="text-red-800 font-serif italic">02.</span>
-                  Betala aldrig i förskott utan att ha sett varan eller tjänsten.
-                </li>
-              </ul>
+                <div className="text-left">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300 mb-6 flex items-center gap-4">
+                    Beskrivning <div className="h-px flex-1 bg-zinc-50"></div>
+                  </h3>
+                  <p className="text-zinc-600 font-medium text-base md:text-lg leading-relaxed whitespace-pre-wrap px-1">
+                    {ad.description}
+                  </p>
+                </div>
+              </div>
+
+              {/* RIGHT: Seller & Contact */}
+              <div className="lg:col-span-4 space-y-8">
+
+                {/* Seller Info Box */}
+                <div className="bg-zinc-50 border border-zinc-100 p-8 rounded-sm text-left">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest mb-6 text-[#003366] border-b border-zinc-200 pb-2">Om Säljaren</h4>
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-12 h-12 rounded-full bg-white border border-zinc-200 flex items-center justify-center overflow-hidden shadow-sm">
+                      {seller?.avatar_url ? (
+                        <img src={seller.avatar_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <User size={24} className="text-zinc-300" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-black text-[#003366] uppercase text-xs italic">{seller?.full_name || 'Anonym medlem'}</p>
+                      <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-tighter">{seller?.city || 'Sverige'}</p>
+                    </div>
+                  </div>
+
+                  {/* Public Contact Details */}
+                  <div className="space-y-4">
+                    {seller?.show_email_publicly && (
+                      <div className="flex items-center gap-3 p-3 bg-white border border-zinc-100 rounded-sm">
+                        <Mail size={16} className="text-[#a11a2d]" />
+                        <span className="text-xs font-bold text-zinc-800 lowercase">{seller.email}</span>
+                      </div>
+                    )}
+                    {seller?.show_phone_publicly && seller?.phone && (
+                      <div className="flex items-center gap-3 p-3 bg-white border border-zinc-100 rounded-sm">
+                        <Phone size={16} className="text-[#a11a2d]" />
+                        <span className="text-xs font-bold text-zinc-800">{seller.phone}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Internal Messaging */}
+                <ContactForm
+                  receiverId={ad.user_id}
+                  adId={ad.id}
+                  adTitle={ad.title}
+                />
+
+                <div className="p-8 border border-zinc-100 rounded-sm italic bg-white shadow-sm">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest mb-4 text-zinc-300">Säkerhetstips</h4>
+                  <p className="text-[10px] text-zinc-400 leading-relaxed mb-4">"Träffas alltid på en offentlig plats vid affärer. Betala aldrig i förskott."</p>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>

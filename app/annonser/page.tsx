@@ -3,203 +3,158 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-import { ChevronRight, MapPin, Tag } from 'lucide-react'
+import Image from 'next/image'
+import { ChevronRight, MapPin, Tag, Newspaper, Calendar, Box, Info, Users, ArrowRight } from 'lucide-react'
 import SearchBar from '@/components/search/SearchBar'
+import SwedenMap from "@/components/map/SwedenMap";
+import HomeHero from "@/components/HomeHero";
 
 const CATEGORIES = ["Alla", "Jobb", "Bostad", "Event", "Tjänster", "Övrigt"]
 
 export default function AnnonserPage() {
-// ...
   const [ads, setAds] = useState<any[]>([])
+  const [featuredAds, setFeaturedAds] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('Alla')
   const supabase = createClient()
 
   useEffect(() => {
-    const fetchAds = async () => {
+    const fetchData = async () => {
       setLoading(true)
-      let query = supabase
-        .from('ads')
-        .select('*')
-        .order('created_at', { ascending: false })
 
-      if (filter !== 'Alla') {
-        query = query.eq('category', filter)
-      }
+      const { data: premData } = await supabase.from('ads').select('*').eq('is_premium', true).order('created_at', { ascending: false }).limit(4)
+      if (premData) setFeaturedAds(premData)
+
+      let query = supabase.from('ads').select('*').order('created_at', { ascending: false })
+      if (filter !== 'Alla') query = query.eq('category', filter)
 
       const { data } = await query
       if (data) setAds(data)
       setLoading(false)
     }
-
-    fetchAds()
+    fetchData()
   }, [filter])
 
-  const premiumAds = ads.filter(ad => ad.is_premium)
-  const standardAds = ads.filter(ad => !ad.is_premium)
+  const today = new Date().toLocaleDateString('sv-SE', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
-      {/* Header Area */}
-      <div className="bg-white border-b border-zinc-200 py-12 md:py-16">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-8">
-          <div>
-            <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-[#003366] uppercase">Bazar / <span className="text-[#a11a2d]">Forum</span></h1>
-            <p className="text-zinc-500 mt-2 font-serif italic">Marknadsplatsen för det polska communityt i Sverige</p>
+    <div className="flex flex-col min-h-screen bg-[#f8f9fa] text-left">
+      {/* Consistent Header across all pages */}
+      <HomeHero />
+
+      {/* Top Portal Info Bar */}
+      <div className="bg-white border-b border-zinc-200 py-2 px-6">
+        <div className="max-w-7xl mx-auto flex justify-between items-center text-[10px] md:text-xs text-zinc-500 font-medium">
+          <div className="capitalize font-bold text-[#003366]">{today}</div>
+          <div className="flex gap-4">
+            <span className="flex items-center gap-1"><Users size={12} /> 142 online</span>
+            <span className="hidden sm:inline border-l pl-4 font-bold text-[#a11a2d]">Välkommen!</span>
           </div>
-          <Link
-            href="/skapa-annons"
-            className="bg-[#a11a2d] text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-red-900 transition-all shadow-xl shadow-red-900/10 active:scale-95"
-          >
-            + Skapa ny annons
-          </Link>
         </div>
       </div>
 
-      {/* Global Search Bar Section */}
       <div className="bg-zinc-50 border-b border-zinc-100 py-6 px-6">
         <div className="max-w-4xl mx-auto">
           <SearchBar />
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* TOP: Horizontal Premium Section */}
-        {premiumAds.length > 0 && (
-          <section className="mb-16">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="bg-[#a11a2d] text-white px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest shadow-sm">
-                Premium Annonser
-              </div>
-              <div className="h-px flex-1 bg-zinc-200"></div>
-            </div>
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 lg:grid-cols-4 gap-6">
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {premiumAds.map((ad) => (
-                <Link href={`/annonser/${ad.id}`} key={ad.id} className="group bg-white border border-zinc-200 rounded-sm overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col">
-                  <div className="aspect-video bg-zinc-100 relative overflow-hidden">
-                    {ad.image_url ? (
-                      <img src={ad.image_url} alt={ad.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[10px] font-bold uppercase tracking-widest italic">Ingen bild</div>
-                    )}
-                    <div className="absolute top-3 left-3 bg-[#a11a2d] text-white text-[8px] font-bold px-2 py-0.5 uppercase tracking-widest shadow-md">Premium</div>
-                  </div>
-                  <div className="p-5 flex-1 flex flex-col">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="text-[9px] font-bold text-[#a11a2d] uppercase tracking-wider">{ad.category}</span>
-                      <span className="text-[9px] text-zinc-400 font-bold">{new Date(ad.created_at).toLocaleDateString()}</span>
-                    </div>
-                    <h3 className="text-sm font-bold text-[#003366] group-hover:underline mb-3 line-clamp-2 italic">{ad.title}</h3>
-                    <div className="mt-auto pt-4 border-t border-zinc-50 flex justify-between items-center">
-                      <span className="text-sm font-bold text-zinc-900">{ad.price || 'Diskuteras'}</span>
-                      <span className="text-[9px] text-zinc-400 flex items-center gap-1 font-bold uppercase tracking-tighter italic">
-                        <MapPin size={10} /> {ad.location}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <div className="grid lg:grid-cols-4 gap-12">
-          {/* LEFT: Categories Sidebar */}
-          <aside className="space-y-10">
-            <div className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm">
-              <div className="bg-[#003366] text-white px-5 py-3 text-[10px] font-bold uppercase tracking-widest">
-                Filtrera Bazar
-              </div>
-              <div className="p-2 space-y-1">
+          <aside className="hidden md:block md:col-span-3 lg:col-span-1 space-y-6">
+            <section className="bg-white p-5 border border-zinc-200 shadow-sm relative overflow-hidden rounded-sm text-left">
+               <div className="absolute top-0 left-0 w-1 h-full bg-[#003366]"></div>
+               <h4 className="text-[10px] font-black uppercase text-[#003366] mb-4 tracking-widest text-left">Kategorier</h4>
+               <nav className="flex flex-col space-y-1">
                 {CATEGORIES.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setFilter(cat)}
-                    className={`w-full flex items-center justify-between p-3 text-xs font-bold transition-all rounded-sm ${
-                      filter === cat
-                      ? "bg-zinc-50 text-[#a11a2d] border-l-4 border-[#a11a2d]"
-                      : "text-zinc-500 hover:bg-zinc-50 border-l-4 border-transparent"
+                    className={`flex items-center justify-between py-2.5 text-[11px] font-bold border-b border-zinc-50 last:border-0 transition-all group text-left ${
+                      filter === cat ? "text-[#a11a2d]" : "text-[#003366] hover:text-[#a11a2d]"
                     }`}
                   >
-                    {cat}
-                    <ChevronRight size={12} className={filter === cat ? "opacity-100" : "opacity-0"} />
+                    <div className="flex items-center gap-3">{cat}</div>
+                    <ArrowRight size={10} className={filter === cat ? "opacity-100" : "opacity-0"} />
                   </button>
                 ))}
-              </div>
-            </div>
-
-            <div className="bg-white p-6 border border-zinc-200 shadow-sm rounded-sm italic">
-               <h4 className="text-[10px] font-bold text-[#003366] uppercase mb-3 border-b pb-2 tracking-widest">Säker handel</h4>
-               <p className="text-[11px] text-zinc-500 leading-relaxed">
-                 Tänk på att alltid träffas på en offentlig plats när du genomför affärer i Bazaren.
-               </p>
-            </div>
+              </nav>
+            </section>
           </aside>
 
-          {/* MAIN: Vertical Standard Ads */}
-          <main className="lg:col-span-3">
-            <div className="flex items-center gap-4 mb-8">
-              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Senaste Annonserna</h2>
-              <div className="h-px flex-1 bg-zinc-200 opacity-50"></div>
-            </div>
-
-            {loading ? (
-              <div className="text-center py-20 font-serif italic text-zinc-400">Hämtar annonser...</div>
-            ) : standardAds.length === 0 ? (
-              <div className="text-center py-24 bg-white border border-zinc-200 rounded-sm">
-                <p className="text-zinc-400 font-serif italic">Här var det tomt för tillfället.</p>
+          <div className="col-span-1 md:col-span-9 lg:col-span-2 space-y-6 text-left">
+            <div className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm text-left">
+              <div className="bg-[#003366] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider flex justify-between items-center text-left">
+                <span>{filter === 'Alla' ? 'Bazar / Forum - Alla annonser' : `Bazar - ${filter}`}</span>
               </div>
-            ) : (
-              <div className="space-y-6">
-                {standardAds.map((ad) => (
-                  <Link href={`/annonser/${ad.id}`} key={ad.id} className="group bg-white p-5 border border-zinc-200 rounded-sm shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row gap-8">
-                    {/* Standard Image Thumbnail */}
-                    <div className="w-full md:w-56 h-40 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0">
-                      {ad.image_url ? (
-                        <img
-                          src={ad.image_url}
-                          alt={ad.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-zinc-300 gap-2 bg-zinc-50">
-                          <Tag size={20} className="opacity-30" />
-                          <span className="text-[8px] font-bold uppercase tracking-widest">Ingen bild</span>
-                        </div>
-                      )}
-                    </div>
 
-                    <div className="flex-1 flex flex-col justify-between py-1">
-                      <div>
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className="text-[9px] font-bold uppercase tracking-widest text-[#a11a2d] border border-red-800/10 px-2 py-0.5 rounded-sm bg-red-50/30">
-                            {ad.category}
-                          </span>
-                          <span className="text-[9px] text-zinc-300 font-bold uppercase tracking-widest border-l pl-3">
-                            {new Date(ad.created_at).toLocaleDateString()}
-                          </span>
+              <div className="p-4 md:p-6 text-left">
+                {loading ? (
+                  <div className="space-y-4 text-left">
+                    {[1, 2, 3].map(i => <div key={i} className="h-32 bg-zinc-100 animate-pulse rounded-sm" />)}
+                  </div>
+                ) : ads.length === 0 ? (
+                  <div className="text-center py-20 italic text-zinc-400">Inga annonser hittades.</div>
+                ) : (
+                  <div className="space-y-6 text-left">
+                    {ads.map((ad) => (
+                      <Link href={`/annonser/${ad.id}`} key={ad.id} className="group bg-white p-4 border border-zinc-100 rounded-sm shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row gap-6 text-left">
+                        <div className="w-full sm:w-40 h-32 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0 relative">
+                          {ad.image_url ? (
+                            <Image src={ad.image_url} alt="" fill className="object-cover group-hover:scale-105 transition-transform" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[8px] font-bold uppercase">Ingen bild</div>
+                          )}
                         </div>
-                        <h3 className="text-xl font-bold text-[#003366] group-hover:text-blue-800 transition-colors tracking-tight italic mb-2">
-                          {ad.title}
-                        </h3>
-                        <p className="text-xs text-zinc-400 font-serif italic mb-4 line-clamp-1">📍 {ad.location}</p>
-                      </div>
+                        <div className="flex-1 flex flex-col justify-between py-1 text-left">
+                          <div className="text-left">
+                            <div className="flex items-center gap-2 mb-2 text-left">
+                              <span className="text-[9px] font-black uppercase text-[#a11a2d]">{ad.category}</span>
+                              <span className="text-[8px] text-zinc-300 font-bold border-l pl-2">{new Date(ad.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <h3 className="text-lg font-bold text-[#003366] italic group-hover:underline leading-tight mb-2 text-left">{ad.title}</h3>
+                            <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tighter flex items-center gap-1 text-left"><MapPin size={10} /> {ad.location}</p>
+                          </div>
+                          <div className="flex justify-between items-end mt-4 pt-4 border-t border-zinc-50 text-left">
+                            <span className="text-sm font-black text-zinc-900">{ad.price || 'Bud'}</span>
+                            <span className="text-[9px] font-black text-[#003366] uppercase tracking-widest text-left">Visa info &raquo;</span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
-                      <div className="flex items-end justify-between pt-4 border-t border-zinc-50">
-                        <span className="text-lg font-bold text-zinc-900">{ad.price || 'Pris på förfrågan'}</span>
-                        <div className="flex items-center gap-2 text-[#003366] font-bold text-[10px] uppercase tracking-widest group-hover:gap-4 transition-all">
-                          Visa Info <ChevronRight size={14} />
-                        </div>
+          <aside className="hidden lg:block lg:col-span-1 space-y-6 text-left">
+            <section className="bg-white shadow-sm overflow-hidden border border-zinc-200 text-left">
+              <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-left">Bazar - Premium</div>
+              <div className="p-4 space-y-5 text-left">
+                {featuredAds.map((ad) => (
+                  <Link href={`/annonser/${ad.id}`} key={ad.id} className="block group border-b border-zinc-50 last:border-0 pb-4 text-left">
+                    <div className="flex gap-4 text-left">
+                      <div className="w-16 h-16 bg-zinc-100 relative overflow-hidden border rounded-sm"><Image src={ad.image_url || "/placeholder.jpg"} alt="" fill className="object-cover" /></div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <h4 className="text-[11px] font-bold text-[#003366] italic leading-tight truncate text-left">{ad.title}</h4>
+                        <p className="text-[10px] text-red-800 font-bold mt-1 text-left">{ad.price}</p>
                       </div>
                     </div>
                   </Link>
                 ))}
               </div>
-            )}
-          </main>
+            </section>
+            <section className="bg-white border border-zinc-200 overflow-hidden shadow-sm text-left">
+                <div className="bg-[#003366] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-left">Sverigekartan</div>
+               <SwedenMap />
+            </section>
+          </aside>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

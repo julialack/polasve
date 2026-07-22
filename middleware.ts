@@ -34,11 +34,18 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Protect sensitive routes
-  const protectedRoutes = ['/profil', '/meddelanden', '/skapa-annons']
+  const protectedRoutes = ['/profil', '/meddelanden', '/skapa-annons', '/admin']
   const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))
 
   if (isProtectedRoute && !user) {
     return NextResponse.redirect(new URL('/logga-in', request.url))
+  }
+
+  // Extra security for Admin route
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    if (user?.email !== 'julia.lackchristensen@gmail.com') {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
   }
 
   return response
