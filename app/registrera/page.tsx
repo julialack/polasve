@@ -32,7 +32,7 @@ export default function RegistreraPage() {
     if (error) {
       alert(error.message);
     } else {
-      alert("Kolla din e-post för att bekräfta kontot!");
+      alert("Välkommen! Ditt konto har skapats. Du kan nu logga in.");
       router.push("/logga-in");
     }
     setLoading(false);
