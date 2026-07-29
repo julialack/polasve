@@ -124,12 +124,16 @@ export default function ProfilPage() {
 
             {/* LEFT: User Card */}
             <div className="lg:col-span-4 space-y-6">
-              <div className="bg-white border border-zinc-200 rounded-sm shadow-xl overflow-hidden text-left">
-                <div className="bg-[#003366] h-24 relative">
+              <div className="bg-zinc-50 border border-zinc-200 rounded-sm shadow-xl overflow-hidden text-left">
+                <div className="h-32 relative bg-gradient-to-r from-[#a11a2d] to-[#003366]">
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-zinc-50"></div>
                   <div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
                     <div className="w-24 h-24 bg-white p-1 rounded-full shadow-2xl overflow-hidden border-4 border-white relative flex items-center justify-center">
                       {avatarSvg ? (
-                        <div dangerouslySetInnerHTML={{ __html: avatarSvg }} className="w-full h-full object-cover rounded-full bg-zinc-50" />
+                        <div
+                          dangerouslySetInnerHTML={{ __html: avatarSvg }}
+                          className="w-full h-full [&_svg]:w-full [&_svg]:h-full rounded-full bg-zinc-50 flex items-center justify-center"
+                        />
                       ) : (
                         <div className="w-full h-full bg-zinc-100 rounded-full flex items-center justify-center text-3xl font-black text-[#003366]">
                           {user?.email?.[0].toUpperCase()}
@@ -139,7 +143,7 @@ export default function ProfilPage() {
                   </div>
                 </div>
                 <div className="pt-14 pb-10 px-8 text-center">
-                  <h2 className="text-xl font-black text-[#003366] uppercase tracking-tighter italic">
+                  <h2 className="text-2xl font-pacifico text-[#003366] italic">
                     {formatDisplayName(meta.full_name || user?.email?.split('@')[0])}
                   </h2>
                   <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest mt-1 mb-6">{user?.email}</p>

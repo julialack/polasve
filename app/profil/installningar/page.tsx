@@ -62,6 +62,47 @@ const AVAILABLE_LANGUAGES = [
   { id: 'en', label: 'English' },
 ]
 
+const HAIR_COLOR_MAP: Record<string, string> = {
+  Auburn: '#A55728',
+  Black: '#2C1B18',
+  Blonde: '#B58143',
+  BlondeGolden: '#D6B370',
+  Brown: '#724133',
+  BrownDark: '#4A312C',
+  PastelPink: '#F59797',
+  Platinum: '#ECDCBF',
+  Red: '#C93305',
+  SilverGray: '#E8E1E1',
+}
+
+const SKIN_COLOR_MAP: Record<string, string> = {
+  Tanned: '#FD9841',
+  Yellow: '#F8D25C',
+  Pale: '#FFDBB4',
+  Light: '#EDB98A',
+  Brown: '#D08B5B',
+  DarkBrown: '#AE5D29',
+  Black: '#614335',
+}
+
+const CLOTHE_COLOR_MAP: Record<string, string> = {
+  Black: '#262E33',
+  Blue01: '#65C9FF',
+  Blue02: '#5199E4',
+  Blue03: '#25557C',
+  Gray01: '#E6E6E6',
+  Gray02: '#929598',
+  Heather: '#3C4A4D',
+  PastelBlue: '#B1E1FF',
+  PastelGreen: '#A7FFC4',
+  PastelOrange: '#FFD28E',
+  PastelRed: '#FF9090',
+  PastelYellow: '#FFF070',
+  Pink: '#FF488E',
+  Red: '#FF5C5C',
+  White: '#FFFFFF',
+}
+
 export default function InstallningarPage() {
   const [activeTab, setActiveTab] = useState('topType')
   const [user, setUser] = useState<any>(null)
@@ -270,7 +311,7 @@ export default function InstallningarPage() {
                          <label className="block text-[10px] font-black uppercase text-zinc-300 mb-6 tracking-widest text-left text-left">Hårfärg</label>
                          <div className="grid grid-cols-5 sm:grid-cols-9 gap-3 text-left text-left">
                            {OPTIONS.hairColor.map(color => (
-                             <button key={color} onClick={() => updateConfig('hairColor', color)} className={`aspect-square rounded-full border-2 transition-all text-left text-left ${config.hairColor === color ? 'border-[#003366] scale-110 shadow-lg' : 'border-white shadow-sm'}`} style={{ backgroundColor: color }} title={color} />
+                             <button key={color} onClick={() => updateConfig('hairColor', color)} className={`aspect-square rounded-full border-2 transition-all text-left text-left ${config.hairColor === color ? 'border-[#003366] scale-110 shadow-lg' : 'border-white shadow-sm'}`} style={{ backgroundColor: HAIR_COLOR_MAP[color] || color }} title={color} />
                            ))}
                          </div>
                        </div>
@@ -368,7 +409,7 @@ export default function InstallningarPage() {
                          <label className="block text-[10px] font-black uppercase text-zinc-300 mb-6 tracking-widest text-left">Färg</label>
                          <div className="grid grid-cols-5 sm:grid-cols-10 gap-3 text-left">
                            {OPTIONS.clotheColor.map(color => (
-                             <button key={color} onClick={() => updateConfig('clotheColor', color)} className={`aspect-square rounded-full border-2 transition-all text-left ${config.clotheColor === color ? 'border-[#003366] scale-110 shadow-lg' : 'border-white shadow-sm'}`} style={{ backgroundColor: color }} title={color} />
+                             <button key={color} onClick={() => updateConfig('clotheColor', color)} className={`aspect-square rounded-full border-2 transition-all text-left ${config.clotheColor === color ? 'border-[#003366] scale-110 shadow-lg' : 'border-white shadow-sm'}`} style={{ backgroundColor: CLOTHE_COLOR_MAP[color] || color }} title={color} />
                            ))}
                          </div>
                        </div>

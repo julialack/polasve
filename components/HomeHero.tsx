@@ -73,6 +73,8 @@ export default function HomeHero() {
           alt=""
           className="w-full h-full object-cover opacity-20 mix-blend-overlay"
         />
+        {/* Blurry white line at the very bottom of the image */}
+        <div className="absolute inset-x-0 bottom-0 h-6 bg-white/40 blur-md"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 pt-10 pb-24 md:pt-16 md:pb-32 flex flex-col items-center text-left">
@@ -146,7 +148,7 @@ export default function HomeHero() {
 
       <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
         <svg viewBox="0 0 1440 80" className="w-full h-auto translate-y-1">
-          <path fill="#f8f9fa" d="M0,40 C480,80 960,80 1440,40 L1440,80 L0,80 Z" />
+          <path fill="white" d="M0,40 C480,80 960,80 1440,40 L1440,80 L0,80 Z" />
         </svg>
       </div>
     </header>

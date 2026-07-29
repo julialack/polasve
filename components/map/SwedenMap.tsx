@@ -4,69 +4,114 @@ import { MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 const CITIES = [
-  { name: 'Stockholm', top: '70%', left: '75%' },
-  { name: 'Göteborg', top: '78%', left: '40%' },
-  { name: 'Malmö', top: '88%', left: '45%' },
-  { name: 'Uppsala', top: '65%', left: '72%' },
-  { name: 'Västerås', top: '66%', left: '62%' },
-  { name: 'Örebro', top: '69%', left: '55%' },
-  { name: 'Linköping', top: '73%', left: '60%' },
-  { name: 'Helsingborg', top: '85%', left: '42%' },
-  { name: 'Jönköping', top: '76%', left: '52%' },
-  { name: 'Norrköping', top: '74%', left: '64%' },
-  { name: 'Umeå', top: '35%', left: '80%' },
-  { name: 'Luleå', top: '22%', left: '85%' },
-  { name: 'Kiruna', top: '10%', left: '75%' },
-  { name: 'Östersund', top: '45%', left: '50%' },
+  { name: 'Stockholm', top: '72%', left: '68%', pulse: true },
+  { name: 'Göteborg', top: '78%', left: '32%', pulse: true },
+  { name: 'Malmö', top: '92%', left: '38%', pulse: true },
+  { name: 'Uppsala', top: '68%', left: '65%' },
+  { name: 'Västerås', top: '70%', left: '58%' },
+  { name: 'Örebro', top: '72%', left: '52%' },
+  { name: 'Linköping', top: '75%', left: '55%' },
+  { name: 'Jönköping', top: '80%', left: '46%' },
+  { name: 'Norrköping', top: '74%', left: '60%' },
+  { name: 'Gävle', top: '64%', left: '62%' },
+  { name: 'Umeå', top: '40%', left: '78%' },
+  { name: 'Luleå', top: '30%', left: '85%' },
+  { name: 'Kiruna', top: '10%', left: '72%' },
+  { name: 'Östersund', top: '48%', left: '48%' },
 ]
 
 export default function SwedenMap() {
   const router = useRouter()
 
   const handleCityClick = (cityName: string) => {
-    // Redirect to Search or Ads page with location filter
     router.push(`/sok?q=${encodeURIComponent(cityName)}`)
   }
 
   return (
-    <div className="relative w-full aspect-[3/4] bg-zinc-50 border border-zinc-100 rounded-sm overflow-hidden p-4 group">
-      {/* Sweden Silhouette SVG */}
-      <svg
-        viewBox="0 0 100 200"
-        className="w-full h-full opacity-10 text-zinc-900 fill-current"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <path d="M75 10 L85 20 L80 40 L85 60 L75 80 L70 100 L65 120 L60 140 L55 160 L50 180 L45 190 L40 195 L35 185 L38 175 L45 165 L48 150 L52 135 L58 120 L62 100 L65 85 L60 70 L65 55 L70 30 Z" />
-      </svg>
+    <div className="relative w-full aspect-[3/5] bg-white border border-zinc-200 rounded-sm overflow-hidden p-6 group shadow-inner">
+      {/* Sweden Detailed Silhouette SVG with Provincial Lines */}
+      <div className="absolute inset-0 flex items-center justify-center p-8 pointer-events-none">
+        <svg
+          viewBox="0 0 100 250"
+          className="h-full w-auto text-[#003366] drop-shadow-2xl"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {/* Main Landmass Silhouette */}
+          <path
+            d="M72,5 L78,12 L82,20 L80,35 L85,45 L88,60 L85,75 L80,85 L78,100 L75,115 L72,130 L70,145 L65,160 L60,175 L55,190 L50,205 L45,215 L40,225 L35,220 L38,210 L30,200 L25,185 L22,170 L25,155 L28,140 L32,125 L35,110 L38,95 L35,80 L32,65 L35,50 L38,35 L42,20 L45,10 L50,5 Z"
+            fill="currentColor"
+            className="opacity-[0.04]"
+          />
+
+          {/* Provincial Borders (Internal Lines) */}
+          <g fill="none" stroke="currentColor" strokeWidth="0.5" className="opacity-20">
+            {/* Norrland boundaries */}
+            <path d="M50,5 L55,30 M55,30 L82,35 M55,30 L42,60 M42,60 L85,75 M42,60 L38,95 M38,95 L80,110" />
+            {/* Svealand boundaries */}
+            <path d="M38,95 L32,125 M32,125 L75,140 M32,125 L28,150 M28,150 L70,165" />
+            {/* Götaland boundaries */}
+            <path d="M28,150 L25,185 M25,185 L65,195 M25,185 L35,220 M35,220 L50,230" />
+            {/* Detailed internal provincial lines (approximated from image) */}
+            <path d="M78,100 L65,105 M72,130 L60,135 M65,160 L50,170 M45,215 L55,210" />
+          </g>
+
+          {/* Islands with borders */}
+          <g fill="currentColor" stroke="currentColor" strokeWidth="0.5" className="opacity-[0.08]">
+            {/* Öland */}
+            <path d="M52,185 L54,195 L50,195 Z" />
+            {/* Gotland */}
+            <path d="M68,170 L72,185 L65,185 Z" />
+          </g>
+        </svg>
+      </div>
 
       {/* Interactive Pins */}
       {CITIES.map((city) => (
         <button
           key={city.name}
           onClick={() => handleCityClick(city.name)}
-          className="absolute -translate-x-1/2 -translate-y-1/2 group/pin transition-all hover:scale-125 z-10"
+          className="absolute -translate-x-1/2 -translate-y-1/2 group/pin z-10 transition-all hover:scale-125"
           style={{ top: city.top, left: city.left }}
           title={`Sök i ${city.name}`}
         >
-          <div className="relative">
+          <div className="relative flex items-center justify-center">
+            {city.pulse && (
+              <span className="absolute w-6 h-6 bg-amber-400/30 rounded-full animate-ping"></span>
+            )}
             <MapPin
-              size={18}
-              className="text-[#003366] group-hover/pin:text-[#a11a2d] transition-colors drop-shadow-sm"
+              size={city.pulse ? 20 : 16}
+              className={`${city.pulse ? 'text-[#a11a2d]' : 'text-[#003366]'} group-hover/pin:text-amber-500 transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]`}
             />
-            <span className="absolute left-5 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm border border-zinc-100 px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover/pin:opacity-100 transition-opacity shadow-sm text-[#003366]">
-              {city.name}
-            </span>
+
+            {/* Tooltip Label */}
+            <div className="absolute left-6 top-1/2 -translate-y-1/2 opacity-0 group-hover/pin:opacity-100 transition-all duration-300 translate-x-2 group-hover/pin:translate-x-0 pointer-events-none">
+              <div className="bg-[#003366] text-white px-2.5 py-1 rounded-sm shadow-xl flex items-center gap-2 whitespace-nowrap">
+                <span className="text-[8px] font-black uppercase tracking-widest">{city.name}</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+              </div>
+            </div>
           </div>
         </button>
       ))}
 
-      {/* Map Legend/Info Overlay */}
+      {/* Map Header Overlay */}
+      <div className="absolute top-4 left-0 right-0 px-4 flex justify-between items-center pointer-events-none">
+        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-zinc-100"></div>
+        <span className="px-3 text-[8px] font-black uppercase text-zinc-300 tracking-[0.2em]">Interaktiv Marknad</span>
+        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-zinc-100"></div>
+      </div>
+
+      {/* Map Footer Overlay */}
       <div className="absolute bottom-4 left-4 right-4 pointer-events-none">
-        <div className="bg-white/80 backdrop-blur-sm p-3 border border-zinc-200 shadow-sm rounded-sm text-center">
-          <p className="text-[9px] font-black text-[#003366] uppercase tracking-[0.1em]">Interaktiv Marknadskarta</p>
-          <p className="text-[8px] text-zinc-400 italic mt-0.5">Klicka på en stad för att se annonser</p>
+        <div className="bg-white/90 backdrop-blur-md p-3 border border-zinc-100 shadow-lg rounded-sm text-center transform transition-transform group-hover:-translate-y-1">
+          <p className="text-[9px] font-black text-[#003366] uppercase tracking-[0.1em]">Utforska Regioner</p>
+          <p className="text-[7px] text-zinc-400 font-bold uppercase mt-1 tracking-tighter">Hitta lokala annonser & tjänster</p>
         </div>
       </div>
+
+      {/* Decorative corners */}
+      <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-zinc-100"></div>
+      <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-zinc-100"></div>
     </div>
   )
 }

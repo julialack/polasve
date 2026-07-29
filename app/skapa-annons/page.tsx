@@ -164,7 +164,7 @@ export default function SkapaAnnonsPage() {
                   <div className="flex items-center justify-center w-full">
                     {imagePreview ? (
                       <div className="relative w-full aspect-video rounded-md overflow-hidden border-4 border-zinc-100 shadow-xl">
-                        <Image src={imagePreview} alt="Preview" fill className="object-cover" />
+                        <Image src={imagePreview} alt="Preview" fill sizes="(max-width: 768px) 100vw, 600px" className="object-cover" />
                         <button type="button" onClick={() => setImagePreview(null)} className="absolute top-4 right-4 bg-white/90 p-2 rounded-full text-zinc-900 hover:text-red-800 transition-colors shadow-lg z-10"><X size={20} /></button>
                       </div>
                     ) : (

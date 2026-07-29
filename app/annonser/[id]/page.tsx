@@ -13,18 +13,23 @@ export default async function AnnonsDetaljPage({
   const { id } = await params
   const supabase = await createClient()
 
-  // Fetch ad with seller profile info
-  const { data: ad, error } = await supabase
+  // 1. Fetch the ad first
+  const { data: ad, error: adError } = await supabase
     .from('ads')
-    .select('*, profiles:user_id (*)')
+    .select('*')
     .eq('id', id)
     .single()
 
-  if (error || !ad) {
+  if (adError || !ad) {
     notFound()
   }
 
-  const seller = ad.profiles;
+  // 2. Fetch the seller's profile separately to avoid relationship errors
+  const { data: seller } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', ad.user_id)
+    .single()
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col text-left">

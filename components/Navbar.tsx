@@ -59,8 +59,35 @@ export default function Navbar() {
   ];
 
   // Hide main navbar on pages that have the HomeHero component included
-  const mainPages = ['/', '/annonser', '/nyheter', '/evenemang', '/om-oss', '/profil', '/profil/installningar', '/skapa-annons', '/meddelanden'];
-  if (mainPages.includes(pathname)) return null;
+  const hideOnPaths = [
+    '/annonser',
+    '/nyheter',
+    '/evenemang',
+    '/om-oss',
+    '/profil',
+    '/skapa-annons',
+    '/meddelanden',
+    '/marketplace',
+    '/bostad',
+    '/jobb',
+    '/tjanster',
+    '/transport',
+    '/tips',
+    '/meeting-place',
+    '/community',
+    '/institutioner',
+    '/annonsera-foretag',
+    '/reklam',
+    '/villkor',
+    '/faq',
+    '/admin'
+  ];
+
+  const shouldHideNavbar = pathname === '/' || hideOnPaths.some(path =>
+    pathname.startsWith(path)
+  );
+
+  if (shouldHideNavbar) return null;
 
   return (
     <header className="bg-white border-b border-zinc-100 z-50 shadow-sm relative text-left">

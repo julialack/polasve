@@ -1,0 +1,3 @@
+- [x] Förenkla `components/ui/UserAvatar.tsx` (ta bort storage-lookup)
+- [x] Granska `app/profil/installningar/page.tsx` för strikt avatar-sparande
+- [x] Verifiera att inga riktiga foton visas som profilbilder

@@ -13,12 +13,38 @@ export default function FeedList() {
   const supabase = createClient()
 
   const fetchPosts = async () => {
-    const { data, error } = await supabase
+    setLoading(true)
+    const { data: postsData, error: postsError } = await supabase
       .from('posts')
       .select('*')
       .order('created_at', { ascending: false })
-    if (error) console.error("Error fetching posts:", error)
-    if (data) setPosts(data)
+
+    if (postsError) {
+      console.error("Error fetching posts:", postsError)
+      setLoading(false)
+      return
+    }
+
+    if (postsData) {
+      // Fetch profiles for all unique user_ids in the posts
+      const userIds = Array.from(new Set(postsData.map(p => p.user_id)))
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, avatar_url')
+        .in('id', userIds)
+
+      const profileMap = (profilesData || []).reduce((acc: any, p: any) => {
+        acc[p.id] = p.avatar_url
+        return acc
+      }, {})
+
+      const postsWithProfiles = postsData.map(post => ({
+        ...post,
+        avatar_url: profileMap[post.user_id]
+      }))
+
+      setPosts(postsWithProfiles as any)
+    }
     setLoading(false)
   }
 

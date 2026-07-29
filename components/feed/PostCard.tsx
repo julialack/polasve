@@ -6,6 +6,7 @@ import { formatDisplayName } from '@/utils/formatName'
 import { Heart, MessageSquare, Loader2, Send, Trash2, Edit2, X, Check, Tag } from 'lucide-react'
 import { toast } from 'sonner'
 import { Post, Comment } from '@/types/database'
+import UserAvatar from '../ui/UserAvatar'
 
 interface PostCardProps {
   post: Post & { category?: string }
@@ -26,7 +27,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
   const [loadingLikes, setLoadingLikes] = useState(false)
   const [activeCommentPost, setActiveCommentPost] = useState(false)
   const [commentContent, setCommentContent] = useState('')
-  const [comments, setComments] = useState<Comment[]>([])
+  const [comments, setComments] = useState<any[]>([])
   const [commentCount, setCommentCount] = useState(0)
   const [userLikes, setUserLikes] = useState(false)
 
@@ -35,38 +36,37 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
 
   const [editingComment, setEditingComment] = useState<string | null>(null)
   const [editCommentContent, setEditCommentContent] = useState('')
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
   const supabase = createClient()
 
   const fetchComments = async () => {
-    const { data, error } = await supabase
+    const { data: commentsData, error: commentsError } = await supabase
       .from('comments')
       .select('*')
       .eq('post_id', post.id)
       .order('created_at', { ascending: true })
 
-    if (!error) {
-      setComments(data || [])
-      setCommentCount(data?.length || 0)
+    if (!commentsError && commentsData) {
+      const userIds = Array.from(new Set(commentsData.map(c => c.user_id)))
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, avatar_url')
+        .in('id', userIds)
+
+      const profileMap = (profilesData || []).reduce((acc: any, p: any) => {
+        acc[p.id] = p.avatar_url
+        return acc
+      }, {})
+
+      const commentsWithProfiles = commentsData.map(c => ({
+        ...c,
+        avatar_url: profileMap[c.user_id]
+      }))
+
+      setComments(commentsWithProfiles)
+      setCommentCount(commentsData.length)
     }
   }
-
-  useEffect(() => {
-    let mounted = true
-    const tryLoadAvatar = async () => {
-      if (!post?.user_id) return
-      try {
-        const { data: listData, error: listError } = await supabase.storage.from('avatars').list('', { search: post.user_id })
-        if (!listError && listData && listData.length > 0 && mounted) {
-          const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(listData[0].name)
-          if (urlData && urlData.publicUrl) setAvatarUrl(urlData.publicUrl)
-        }
-      } catch { /* ignore */ }
-    }
-    tryLoadAvatar()
-    return () => { mounted = false }
-  }, [post?.user_id])
 
   useEffect(() => {
     const fetchCommentCount = async () => {
@@ -130,13 +130,12 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
     <div className="bg-white border border-zinc-100 p-4 rounded-sm shadow-sm group text-left">
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center overflow-hidden border border-zinc-50 shadow-inner">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-[10px] font-black text-zinc-400">{post.user_name?.[0]?.toUpperCase()}</span>
-            )}
-          </div>
+          <UserAvatar
+            avatarUrl={(post as any).avatar_url}
+            userId={post.user_id}
+            userName={post.user_name}
+            size="sm"
+          />
           <div>
             <div className="flex items-center gap-2">
               <span className="font-pacifico text-sm text-[#003366] tracking-normal">{formatDisplayName(post.user_name)}</span>
@@ -189,30 +188,47 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
             <div className="space-y-4 mb-4 max-h-60 overflow-y-auto pr-2 scrollbar-hide">
               {comments.map((comment) => (
                 <div key={comment.id} className="group/comment">
-                  <div className="flex justify-between items-start mb-1 text-xs">
-                    <span className="font-pacifico text-[#003366] tracking-normal">{formatDisplayName(comment.user_name)} {comment.edited && <span className="font-sans font-normal text-[8px] text-zinc-300 italic lowercase ml-1">(redigerad)</span>}</span>
-                    {currentUser?.id === comment.user_id && !editingComment && (
-                      <div className="flex gap-2 opacity-0 group-hover/comment:opacity-100 transition-opacity">
-                        <button onClick={() => { setEditingComment(comment.id); setEditCommentContent(comment.content) }} className="text-zinc-300 hover:text-blue-600"><Edit2 size={10} /></button>
-                        <button onClick={() => handleDeleteComment(comment.id)} className="text-zinc-300 hover:text-red-800"><Trash2 size={10} /></button>
+                  <div className="flex items-start gap-2.5 mb-1">
+                    <UserAvatar
+                      avatarUrl={(comment as any).avatar_url}
+                      userId={comment.user_id}
+                      userName={comment.user_name}
+                      size="xs"
+                      className="mt-0.5"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start text-xs">
+                        <span className="font-pacifico text-[#003366] tracking-normal">{formatDisplayName(comment.user_name)} {comment.edited && <span className="font-sans font-normal text-[8px] text-zinc-300 italic lowercase ml-1">(redigerad)</span>}</span>
+                        {currentUser?.id === comment.user_id && !editingComment && (
+                          <div className="flex gap-2 opacity-0 group-hover/comment:opacity-100 transition-opacity">
+                            <button onClick={() => { setEditingComment(comment.id); setEditCommentContent(comment.content) }} className="text-zinc-300 hover:text-blue-600"><Edit2 size={10} /></button>
+                            <button onClick={() => handleDeleteComment(comment.id)} className="text-zinc-300 hover:text-red-800"><Trash2 size={10} /></button>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  {editingComment === comment.id ? (
-                    <div className="flex gap-2 mt-1">
-                      <input value={editCommentContent} onChange={(e) => setEditCommentContent(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleUpdateComment(comment.id)} className="flex-1 border border-[#003366]/30 text-xs text-black p-2 font-bold outline-none rounded-sm" autoFocus />
-                      <button onClick={() => handleUpdateComment(comment.id)} className="text-[#003366] p-1"><Check size={14} /></button>
-                      <button onClick={() => setEditingComment(null)} className="text-zinc-400 p-1"><X size={14} /></button>
+                      {editingComment === comment.id ? (
+                        <div className="flex gap-2 mt-1">
+                          <input value={editCommentContent} onChange={(e) => setEditCommentContent(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleUpdateComment(comment.id)} className="flex-1 border border-[#003366]/30 text-xs text-black p-2 font-bold outline-none rounded-sm" autoFocus />
+                          <button onClick={() => handleUpdateComment(comment.id)} className="text-[#003366] p-1"><Check size={14} /></button>
+                          <button onClick={() => setEditingComment(null)} className="text-zinc-400 p-1"><X size={14} /></button>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-zinc-700 font-medium leading-normal bg-zinc-50/50 p-2.5 rounded-sm border border-zinc-100/50">{comment.content}</p>
+                      )}
                     </div>
-                  ) : (
-                    <p className="text-xs text-zinc-700 font-medium leading-normal bg-zinc-50/50 p-2.5 rounded-sm border border-zinc-100/50">{comment.content}</p>
-                  )}
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
-          <div className="flex gap-2 pt-2 border-t border-zinc-50">
+          <div className="flex gap-2 pt-2 border-t border-zinc-50 items-center">
+            <UserAvatar
+              avatarUrl={currentUser?.user_metadata?.avatar_url}
+              userId={currentUser?.id}
+              userName={currentUser?.user_metadata?.full_name}
+              size="xs"
+            />
             <input value={commentContent} onChange={(e) => setCommentContent(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handlePostComment()} placeholder="Skriv ett svar..." className="flex-1 bg-zinc-100 border border-zinc-200 p-2.5 px-5 rounded-full text-xs text-black font-black outline-none focus:border-[#003366] placeholder:text-zinc-400 placeholder:font-normal" />
             <button onClick={handlePostComment} className="text-[#003366] hover:text-[#a11a2d] transition-all p-2 active:scale-90"><Send size={18} /></button>
           </div>

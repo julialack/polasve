@@ -88,7 +88,7 @@ export default function AdminPage() {
     const { error } = await supabase.from('news').insert([{
       title: newsTitle,
       description: newsDesc,
-      image_url: newsImg || 'https://images.unsplash.com/photo-1590424600305-674393608226?q=80&w=800&auto=format&fit=crop',
+      image_url: newsImg || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
       date: new Date().toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
     }])
     if (!error) {
