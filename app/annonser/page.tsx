@@ -36,6 +36,7 @@ interface Ad {
   price: string | null
   created_at: string
   is_premium: boolean
+  status?: 'active' | 'sold' | 'finished'
 }
 
 function AnnonserList() {
@@ -133,19 +134,24 @@ function AnnonserList() {
                 ) : (
                   <div className="space-y-6">
                     {ads.map((ad) => (
-                      <Link href={`/annonser/${ad.id}`} key={ad.id} className="group bg-white p-4 border border-zinc-100 rounded-sm shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row gap-6">
-                        <div className="w-full sm:w-40 h-32 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0">
+                      <Link href={`/annonser/${ad.id}`} key={ad.id} className={`group bg-white p-4 border border-zinc-100 rounded-sm shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row gap-6 ${ad.status === 'finished' ? 'opacity-60' : ''}`}>
+                        <div className="w-full sm:w-40 h-32 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0 relative">
                           <SafeImage
                             src={ad.image_url || ""}
                             alt={ad.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                             fallbackSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"
                           />
+                          {ad.status === 'finished' && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                              <span className="text-[10px] font-black text-white uppercase tracking-widest rotate-[-15deg] border-2 border-white px-2 py-1">SÅLD / KLAR</span>
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1 flex flex-col justify-between py-1">
                           <div>
                             <div className="flex items-center gap-2 mb-2">
-                              <span className="text-[9px] font-black uppercase text-[#a11a2d]">{ad.category}</span>
+                              <span className="text-[9px] font-black uppercase text-[#a11a2d]">{ad.status === 'finished' ? 'AVSLUTAD' : ad.category}</span>
                               <span className="text-[8px] text-zinc-300 font-bold border-l pl-2">{new Date(ad.created_at).toLocaleDateString()}</span>
                             </div>
                             <h3 className={`text-lg font-bold italic group-hover:underline leading-tight mb-2 text-[#003366]`}>

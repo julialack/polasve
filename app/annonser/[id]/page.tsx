@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Mail, Phone, MapPin, ShieldCheck, Calendar, User } from 'lucide-react'
+import { Mail, Phone, MapPin, ShieldCheck, Calendar, User, Edit3 } from 'lucide-react'
 import ContactForm from '@/components/ads/ContactForm'
 import HomeHero from '@/components/HomeHero'
 
@@ -30,6 +30,10 @@ export default async function AnnonsDetaljPage({
     .select('*')
     .eq('id', ad.user_id)
     .single()
+
+  // 3. Get current user to check ownership
+  const { data: { user } } = await supabase.auth.getUser()
+  const isOwner = user?.id === ad.user_id
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col text-left">
@@ -65,8 +69,23 @@ export default async function AnnonsDetaljPage({
               {/* LEFT: Ad Content */}
               <div className="lg:col-span-8 space-y-10 text-left">
                 <div className="text-left">
-                  <div className="flex items-center gap-3 text-zinc-400 text-[10px] font-bold uppercase tracking-widest mb-4">
-                    <Calendar size={14} className="text-[#a11a2d]" /> Publicerad {new Date(ad.created_at).toLocaleDateString()}
+                  {ad.status === 'finished' && (
+                    <div className="mb-6 bg-red-600 text-white px-6 py-2 rounded-sm font-black uppercase tracking-widest text-center animate-in zoom-in-95 duration-300">
+                      Denna annons är avslutad (SÅLD / TILLSATT)
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <div className="flex items-center gap-3 text-zinc-400 text-[10px] font-bold uppercase tracking-widest">
+                      <Calendar size={14} className="text-[#a11a2d]" /> Publicerad {new Date(ad.created_at).toLocaleDateString()}
+                    </div>
+                    {isOwner && (
+                      <Link
+                        href={`/annonser/${id}/redigera`}
+                        className="flex items-center gap-2 bg-zinc-900 text-white px-4 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest hover:bg-[#003366] transition-all"
+                      >
+                        <Edit3 size={12} /> Redigera Min Annons
+                      </Link>
+                    )}
                   </div>
                   <h1 className="text-3xl md:text-5xl font-black text-[#003366] uppercase tracking-tighter italic mb-6 leading-tight">
                     {ad.title}
@@ -84,9 +103,24 @@ export default async function AnnonsDetaljPage({
                   <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300 mb-6 flex items-center gap-4">
                     Beskrivning <div className="h-px flex-1 bg-zinc-50"></div>
                   </h3>
-                  <p className="text-zinc-600 font-medium text-base md:text-lg leading-relaxed whitespace-pre-wrap px-1">
+                  <p className="text-zinc-600 font-medium text-base md:text-lg leading-relaxed whitespace-pre-wrap px-1 mb-10">
                     {ad.description}
                   </p>
+
+                  {ad.extra_images && ad.extra_images.length > 0 && (
+                    <div className="space-y-6">
+                       <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300 mb-6 flex items-center gap-4">
+                        Fler Bilder <div className="h-px flex-1 bg-zinc-50"></div>
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {ad.extra_images.map((img: string, idx: number) => (
+                          <div key={idx} className="relative aspect-video rounded-sm overflow-hidden border border-zinc-100 shadow-sm group cursor-zoom-in">
+                            <img src={img} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

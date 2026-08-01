@@ -57,6 +57,8 @@ export default function SkapaAnnonsPage() {
   const [description, setDescription] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [extraFiles, setExtraFiles] = useState<(File | null)[]>([null, null])
+  const [extraPreviews, setExtraPreviews] = useState<(string | null)[]>([null, null])
 
   const router = useRouter()
   const supabase = createClient()
@@ -66,6 +68,18 @@ export default function SkapaAnnonsPage() {
     if (file) {
       setImageFile(file)
       setImagePreview(URL.createObjectURL(file))
+    }
+  }
+
+  const handleExtraImageChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const newFiles = [...extraFiles]
+      const newPreviews = [...extraPreviews]
+      newFiles[index] = file
+      newPreviews[index] = URL.createObjectURL(file)
+      setExtraFiles(newFiles)
+      setExtraPreviews(newPreviews)
     }
   }
 
@@ -82,14 +96,30 @@ export default function SkapaAnnonsPage() {
       return
     }
 
+    // 1. Upload Main Image
     let imageUrl = null
     if (imageFile) {
       const fileExt = imageFile.name.split('.').pop()
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`
+      const fileName = `${user.id}-${Date.now()}-main.${fileExt}`
       const { error: uploadError } = await supabase.storage.from('ad-images').upload(fileName, imageFile)
       if (!uploadError) {
         const { data: { publicUrl } } = supabase.storage.from('ad-images').getPublicUrl(fileName)
         imageUrl = publicUrl
+      }
+    }
+
+    // 2. Upload Extra Images
+    const extraUrls: string[] = []
+    for (let i = 0; i < extraFiles.length; i++) {
+      const file = extraFiles[i]
+      if (file) {
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${user.id}-${Date.now()}-extra-${i}.${fileExt}`
+        const { error: err } = await supabase.storage.from('ad-images').upload(fileName, file)
+        if (!err) {
+          const { data: { publicUrl } } = supabase.storage.from('ad-images').getPublicUrl(fileName)
+          extraUrls.push(publicUrl)
+        }
       }
     }
 
@@ -101,7 +131,8 @@ export default function SkapaAnnonsPage() {
       description,
       is_premium: selectedPackage !== 'free',
       user_id: user.id,
-      image_url: imageUrl
+      image_url: imageUrl,
+      extra_images: extraUrls.length > 0 ? extraUrls : null
     }])
 
     if (error) {
@@ -112,6 +143,8 @@ export default function SkapaAnnonsPage() {
     }
     setLoading(false)
   }
+
+  const showExtraImages = ['Marketplace', 'Bytes', 'Hyra', 'Sökes'].includes(category)
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-20">
@@ -180,18 +213,47 @@ export default function SkapaAnnonsPage() {
                   <div className="grid gap-6">
                     <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Annonsens titel" required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-md focus:border-[#003366] focus:bg-white outline-none font-bold text-lg" />
                     <div className="grid md:grid-cols-2 gap-6">
-                      <select value={category} onChange={(e) => setCategory(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-md focus:border-[#003366] focus:bg-white outline-none font-bold">
+                      <select value={category} onChange={(e) => setCategory(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-md focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-900">
                         <option value="">Välj kategori</option>
                         <option value="Jobb">Jobb</option>
                         <option value="Bostad">Bostad</option>
                         <option value="Hyra">Hyra</option>
                         <option value="Sökes">Sökes</option>
+                        <option value="Marketplace">Säljes (Marketplace)</option>
+                        <option value="Bytes">Bytes</option>
                         <option value="Tjänster">Tjänster</option>
-                        <option value="Marketplace">Marketplace</option>
                         <option value="Övrigt">Övrigt</option>
                       </select>
                       <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Pris (t.ex. 500 kr)" className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-md focus:border-[#003366] focus:bg-white outline-none font-bold" />
                     </div>
+
+                    {showExtraImages && (
+                      <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Extra bilder (valfritt, max 2)</p>
+                        <div className="grid grid-cols-2 gap-4">
+                          {[0, 1].map((idx) => (
+                            <div key={idx} className="relative aspect-video">
+                              {extraPreviews[idx] ? (
+                                <div className="relative w-full h-full rounded-md overflow-hidden border-2 border-zinc-100 shadow-sm">
+                                  <Image src={extraPreviews[idx]!} alt="Extra Preview" fill className="object-cover" />
+                                  <button type="button" onClick={() => {
+                                    const newF = [...extraFiles]; const newP = [...extraPreviews];
+                                    newF[idx] = null; newP[idx] = null;
+                                    setExtraFiles(newF); setExtraPreviews(newP);
+                                  }} className="absolute top-2 right-2 bg-white/90 p-1 rounded-full text-zinc-900 hover:text-red-800 transition-colors shadow-sm z-10"><X size={14} /></button>
+                                </div>
+                              ) : (
+                                <label className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed border-zinc-200 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-all cursor-pointer group">
+                                  <Camera className="w-6 h-6 text-zinc-300 group-hover:text-[#003366] transition-colors mb-1" />
+                                  <span className="text-[8px] font-black uppercase text-zinc-400 group-hover:text-zinc-600">Extra bild {idx + 1}</span>
+                                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleExtraImageChange(e, idx)} />
+                                </label>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Stad / Plats" required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-md focus:border-[#003366] focus:bg-white outline-none font-bold" />
                     <textarea rows={6} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Beskrivning av vad du erbjuder..." required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-md focus:border-[#003366] focus:bg-white outline-none font-bold resize-none" />
                   </div>

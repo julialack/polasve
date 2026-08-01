@@ -5,8 +5,9 @@ import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { formatDisplayName } from '@/utils/formatName'
-import { Package, MessageSquare, ChevronRight, PlusCircle, Settings, Globe, Info } from 'lucide-react'
+import { Package, MessageSquare, ChevronRight, PlusCircle, Settings, Globe, Info, Trash2, CheckCircle, Edit3 } from 'lucide-react'
 import HomeHero from '@/components/HomeHero'
+import { toast } from 'sonner'
 
 interface Ad {
   id: string
@@ -69,11 +70,11 @@ export default function ProfilPage() {
     // Hämta användarens egna annonser
     const { data: userAds } = await supabase
       .from('ads')
-      .select('id, title, image_url, category, price')
+      .select('id, title, image_url, category, price, status')
       .eq('user_id', currentUser.id)
       .order('created_at', { ascending: false })
 
-    if (userAds) setAds(userAds)
+    if (userAds) setAds(userAds as any)
 
     // Hämta senaste meddelanden
     const { data: userMessages } = await supabase
@@ -87,6 +88,36 @@ export default function ProfilPage() {
 
     setLoading(false)
   }, [supabase, router])
+
+  const handleDeleteAd = async (adId: string) => {
+    if (!confirm('Är du säker på att du vill ta bort annonsen permanent?')) return
+
+    try {
+      const { error } = await supabase.from('ads').delete().eq('id', adId)
+      if (error) throw error
+
+      toast.success('Annonsen har tagits bort')
+      setAds(prev => prev.filter(ad => ad.id !== adId))
+    } catch (err) {
+      toast.error('Kunde inte ta bort annonsen')
+    }
+  }
+
+  const handleMarkAsFinished = async (adId: string) => {
+    try {
+      const { error } = await supabase
+        .from('ads')
+        .update({ status: 'finished' })
+        .eq('id', adId)
+
+      if (error) throw error
+
+      toast.success('Annonsen markerad som klar!')
+      setAds(prev => prev.map(ad => ad.id === adId ? { ...ad, status: 'finished' } : ad))
+    } catch (err) {
+      toast.error('Kunde inte uppdatera annonsen')
+    }
+  }
 
   useEffect(() => {
     fetchUserData()
@@ -214,22 +245,56 @@ export default function ProfilPage() {
                     </div>
                   ) : (
                     <div className="grid gap-4 text-left">
-                      {ads.map((ad) => (
-                        <Link href={`/annonser/${ad.id}`} key={ad.id} className="group flex items-center gap-6 p-4 border border-zinc-50 hover:border-[#003366]/20 hover:bg-zinc-50/50 transition-all rounded-sm text-left">
-                          <div className="w-16 h-16 md:w-20 md:h-20 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border text-left">
-                            {ad.image_url ? (
-                              <img src={ad.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[8px] font-bold uppercase text-left">Bild saknas</div>
+                      {ads.map((ad: any) => (
+                        <div key={ad.id} className={`group relative flex flex-col md:flex-row items-center gap-6 p-4 border border-zinc-50 rounded-sm transition-all ${ad.status === 'finished' ? 'opacity-60 bg-zinc-50' : 'hover:border-[#003366]/20 hover:bg-zinc-50/50'}`}>
+                          <Link href={`/annonser/${ad.id}`} className="flex flex-1 items-center gap-6 min-w-0">
+                            <div className="w-16 h-16 md:w-20 md:h-20 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border text-left relative">
+                              {ad.image_url ? (
+                                <img src={ad.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[8px] font-bold uppercase text-left">Bild saknas</div>
+                              )}
+                              {ad.status === 'finished' && (
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                  <span className="text-[10px] font-black text-white uppercase tracking-widest rotate-[-15deg] border-2 border-white px-1 py-0.5">SÅLD / KLAR</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0 text-left">
+                              <span className="text-[7px] font-black text-[#a11a2d] uppercase tracking-widest text-left">{ad.category}</span>
+                              <h4 className="font-bold text-base text-[#003366] truncate italic group-hover:underline text-left">{ad.title}</h4>
+                              <p className="text-sm font-black text-zinc-900 mt-1 text-left">{ad.price || 'Bud'}</p>
+                            </div>
+                          </Link>
+
+                          <div className="flex items-center gap-3 md:border-l border-zinc-100 md:pl-6 w-full md:w-auto">
+                            {ad.status !== 'finished' && (
+                              <>
+                                <Link
+                                  href={`/annonser/${ad.id}/redigera`}
+                                  title="Redigera annons"
+                                  className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-blue-50 text-[#003366] px-4 py-2 rounded-sm text-[9px] font-black uppercase tracking-widest hover:bg-[#003366] hover:text-white transition-all shadow-sm"
+                                >
+                                  <Edit3 size={14} /> Redigera
+                                </Link>
+                                <button
+                                  onClick={() => handleMarkAsFinished(ad.id)}
+                                  title="Markera som klart/sålt"
+                                  className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-sm text-[9px] font-black uppercase tracking-widest hover:bg-green-600 hover:text-white transition-all shadow-sm"
+                                >
+                                  <CheckCircle size={14} /> Klar
+                                </button>
+                              </>
                             )}
+                            <button
+                              onClick={() => handleDeleteAd(ad.id)}
+                              title="Ta bort annons"
+                              className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-sm text-[9px] font-black uppercase tracking-widest hover:bg-[#a11a2d] hover:text-white transition-all shadow-sm"
+                            >
+                              <Trash2 size={14} /> Ta bort
+                            </button>
                           </div>
-                          <div className="flex-1 min-w-0 text-left">
-                            <span className="text-[7px] font-black text-[#a11a2d] uppercase tracking-widest text-left">{ad.category}</span>
-                            <h4 className="font-bold text-base text-[#003366] truncate italic group-hover:underline text-left">{ad.title}</h4>
-                            <p className="text-sm font-black text-zinc-900 mt-1 text-left">{ad.price || 'Bud'}</p>
-                          </div>
-                          <ChevronRight size={20} className="text-zinc-300 group-hover:text-[#003366] transition-colors" />
-                        </Link>
+                        </div>
                       ))}
                     </div>
                   )}

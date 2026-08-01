@@ -23,8 +23,9 @@ export default function PremiumAdsSidebar() {
       setLoading(true)
       const { data, error } = await supabase
         .from('ads')
-        .select('id, title, image_url, price, location')
+        .select('id, title, image_url, price, location, status')
         .eq('is_premium', true)
+        .neq('status', 'finished')
         .order('created_at', { ascending: false })
         .limit(5)
 

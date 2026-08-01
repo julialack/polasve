@@ -22,6 +22,8 @@ export default function RedigeraAnnonsPage({ params }: { params: Promise<{ id: s
   const [description, setDescription] = useState('')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [extraImages, setExtraImages] = useState<string[]>([])
+  const [extraFiles, setExtraFiles] = useState<(File | null)[]>([null, null])
+  const [extraPreviews, setExtraPreviews] = useState<(string | null)[]>([null, null])
   const [selectedLangs, setSelectedLangs] = useState<string[]>([])
 
   const router = useRouter()
@@ -57,6 +59,7 @@ export default function RedigeraAnnonsPage({ params }: { params: Promise<{ id: s
       setDescription(data.description)
       setImageUrl(data.image_url)
       setExtraImages(data.extra_images || [])
+      setExtraPreviews(data.extra_images || [null, null])
       setSelectedLangs(data.languages || [])
       setLoading(false)
     }
@@ -70,24 +73,47 @@ export default function RedigeraAnnonsPage({ params }: { params: Promise<{ id: s
     )
   }
 
+  const handleExtraImageChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const newFiles = [...extraFiles]
+      const newPreviews = [...extraPreviews]
+      newFiles[index] = file
+      newPreviews[index] = URL.createObjectURL(file)
+      setExtraFiles(newFiles)
+      setExtraPreviews(newPreviews)
+    }
+  }
+
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
 
     try {
-      // Create history entry
-      const historyEntry = {
-        updated_at: new Date().toISOString(),
-        old_data: {
-          title: ad.title,
-          price: ad.price,
-          description: ad.description,
-          category: ad.category,
-          location: ad.location
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      if (!currentUser) throw new Error('Not logged in')
+
+      // Upload New Extra Images
+      const finalExtraUrls: string[] = []
+
+      for (let i = 0; i < 2; i++) {
+        const preview = extraPreviews[i]
+        const file = extraFiles[i]
+
+        if (file) {
+          // New file to upload
+          const fileExt = file.name.split('.').pop()
+          const fileName = `${currentUser.id}-${Date.now()}-extra-${i}.${fileExt}`
+          const { error: err } = await supabase.storage.from('ad-images').upload(fileName, file)
+          if (!err) {
+            const { data: { publicUrl } } = supabase.storage.from('ad-images').getPublicUrl(fileName)
+            finalExtraUrls.push(publicUrl)
+          }
+        } else if (preview && !preview.startsWith('blob:')) {
+          // Old image kept
+          finalExtraUrls.push(preview)
         }
       }
-
-      const newHistory = [...(ad.edit_history || []), historyEntry]
 
       const updateData = {
         title,
@@ -97,7 +123,7 @@ export default function RedigeraAnnonsPage({ params }: { params: Promise<{ id: s
         description,
         languages: selectedLangs,
         edited: true,
-        edit_history: newHistory
+        extra_images: finalExtraUrls.length > 0 ? finalExtraUrls : null
       }
 
       const { error } = await supabase
@@ -151,21 +177,53 @@ export default function RedigeraAnnonsPage({ params }: { params: Promise<{ id: s
                 <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-900 text-lg" />
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Kategori</label>
-                  <select value={category} onChange={(e) => setCategory(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-900">
-                    <option value="Jobb">Jobb</option>
-                    <option value="Bostad">Bostad</option>
-                    <option value="Tjänster">Tjänster</option>
-                    <option value="Övrigt">Övrigt</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Pris</label>
-                  <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Bud" className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-900" />
-                </div>
-              </div>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Kategori</label>
+                      <select value={category} onChange={(e) => setCategory(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-900">
+                        <option value="Jobb">Jobb</option>
+                        <option value="Bostad">Bostad</option>
+                        <option value="Hyra">Hyra</option>
+                        <option value="Sökes">Sökes</option>
+                        <option value="Marketplace">Säljes (Marketplace)</option>
+                        <option value="Bytes">Bytes</option>
+                        <option value="Tjänster">Tjänster</option>
+                        <option value="Övrigt">Övrigt</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Pris</label>
+                      <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Bud" className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-900" />
+                    </div>
+                  </div>
+
+                  {['Marketplace', 'Bytes', 'Hyra', 'Sökes'].includes(category) && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                      <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Extra bilder (valfritt, max 2)</p>
+                      <div className="grid grid-cols-2 gap-4">
+                        {[0, 1].map((idx) => (
+                          <div key={idx} className="relative aspect-video">
+                            {extraPreviews[idx] ? (
+                              <div className="relative w-full h-full rounded-sm overflow-hidden border-2 border-zinc-100 shadow-sm">
+                                <Image src={extraPreviews[idx]!} alt="Extra Preview" fill className="object-cover" />
+                                <button type="button" onClick={() => {
+                                  const newF = [...extraFiles]; const newP = [...extraPreviews];
+                                  newF[idx] = null; newP[idx] = null;
+                                  setExtraFiles(newF); setExtraPreviews(newP);
+                                }} className="absolute top-2 right-2 bg-white/90 p-1 rounded-full text-zinc-900 hover:text-red-800 transition-colors shadow-sm z-10"><X size={14} /></button>
+                              </div>
+                            ) : (
+                              <label className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed border-zinc-200 rounded-sm bg-zinc-50 hover:bg-zinc-100 transition-all cursor-pointer group">
+                                <Camera className="w-6 h-6 text-zinc-300 group-hover:text-[#003366] transition-colors mb-1" />
+                                <span className="text-[8px] font-black uppercase text-zinc-400 group-hover:text-zinc-600">Extra bild {idx + 1}</span>
+                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleExtraImageChange(e, idx)} />
+                              </label>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Plats</label>

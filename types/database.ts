@@ -29,7 +29,9 @@ export interface Ad {
   location: string;
   user_id: string;
   image_url: string | null;
+  extra_images?: string[] | null;
   is_premium: boolean;
+  status?: 'active' | 'sold' | 'finished';
 }
 
 export interface Message {

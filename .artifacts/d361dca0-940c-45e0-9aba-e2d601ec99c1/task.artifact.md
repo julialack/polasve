@@ -1,4 +1,4 @@
-- [ ] Ta bort `activeTab` och flik-knappar i `components/ads/CategoryLanding.tsx`
-- [ ] Implementera en vertikal layout med Annonser i toppen och Community i botten
-- [ ] Lägg till en tydlig sektionsavskiljare för Community
-- [ ] Verifiera att sidan laddar korrekt och att flödet fungerar
+- [ ] Skapa `app/api/poland-news/route.ts` för att hämta och parsa RSS
+- [ ] Uppdatera `app/nyheter/page.tsx` med den nya sektionen för polska nyheter
+- [ ] Styla nyhetslistan och lägg till käll-markeringar
+- [ ] Verifiera att realtidsuppdateringarna fungerar

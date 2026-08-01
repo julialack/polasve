@@ -1,24 +1,31 @@
-# Plan för enhetlig flödes- och annonssida
+# Plan för extra bilder i specifika kategorier
 
-Jag ska bygga om kategorisidorna så att de inte längre kräver att man växlar mellan flikar. Istället kommer annonserna (fokus på betalda/premium) att ligga högst upp, följt av community-flödet direkt under på samma sida.
+Jag ska implementera möjligheten att ladda upp 2 extra bilder för kategorierna Säljes (Marketplace), Bytes, Hyra och Sökes.
 
 ## Föreslagna ändringar
 
-### 1. Uppdatera layouten (`CategoryLanding.tsx`)
-- **Ta bort flik-systemet:** Inget behov av att klicka för att byta vy.
-- **Sektionsindelning:**
-    1. **Toppsektion:** "Aktuella Annonser" - Visar alla annonser i kategorin (med de som betalat/premium tydligt markerade eller först).
-    2. **Mellansektion:** En tydlig avskiljare för Community.
-    3. **Bottensektion:** `PostBox` och `FeedList` för att låta diskussionen flöda fritt under annonserna.
+### 1. Databas och Typer
+- [x] SQL-kommando för `extra_images TEXT[]` förberett.
+- [MODIFY] [types/database.ts](file:///C:/Users/admin/Desktop/polasve/types/database.ts): Lägg till `extra_images: string[] | null` i `Ad`.
 
-### 2. Designförbättringar
-- Se till att övergången mellan annonslistan och inläggsfältet är naturlig och snygg.
-- Behåll sidomenyerna (Premium sidebar och navigering) på kanterna som vanligt.
+### 2. Annonsskapande
+#### [MODIFY] [app/skapa-annons/page.tsx](file:///C:/Users/admin/Desktop/polasve/app/skapa-annons/page.tsx)
+- Lägg till "Bytes" i kategorivalet.
+- Skapa state för `extraImageFiles` och `extraImagePreviews`.
+- Visa två mindre uppladdningsrutor om kategorin är Marketplace, Bytes, Hyra eller Sökes.
+- Uppdatera `handleSubmit` för att ladda upp och spara dessa bilder.
+
+### 3. Redigering
+#### [MODIFY] [app/annonser/[id]/redigera/page.tsx](file:///C:/Users/admin/Desktop/polasve/app/annonser/[id]/redigera/page.tsx)
+- Implementera samma UI för extra bilder som på "skapa"-sidan.
+- Möjliggör uppdatering av befintliga extra bilder.
+
+### 4. Visning
+#### [MODIFY] [app/annonser/[id]/page.tsx](file:///C:/Users/admin/Desktop/polasve/app/annonser/[id]/page.tsx)
+- Lägg till ett bildgalleri under huvudbilden som visar de extra bilderna om de finns.
 
 ## Verifieringsplan
-
-### Manuell verifiering
-1. Gå till `/jobb`.
-2. Verifiera att annonserna syns direkt i toppen.
-3. Scrolla ner och se att inläggsfältet och flödet finns där direkt utan klick.
-4. Kontrollera att det fungerar likadant på andra kategorisidor som "Bostad".
+1. Skapa en annons i kategorin "Marketplace" och ladda upp 3 bilder totalt.
+2. Verifiera att alla 3 bilder syns på annonssidan.
+3. Testa att redigera och byta ut en av de mindre bilderna.
+4. Kontrollera att de extra rutorna *inte* syns för t.ex. kategorin "Jobb".

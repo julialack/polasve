@@ -12,7 +12,9 @@ import PremiumAdsSidebar from "@/components/ads/PremiumAdsSidebar";
 
 export default function NyheterPage() {
   const [news, setNews] = useState<any[]>([])
+  const [polandNews, setPolandNews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [polandLoading, setPolandLoading] = useState(true)
   const supabase = createClient()
 
   useEffect(() => {
@@ -22,7 +24,22 @@ export default function NyheterPage() {
       if (newsData) setNews(newsData)
       setLoading(false)
     }
+
+    const fetchPolandNews = async () => {
+      setPolandLoading(true)
+      try {
+        const res = await fetch('/api/poland-news')
+        const data = await res.json()
+        if (Array.isArray(data)) setPolandNews(data)
+      } catch (e) {
+        console.error("Failed to fetch Poland news")
+      } finally {
+        setPolandLoading(false)
+      }
+    }
+
     fetchData()
+    fetchPolandNews()
   }, [])
 
   const today = new Date().toLocaleDateString('sv-SE', {
@@ -59,7 +76,51 @@ export default function NyheterPage() {
           </aside>
 
           {/* MAIN CONTENT - News Feed */}
-          <div className="col-span-1 md:col-span-9 lg:col-span-2 space-y-6 text-left">
+          <div className="col-span-1 md:col-span-9 lg:col-span-2 space-y-8 text-left">
+
+            {/* Poland Real-time News Section */}
+            <div className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm text-left">
+              <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider flex justify-between items-center text-left">
+                <span>Senaste nytt från Polen (Realtid)</span>
+                <span className="flex h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
+              </div>
+              <div className="p-4 md:p-6 text-left">
+                {polandLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3, 4].map(i => <div key={i} className="h-10 bg-zinc-50 animate-pulse rounded-sm" />)}
+                  </div>
+                ) : (
+                  <div className="grid gap-3">
+                    {polandNews.map((item, idx) => (
+                      <a
+                        key={idx}
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 hover:bg-zinc-50 transition-colors border-b border-zinc-50 last:border-0 group"
+                      >
+                        <span
+                          className="text-[8px] font-black uppercase px-2 py-0.5 rounded-full text-white shrink-0 shadow-sm"
+                          style={{ backgroundColor: item.color }}
+                        >
+                          {item.source}
+                        </span>
+                        <h3 className="text-[11px] md:text-xs font-bold text-[#003366] leading-tight group-hover:underline decoration-[#a11a2d] decoration-2 underline-offset-2">
+                          {item.title}
+                        </h3>
+                        <ArrowRight size={12} className="ml-auto text-zinc-300 group-hover:text-[#a11a2d] transition-colors" />
+                      </a>
+                    ))}
+                  </div>
+                )}
+                <div className="mt-4 pt-4 border-t border-zinc-50">
+                  <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest italic text-center">
+                    Automatiskt uppdaterat från TVN24, Rzeczpospolita, Interia & Onet
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm text-left">
               <div className="bg-[#003366] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-left">
                 Officiella Uppdateringar
