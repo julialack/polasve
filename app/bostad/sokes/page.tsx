@@ -4,9 +4,9 @@ import { Search } from "lucide-react";
 export default function BostadSokesPage() {
   return (
     <CategoryLanding
-      title="Lägenhet sökes"
+      title="Bostad - Sökes"
       description="Medlemmar som letar efter ett hem."
-      categoryFilter="Lägenhet sökes"
+      categoryFilter="Sökes"
       icon={<Search size={18} />}
     />
   );

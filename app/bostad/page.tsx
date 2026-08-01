@@ -6,7 +6,7 @@ export default function BostadHubPage() {
     <CategoryLanding
       title="Jobb & Bostad"
       description="Hitta jobb, lägenheter och lokaler på ett ställe."
-      categoryFilter={["Leta jobb", "Lägenhet sökes", "Lägenheter Hyra ut", "Lokaler"]}
+      categoryFilter={["Leta jobb", "Jobb", "Bostad", "Hyra", "Sökes", "Lokaler"]}
       icon={<Home size={18} />}
     />
   );

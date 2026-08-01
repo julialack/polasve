@@ -184,7 +184,10 @@ export default function SkapaAnnonsPage() {
                         <option value="">Välj kategori</option>
                         <option value="Jobb">Jobb</option>
                         <option value="Bostad">Bostad</option>
+                        <option value="Hyra">Hyra</option>
+                        <option value="Sökes">Sökes</option>
                         <option value="Tjänster">Tjänster</option>
+                        <option value="Marketplace">Marketplace</option>
                         <option value="Övrigt">Övrigt</option>
                       </select>
                       <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Pris (t.ex. 500 kr)" className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-md focus:border-[#003366] focus:bg-white outline-none font-bold" />

@@ -13,7 +13,7 @@ export default function SafeImage({
   className,
   ...props
 }: SafeImageProps) {
-  const [imgSrc, setImgSrc] = useState(src)
+  const [imgSrc, setImgSrc] = useState(src || fallbackSrc)
   const [hasError, setHasError] = useState(false)
 
   const handleError = () => {
@@ -23,9 +23,11 @@ export default function SafeImage({
     }
   }
 
+  if (!imgSrc && !src) return null
+
   return (
     <img
-      src={imgSrc}
+      src={imgSrc || fallbackSrc}
       alt={alt}
       onError={handleError}
       className={className}

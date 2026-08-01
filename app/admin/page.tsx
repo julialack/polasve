@@ -4,16 +4,18 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Loader2, Newspaper, Calendar, ArrowLeft, UserCheck, Check, X } from 'lucide-react'
+import { Loader2, Newspaper, Calendar, ArrowLeft, UserCheck, Check, X, Building2 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [tab, setTab] = useState<'news' | 'event' | 'requests'>('news')
+  const [tab, setTab] = useState<'news' | 'event' | 'requests' | 'business'>('news')
 
   // Requests State
   const [requests, setRequests] = useState<any[]>([])
+  const [businessRequests, setBusinessRequests] = useState<any[]>([])
 
   // News Form
   const [newsTitle, setNewsTitle] = useState('')
@@ -36,6 +38,7 @@ export default function AdminPage() {
       if (user && user.email === 'julia.lackchristensen@gmail.com') {
         setIsAdmin(true)
         fetchRequests()
+        fetchBusinessRequests()
       } else {
         toast.error('Endast administratörer har tillgång hit.')
         router.push('/')
@@ -52,6 +55,14 @@ export default function AdminPage() {
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
     if (data) setRequests(data)
+  }
+
+  const fetchBusinessRequests = async () => {
+    const { data } = await supabase
+      .from('business_ad_requests')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (data) setBusinessRequests(data)
   }
 
   const handleApproveRequest = async (request: any) => {
@@ -80,6 +91,41 @@ export default function AdminPage() {
     if (!error) {
       toast.error('Begäran borttagen.')
       fetchRequests()
+    }
+  }
+
+  const handleApproveBusinessRequest = async (req: any) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // 1. Create the actual ad
+      const { error: adError } = await supabase.from('ads').insert([{
+        title: req.company_name,
+        description: req.message || `Annons för ${req.company_name}`,
+        image_url: req.image_url,
+        category: 'Tjänster',
+        location: 'Hela Sverige',
+        price: 'Sponsrad',
+        is_premium: true,
+        user_id: user.id
+      }])
+
+      if (adError) throw adError
+
+      // 2. Mark the request as approved
+      const { error: reqError } = await supabase
+        .from('business_ad_requests')
+        .update({ status: 'approved' })
+        .eq('id', req.id)
+
+      if (reqError) throw reqError
+
+      toast.success('Annonsen har publicerats i Bazaren!')
+      fetchBusinessRequests()
+    } catch (err: any) {
+      console.error(err)
+      toast.error('Kunde inte publicera annonsen')
     }
   }
 
@@ -133,6 +179,9 @@ export default function AdminPage() {
               <button onClick={() => setTab('event')} className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase transition-all shrink-0 ${tab === 'event' ? 'bg-[#a11a2d] text-white shadow-md' : 'text-blue-200'}`}>Event</button>
               <button onClick={() => setTab('requests')} className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase transition-all shrink-0 flex items-center gap-2 ${tab === 'requests' ? 'bg-[#a11a2d] text-white shadow-md' : 'text-blue-200'}`}>
                 Namnändringar {requests.length > 0 && <span className="bg-white text-red-600 px-1.5 rounded-full text-[8px]">{requests.length}</span>}
+              </button>
+              <button onClick={() => setTab('business')} className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase transition-all shrink-0 flex items-center gap-2 ${tab === 'business' ? 'bg-[#a11a2d] text-white shadow-md' : 'text-blue-200'}`}>
+                Företag {businessRequests.filter(r => r.status === 'pending').length > 0 && <span className="bg-white text-red-600 px-1.5 rounded-full text-[8px]">{businessRequests.filter(r => r.status === 'pending').length}</span>}
               </button>
             </div>
           </div>
@@ -199,6 +248,84 @@ export default function AdminPage() {
                      **Notera:** Som admin behöver du manuellt godkänna ändringen här och sedan uppdatera användarens namn i Supabase Auth Dashboard (eftersom vi kör klientsidan här). Denna lista hjälper dig att hålla koll på vem som vill byta vad!
                    </p>
                 </div>
+              </div>
+            )}
+
+            {tab === 'business' && (
+              <div className="space-y-8">
+                <div className="flex items-center gap-3 text-[#a11a2d] mb-6">
+                  <Newspaper size={20} />
+                  <h2 className="text-sm font-black uppercase tracking-widest">Företagsförfrågningar</h2>
+                </div>
+
+                {businessRequests.length === 0 ? (
+                  <p className="text-center py-20 text-zinc-400 italic">Inga företagsförfrågningar ännu.</p>
+                ) : (
+                  <div className="space-y-6">
+                    {businessRequests.map((req) => (
+                      <div key={req.id} className={`p-6 border rounded-sm transition-all ${req.status === 'pending' ? 'bg-amber-50 border-amber-200' : 'bg-zinc-50 border-zinc-100'}`}>
+                        <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-black text-[#003366] uppercase text-lg italic">{req.company_name}</h3>
+                              {req.status === 'pending' && <span className="bg-amber-400 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase">Ny!</span>}
+                              {req.status === 'approved' && <span className="bg-green-600 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase">Godkänd & Publicerad</span>}
+                            </div>
+                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                              <UserCheck size={12} /> {req.contact_person} • {req.email}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                             <p className="text-xl font-black text-[#a11a2d]">{req.duration}</p>
+                             <p className="text-[8px] text-zinc-400 font-bold uppercase tracking-widest">{new Date(req.created_at).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6 mb-6">
+                          <div className="bg-white p-4 rounded-sm border border-zinc-100">
+                            <p className="text-[10px] font-black uppercase text-zinc-400 mb-2 tracking-widest">Meddelande:</p>
+                            <p className="text-xs text-zinc-600 italic leading-relaxed">&quot;{req.message || 'Inget meddelande bifogat.'}&quot;</p>
+                          </div>
+                          {req.image_url && (
+                            <div className="relative aspect-video bg-zinc-100 rounded-sm border border-zinc-200 overflow-hidden">
+                              <Image src={req.image_url} alt="Annonsbild" fill className="object-contain bg-zinc-900" />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100">
+                          {req.status === 'pending' && (
+                            <>
+                              <button
+                                onClick={() => handleApproveBusinessRequest(req)}
+                                className="bg-green-600 text-white px-6 py-2.5 rounded-sm text-[10px] font-black uppercase tracking-widest hover:bg-green-700 transition-all shadow-md flex items-center gap-2"
+                              >
+                                <Check size={14} /> Godkänn & Publicera
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  if (confirm('Vill du ta bort denna förfrågan?')) {
+                                    await supabase.from('business_ad_requests').delete().eq('id', req.id);
+                                    fetchBusinessRequests();
+                                    toast.error('Förfrågan borttagen');
+                                  }
+                                }}
+                                className="text-zinc-400 hover:text-red-600 transition-colors text-[9px] font-black uppercase p-2"
+                              >
+                                Radera
+                              </button>
+                            </>
+                          )}
+                          {req.status === 'approved' && (
+                            <span className="text-[9px] font-black uppercase text-green-600 flex items-center gap-1 italic">
+                              <Check size={12} /> Publicerad live
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

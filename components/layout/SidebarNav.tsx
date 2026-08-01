@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 import {
   Box,
   Newspaper,
@@ -22,11 +24,28 @@ import {
   ChevronRight,
   ShieldCheck,
   HelpCircle,
-  Mail
+  Mail,
+  Zap
 } from "lucide-react";
 
 export default function SidebarNav() {
   const pathname = usePathname();
+  const [featuredAd, setFeaturedAd] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      const { data } = await supabase
+        .from('ads')
+        .select('id, title')
+        .eq('is_premium', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      if (data) setFeaturedAd(data);
+    };
+    fetchFeatured();
+  }, [supabase]);
 
   const sections = [
     {
@@ -88,9 +107,29 @@ export default function SidebarNav() {
 
   return (
     <aside className="space-y-2">
+      {/* Premium Link at the top for paying users */}
+      {featuredAd && (
+        <section className="bg-[#a11a2d] shadow-lg overflow-hidden border border-red-900 rounded-sm animate-in fade-in slide-in-from-top-2">
+          <Link href={`/annonser/${featuredAd.id}`} className="block p-3 group">
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 p-1.5 rounded-full text-white">
+                <Zap size={14} fill="currentColor" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[7px] font-black uppercase text-red-200 tracking-widest mb-0.5">Aktuell Just Nu</p>
+                <h4 className="text-[10px] font-bold text-white italic truncate leading-tight group-hover:underline">
+                  {featuredAd.title}
+                </h4>
+              </div>
+              <ChevronRight size={12} className="text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all" />
+            </div>
+          </Link>
+        </section>
+      )}
+
       {/* Sidebar Header */}
       <section className="bg-white shadow-sm overflow-hidden border border-zinc-200 rounded-sm">
-        <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">Sido meny</div>
+        <div className="bg-[#003366] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">Sido meny</div>
       </section>
 
       {/* Navigation Sections */}

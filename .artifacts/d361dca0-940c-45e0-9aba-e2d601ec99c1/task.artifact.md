@@ -1,3 +1,4 @@
-- [x] Förenkla `components/ui/UserAvatar.tsx` (ta bort storage-lookup)
-- [x] Granska `app/profil/installningar/page.tsx` för strikt avatar-sparande
-- [x] Verifiera att inga riktiga foton visas som profilbilder
+- [ ] Ta bort `activeTab` och flik-knappar i `components/ads/CategoryLanding.tsx`
+- [ ] Implementera en vertikal layout med Annonser i toppen och Community i botten
+- [ ] Lägg till en tydlig sektionsavskiljare för Community
+- [ ] Verifiera att sidan laddar korrekt och att flödet fungerar

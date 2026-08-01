@@ -11,11 +11,14 @@ import {
   CheckCircle2,
   ShieldCheck,
   Clock,
-  CreditCard
+  CreditCard,
+  Camera,
+  X
 } from 'lucide-react'
 import { toast } from 'sonner'
 import HomeHero from '@/components/HomeHero'
 import Link from 'next/link'
+import Image from 'next/image'
 
 const PRICING = [
   { days: "7 dagar", price: "249 kr", desc: "Perfekt för korta kampanjer." },
@@ -32,15 +35,41 @@ export default function AnnonseraForetagPage() {
   const [email, setEmail] = useState('')
   const [duration, setDuration] = useState('30 dagar')
   const [message, setMessage] = useState('')
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   const supabase = createClient()
   const router = useRouter()
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImageFile(file)
+      setImagePreview(URL.createObjectURL(file))
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
+      let imageUrl = null
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop()
+        const fileName = `business-${Date.now()}.${fileExt}`
+        const { error: uploadError } = await supabase.storage
+          .from('ad-images')
+          .upload(fileName, imageFile)
+
+        if (!uploadError) {
+          const { data: { publicUrl } } = supabase.storage
+            .from('ad-images')
+            .getPublicUrl(fileName)
+          imageUrl = publicUrl
+        }
+      }
+
       const { error } = await supabase
         .from('business_ad_requests')
         .insert([{
@@ -49,6 +78,7 @@ export default function AnnonseraForetagPage() {
           email,
           duration,
           message,
+          image_url: imageUrl,
           status: 'pending'
         }])
 
@@ -56,9 +86,10 @@ export default function AnnonseraForetagPage() {
 
       setSubmitted(true)
       toast.success('Din förfrågan har skickats!')
-    } catch (err) {
-      console.error(err)
-      toast.error('Kunde inte skicka förfrågan')
+    } catch (err: any) {
+      console.error("Business ad request error:", err)
+      const errorMsg = err.message || err.details || "Okänt fel uppstod"
+      toast.error(`Kunde inte skicka förfrågan: ${errorMsg}`)
     } finally {
       setLoading(false)
     }
@@ -150,6 +181,28 @@ export default function AnnonseraForetagPage() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Ladda upp annonsbild / Logotyp</label>
+                  <div className="flex items-center justify-center w-full">
+                    {imagePreview ? (
+                      <div className="relative w-full aspect-video rounded-sm overflow-hidden border-2 border-zinc-100 shadow-lg">
+                        <Image src={imagePreview} alt="Preview" fill className="object-cover" />
+                        <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="absolute top-2 right-2 bg-white/90 p-1.5 rounded-full text-zinc-900 hover:text-red-800 transition-colors shadow-md z-10">
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-zinc-200 rounded-sm bg-zinc-50 hover:bg-zinc-100 transition-all cursor-pointer group">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Camera className="w-8 h-8 text-zinc-300 group-hover:text-[#003366] transition-colors mb-2" />
+                          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-zinc-600">Välj bild</p>
+                        </div>
+                        <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                      </label>
+                    )}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Företagsnamn</label>

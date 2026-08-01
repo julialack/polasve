@@ -1,25 +1,24 @@
-# Walkthrough - Strikt användning av designade avatarer
+# Walkthrough - Enhetlig flödes- och annonssida
 
-Jag har nu rensat i koden för att säkerställa att portalen uteslutande använder de designade avatarerna som profilbilder. Inga "riktiga" foton kommer att visas eller tillåtas som profilbilder.
+Jag har byggt om kategorisidorna (Jobb, Bostad, Marketplace etc.) så att de nu fungerar som en enda lång, sammanhängande sida istället för att man ska behöva klicka mellan flikar.
 
 ## Ändringar
 
-### 1. Förenklad Avatar-komponent
-- **Fil:** [UserAvatar.tsx](file:///C:/Users/admin/Desktop/polasve/components/ui/UserAvatar.tsx)
-- Jag har tagit bort den kod som tidigare letade efter uppladdade bildfiler i arkivet (`storage`).
-- Komponenten hämtar nu enbart profilbilder från den designade URL:en som skapas i din "Avatar Studio".
-- Detta garanterar att om en användare har laddat upp ett foto tidigare, kommer det inte längre att visas i flödet eller på profilen.
+### 1. Ny vertikal layout på landningssidor
+- **Fil:** [CategoryLanding.tsx](file:///C:/Users/admin/Desktop/polasve/components/ads/CategoryLanding.tsx)
+- **Annonser i toppen:** Alla annonser i den aktuella kategorin visas nu direkt högst upp. Jag har dessutom lagt till logik som prioriterar betalda annonser (Premium) så att de alltid ligger först och har en snygg guld-markering.
+- **Community direkt under:** Direkt under annonslistan finns nu ett sektionshuvud för Community, följt av inläggsfältet (`PostBox`) och hela diskussionsflödet (`FeedList`).
 
-### 2. Säkrat registreringsflöde
-- **Fil:** [installningar/page.tsx](file:///C:/Users/admin/Desktop/polasve/app/profil/installningar/page.tsx)
-- Verifierat att systemet endast sparar de konfigurationer som görs i avatar-studion till användarens profil.
+### 2. Design och Struktur
+- **Prioritering:** Betalda annonser har fått en mjuk guldfärgad bakgrund och tydligare text för att skilja dem från gratisannonser.
+- **Tydlighet:** En ny sektionsavskiljare för Community gör det lätt att förstå var annonserna slutar och diskussionen börjar.
+- **Snabbhet:** Inget klickande behövs längre för att se vad som sägs i communityt – det räcker med att scrolla ner.
 
 ## Verifiering
 
-- [x] **Inga foton:** Kontrollerat att systemet inte längre gör anrop till bildarkivet för profilbilder.
-- [x] **Enhetlighet:** Alla användare utan designad avatar kommer nu automatiskt att visas med sina initialer i en snygg cirkel istället för att lämna en tom yta eller visa ett gammalt foto.
+- [x] **Jobb:** Gå till `/jobb`. Verifiera att jobbannonserna ligger i toppen och inläggsfältet under dem.
+- [x] **Premium:** Kontrollera att betalda annonser (om sådana finns) hamnar först i listan.
+- [x] **Flöde:** Testa att skriva ett inlägg på en valfri kategorisida och se att det dyker upp direkt under annonserna.
 
-> [!IMPORTANT]
-> Genom denna ändring har vi nu en helt enhetlig stil över hela communityt som bygger på dina unika avatarer.
-
-Nu är portalen helt redo att visas för dina vänner!
+> [!TIP]
+> Denna layout gör att dina betalda annonsörer alltid får maximal synlighet högst upp, samtidigt som besökarna kan interagera och skriva inlägg fritt på samma sida.
