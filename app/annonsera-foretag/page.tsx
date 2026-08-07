@@ -135,23 +135,23 @@ export default function AnnonseraForetagPage() {
                 Nå hela det polska <span className="text-[#a11a2d]">nätverket i Sverige</span>
               </h1>
               <p className="text-zinc-500 font-medium leading-relaxed text-base md:text-lg italic">
-                Visa upp ditt företag på vår mest sedda plats. Vi hjälper dig att växa i communityt.
+                Visa upp ditt företag på vår mest sedda plats. Vi hjälper dig att växa i communityt genom personliga samarbeten.
               </p>
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-6 flex items-center gap-4">
-                Prislista <div className="h-px flex-1 bg-zinc-200"></div>
+            <div className="bg-amber-50 border-2 border-amber-200 p-6 md:p-8 rounded-sm shadow-md">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-800 mb-6 flex items-center gap-4">
+                Personligt samarbete <div className="h-px flex-1 bg-amber-200"></div>
               </h3>
-              {PRICING.map((p) => (
-                <div key={p.days} className={`p-5 md:p-6 rounded-sm border-2 transition-all ${p.featured ? 'bg-amber-50 border-amber-200 shadow-md' : 'bg-white border-zinc-100'}`}>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-black text-[#003366] uppercase text-[11px] md:text-sm">{p.days}</span>
-                    <span className="text-lg md:text-xl font-black text-[#a11a2d]">{p.price}</span>
-                  </div>
-                  <p className="text-[10px] text-zinc-500 font-medium">{p.desc}</p>
-                </div>
-              ))}
+              <p className="text-sm font-bold text-amber-900 leading-relaxed italic mb-4">
+                Vi tror på skräddarsydda lösningar.
+              </p>
+              <p className="text-xs text-amber-800 leading-relaxed mb-6 font-medium">
+                Istället för fasta prispaket vill vi förstå dina behov och mål. Fyll i intresseanmälan till höger så bokar vi ett möte för att diskutera ett upplägg och pris som passar just din verksamhet.
+              </p>
+              <div className="flex items-center gap-3 text-amber-600 font-black uppercase text-[9px] tracking-widest">
+                <ShieldCheck size={16} /> Garanterad synlighet
+              </div>
             </div>
 
             <div className="bg-[#003366] p-6 md:p-8 rounded-sm text-white shadow-xl">
@@ -204,44 +204,27 @@ export default function AnnonseraForetagPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Företagsnamn</label>
-                    <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-900" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Kontaktperson</label>
-                    <input type="text" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-900" />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Företagsnamn</label>
+                  <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-950" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Kontaktperson</label>
+                  <input type="text" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-950" />
+                </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">E-postadress</label>
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-900" />
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-950" />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Önskad längd</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {PRICING.map((p) => (
-                      <button
-                        key={p.days}
-                        type="button"
-                        onClick={() => setDuration(p.days)}
-                        className={`py-3 rounded-sm text-[10px] font-black uppercase tracking-widest border-2 transition-all ${
-                          duration === p.days
-                          ? 'bg-[#003366] border-[#003366] text-white shadow-lg'
-                          : 'bg-white border-zinc-100 text-zinc-500 hover:border-zinc-200'
-                        }`}
-                      >
-                        {p.days}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                {/* Hidden pricing selection - defaults to personal contact */}
+                <input type="hidden" value="Personligt" />
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Meddelande / Önskemål</label>
-                  <textarea rows={5} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Berätta gärna kort vad ni vill annonsera för..." className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-900 resize-none" />
+                  <textarea rows={5} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Berätta gärna kort om din verksamhet och vad ni hoppas uppnå med er annonsering..." className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-950 resize-none placeholder:text-zinc-300" />
                 </div>
 
                 <button type="submit" disabled={loading} className="w-full bg-[#a11a2d] text-white py-6 rounded-sm font-black uppercase tracking-[0.3em] hover:bg-[#003366] transition-all shadow-2xl active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3">

@@ -181,13 +181,17 @@ export default function RedigeraAnnonsPage({ params }: { params: Promise<{ id: s
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Kategori</label>
                       <select value={category} onChange={(e) => setCategory(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-900">
-                        <option value="Jobb">Jobb</option>
-                        <option value="Bostad">Bostad</option>
-                        <option value="Hyra">Hyra</option>
-                        <option value="Sökes">Sökes</option>
-                        <option value="Marketplace">Säljes (Marketplace)</option>
-                        <option value="Bytes">Bytes</option>
+                        <option value="Leta jobb">Jobb - Sökes</option>
+                        <option value="Jobb">Jobb - Finns</option>
+                        <option value="Bostad">Bostad - Övrigt</option>
+                        <option value="Hyra">Bostad - Hyra ut</option>
+                        <option value="Sökes">Bostad - Sökes</option>
+                        <option value="Lokaler">Bostad - Lokaler</option>
+                        <option value="Köp / Acceptera">Marketplace - Köpes</option>
+                        <option value="Sälj / Bortskänkes">Marketplace - Säljes</option>
+                        <option value="Bytes">Marketplace - Bytes</option>
                         <option value="Tjänster">Tjänster</option>
+                        <option value="Transport">Transport</option>
                         <option value="Övrigt">Övrigt</option>
                       </select>
                     </div>
@@ -197,7 +201,7 @@ export default function RedigeraAnnonsPage({ params }: { params: Promise<{ id: s
                     </div>
                   </div>
 
-                  {['Marketplace', 'Bytes', 'Hyra', 'Sökes'].includes(category) && (
+                  {['Köp / Acceptera', 'Sälj / Bortskänkes', 'Bytes', 'Hyra', 'Sökes'].includes(category) && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
                       <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Extra bilder (valfritt, max 2)</p>
                       <div className="grid grid-cols-2 gap-4">

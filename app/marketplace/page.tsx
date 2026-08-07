@@ -6,7 +6,7 @@ export default function MarketplaceHubPage() {
     <CategoryLanding
       title="Marketplace"
       description="Allt som köps, säljs och bytes i communityt."
-      categoryFilter={["Köp / Acceptera", "Sälj / Bortskänkes", "Bytes"]}
+      categoryFilter={["Köp / Acceptera", "Sälj / Bortskänkes", "Bytes", "Marketplace"]}
       icon={<ShoppingCart size={18} />}
     />
   );

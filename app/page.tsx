@@ -8,7 +8,7 @@ import SidebarNav from "@/components/layout/SidebarNav";
 import SwedenMap from "@/components/map/SwedenMap";
 import SafeImage from "@/components/ui/SafeImage";
 import { createClient } from "@/utils/supabase/server";
-import { Newspaper, Calendar, Box, Info, ArrowRight, ShieldCheck } from "lucide-react";
+import { Newspaper, Calendar, Box, Info, ArrowRight, ShieldCheck, ExternalLink } from "lucide-react";
 
 const AdBox = ({ title, href, variant = 'gray' }: { title: string, href?: string, variant?: 'gray' | 'gold' }) => {
   const content = (
@@ -85,7 +85,7 @@ export default async function Home() {
               <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">Bazar - Premium</div>
               <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {featuredAds.map((ad) => (
-                  <Link href={`/annonser/${ad.id}`} key={ad.id} className="block group border border-zinc-100 p-3 rounded-sm hover:shadow-md transition-all">
+                  <Link href={`/annonser/${ad.id}`} key={ad.id} className={`block group border border-zinc-100 p-3 rounded-sm hover:shadow-md transition-all ${ad.status === 'finished' ? 'opacity-60' : ''}`}>
                     <div className="flex gap-4">
                       <div className="w-16 h-16 bg-zinc-100 relative overflow-hidden border rounded-sm flex-shrink-0">
                         <SafeImage
@@ -94,10 +94,15 @@ export default async function Home() {
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                           fallbackSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"
                         />
+                        {ad.status === 'finished' && (
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                            <span className="text-[7px] font-black text-white uppercase tracking-widest rotate-[-15deg] border border-white px-1 py-0.5">SÅLD</span>
+                          </div>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-[#003366] italic leading-tight truncate text-[11px]">{ad.title}</h4>
-                        <p className="text-[10px] text-[#D4AF37] font-black mt-2">{ad.price || 'Bud'}</p>
+                        <h4 className={`font-bold italic leading-tight truncate text-[11px] ${ad.status === 'finished' ? 'text-zinc-500 line-through' : 'text-[#003366]'}`}>{ad.title}</h4>
+                        <p className={`text-[10px] font-black mt-2 ${ad.status === 'finished' ? 'text-zinc-400' : 'text-[#D4AF37]'}`}>{ad.status === 'finished' ? 'Avslutad' : (ad.price || 'Bud')}</p>
                         <p className="text-[9px] text-zinc-500 font-bold uppercase mt-1 italic">{ad.location}</p>
                         <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-widest mt-1 block">Visa annons &raquo;</span>
                       </div>
@@ -140,6 +145,33 @@ export default async function Home() {
                 ) : <p className="text-center py-4 text-zinc-400 italic text-[10px]">Inga nyheter...</p>}
               </div>
               <Link href="/nyheter" className="block text-center py-3 bg-zinc-50 text-[10px] font-black text-zinc-500 hover:text-[#003366] uppercase tracking-widest border-t transition-colors italic">Läs alla nyheter &raquo;</Link>
+            </section>
+
+            {/* External News Sources (Compact) */}
+            <section className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm">
+              <div className="bg-zinc-800 text-white px-4 py-1.5 text-[8px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                <Newspaper size={10} /> Polska Medier
+              </div>
+              <div className="p-2 grid grid-cols-2 gap-2">
+                <a
+                  href="https://tvn24.pl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 py-2 px-3 bg-zinc-50 hover:bg-[#005bbb] hover:text-white transition-all border border-zinc-100 rounded-sm group"
+                >
+                  <span className="text-[9px] font-black italic tracking-tighter">TVN24</span>
+                  <ExternalLink size={10} className="opacity-30 group-hover:opacity-100" />
+                </a>
+                <a
+                  href="https://www.onet.pl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 py-2 px-3 bg-zinc-50 hover:bg-[#f7d117] hover:text-black transition-all border border-zinc-100 rounded-sm group"
+                >
+                  <span className="text-[9px] font-black italic tracking-tighter">ONET</span>
+                  <ExternalLink size={10} className="opacity-30 group-hover:opacity-100" />
+                </a>
+              </div>
             </section>
 
             <section className="bg-white border border-zinc-200 overflow-hidden shadow-sm">

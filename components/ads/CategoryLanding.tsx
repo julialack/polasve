@@ -162,44 +162,66 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                     Inga annonser i denna kategori ännu.
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {ads.map((ad) => (
-                      <Link href={`/annonser/${ad.id}`} key={ad.id} className={`group bg-white p-3 border rounded-sm transition-all flex flex-col sm:flex-row gap-4 ${ad.status === 'finished' ? 'opacity-60 bg-zinc-50' : ad.is_premium ? 'border-amber-100 bg-amber-50/20 shadow-sm' : 'border-zinc-100 shadow-sm hover:shadow-md'}`}>
-                        <div className="w-full sm:w-32 h-24 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0 relative">
-                          <SafeImage
-                            src={ad.image_url || ""}
-                            alt={ad.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            fallbackSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"
-                          />
-                          {ad.status === 'finished' && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                              <span className="text-[8px] font-black text-white uppercase tracking-widest rotate-[-15deg] border-2 border-white px-1 py-0.5">AVSLUTAD</span>
+                  <div className="space-y-10">
+                    {/* Active Ads */}
+                    <div className="space-y-4">
+                      {ads.filter(ad => ad.status !== 'finished').map((ad) => (
+                        <Link href={`/annonser/${ad.id}`} key={ad.id} className={`group bg-white p-3 border rounded-sm transition-all flex flex-col sm:flex-row gap-4 ${ad.is_premium ? 'border-amber-100 bg-amber-50/20 shadow-sm' : 'border-zinc-100 shadow-sm hover:shadow-md'}`}>
+                          <div className="w-full sm:w-32 h-24 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0">
+                            <SafeImage
+                              src={ad.image_url || ""}
+                              alt={ad.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              fallbackSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"
+                            />
+                          </div>
+                          <div className="flex-1 flex flex-col justify-between py-0.5">
+                            <div>
+                              <div className="flex items-center gap-2 mb-1.5">
+                                <span className={`text-[8px] font-black uppercase ${ad.is_premium ? 'text-amber-600' : 'text-[#a11a2d]'}`}>
+                                  {ad.is_premium ? 'Premium' : ad.category}
+                                </span>
+                                <span className="text-[7px] text-zinc-300 font-bold border-l pl-2">{new Date(ad.created_at).toLocaleDateString()}</span>
+                              </div>
+                              <h3 className={`text-base font-bold italic group-hover:underline leading-tight mb-1 ${ad.is_premium ? 'text-amber-900' : 'text-[#003366]'}`}>
+                                {ad.title}
+                              </h3>
+                              <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tighter flex items-center gap-1"><MapPin size={8} /> {ad.location}</p>
                             </div>
-                          )}
-                        </div>
-                        <div className="flex-1 flex flex-col justify-between py-0.5">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1.5">
-                              <span className={`text-[8px] font-black uppercase ${ad.status === 'finished' ? 'text-zinc-400' : ad.is_premium ? 'text-amber-600' : 'text-[#a11a2d]'}`}>
-                                {ad.status === 'finished' ? 'Avslutad' : ad.is_premium ? 'Premium' : ad.category}
+                            <div className="flex justify-between items-end mt-2">
+                              <span className={`text-xs font-black ${ad.is_premium ? 'text-amber-600' : 'text-zinc-900'}`}>
+                                {ad.price || 'Bud'}
                               </span>
-                              <span className="text-[7px] text-zinc-300 font-bold border-l pl-2">{new Date(ad.created_at).toLocaleDateString()}</span>
+                              <span className="text-[8px] font-black text-[#003366] opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest">Visa info &raquo;</span>
                             </div>
-                            <h3 className={`text-base font-bold italic group-hover:underline leading-tight mb-1 ${ad.status === 'finished' ? 'text-zinc-500 line-through' : ad.is_premium ? 'text-amber-900' : 'text-[#003366]'}`}>
-                              {ad.title}
-                            </h3>
-                            <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tighter flex items-center gap-1"><MapPin size={8} /> {ad.location}</p>
                           </div>
-                          <div className="flex justify-between items-end mt-2">
-                            <span className={`text-xs font-black ${ad.status === 'finished' ? 'text-zinc-400' : ad.is_premium ? 'text-amber-600' : 'text-zinc-900'}`}>
-                              {ad.price || 'Bud'}
-                            </span>
-                            <span className="text-[8px] font-black text-[#003366] opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest">Visa info &raquo;</span>
-                          </div>
+                        </Link>
+                      ))}
+                    </div>
+
+                    {/* Finished Ads - Compact Grid */}
+                    {ads.some(ad => ad.status === 'finished') && (
+                      <div className="pt-6 border-t border-zinc-100">
+                        <h4 className="text-[9px] font-black uppercase text-zinc-400 tracking-[0.2em] mb-4">Avslutade</h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          {ads.filter(ad => ad.status === 'finished').map((ad) => (
+                            <Link href={`/annonser/${ad.id}`} key={ad.id} className="group bg-white p-2 border border-zinc-100 rounded-sm opacity-50 hover:opacity-100 transition-all">
+                              <div className="aspect-square bg-zinc-50 rounded-sm overflow-hidden mb-1.5 relative">
+                                <SafeImage
+                                  src={ad.image_url || ""}
+                                  alt={ad.title}
+                                  className="w-full h-full object-cover grayscale"
+                                />
+                                <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                                  <span className="text-[6px] font-black text-white uppercase tracking-tighter border border-white/50 px-1">SÅLD</span>
+                                </div>
+                              </div>
+                              <h5 className="text-[9px] font-bold text-zinc-500 truncate">{ad.title}</h5>
+                            </Link>
+                          ))}
                         </div>
-                      </Link>
-                    ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

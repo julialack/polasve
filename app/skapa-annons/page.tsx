@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Check, Camera, X, Loader2 } from 'lucide-react'
+import { Check, Camera, X, Loader2, PlusCircle } from 'lucide-react'
 import Image from 'next/image'
 import { toast } from 'sonner'
 import HomeHero from '@/components/HomeHero'
@@ -144,45 +144,56 @@ export default function SkapaAnnonsPage() {
     setLoading(false)
   }
 
-  const showExtraImages = ['Marketplace', 'Bytes', 'Hyra', 'Sökes'].includes(category)
+  const showExtraImages = ['Köp / Acceptera', 'Sälj / Bortskänkes', 'Bytes', 'Hyra', 'Sökes'].includes(category)
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-20">
       <HomeHero />
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-50 mt-12 md:mt-20">
-        <div className="bg-white rounded-lg shadow-2xl p-8 md:p-12 text-center border border-zinc-100">
-          <h2 className="text-3xl md:text-5xl font-black text-[#003366] mb-4">Annonsnivåer</h2>
-          <p className="text-zinc-500 mb-12 text-lg italic">
-            Välj hur synlig du vill vara på <span className="font-bold text-[#003366]">Polacker i Sverige</span>.
-          </p>
+      <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-50 mt-6 md:mt-10">
+        <div className="bg-white rounded-sm shadow-xl p-4 md:p-8 text-center border border-zinc-200">
+          <div className="mb-6 md:mb-10">
+            <h2 className="text-xl md:text-3xl font-black text-[#003366] uppercase tracking-tighter italic">Välj annonsnivå</h2>
+            <p className="text-zinc-500 text-[10px] md:text-xs font-bold uppercase tracking-widest mt-1">
+              Hitta rätt synlighet för din annons på <span className="text-[#a11a2d]">Polasve</span>
+            </p>
+          </div>
 
-          {/* Pricing Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+          {/* Compact Pricing Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-10">
             {PACKAGES.map((pkg) => (
-              <div key={pkg.id} className={`flex flex-col bg-white rounded-xl overflow-hidden shadow-lg border border-zinc-100 transition-all hover:scale-[1.02] ${selectedPackage === pkg.id ? 'ring-4 ring-[#003366] ring-offset-2' : ''}`}>
-                <div className={`${pkg.color} py-4 px-6 text-white flex items-center justify-center gap-2`}>
-                  {pkg.id === 'free' && <div className="bg-white rounded-full p-1"><Check size={14} className="text-[#2d8a44]" strokeWidth={4} /></div>}
-                  <h3 className="font-black text-sm md:text-base uppercase tracking-wider">{pkg.name}</h3>
+              <div
+                key={pkg.id}
+                onClick={() => setSelectedPackage(pkg.id)}
+                className={`flex flex-col cursor-pointer bg-white rounded-sm overflow-hidden border-2 transition-all hover:shadow-md ${
+                  selectedPackage === pkg.id
+                  ? 'border-[#003366] ring-2 ring-[#003366]/10 bg-zinc-50/50'
+                  : 'border-zinc-100 hover:border-zinc-300'
+                }`}
+              >
+                <div className={`${pkg.color} py-2 px-4 text-white flex items-center justify-between`}>
+                  <h3 className="font-black text-[10px] md:text-xs uppercase tracking-wider">{pkg.name}</h3>
+                  <span className="font-black text-[10px]">{pkg.price}</span>
                 </div>
-                <div className="p-6 flex-1 flex flex-col">
-                  <ul className="space-y-4 mb-8 text-left">
+                <div className="p-3 md:p-4 flex-1 flex flex-col text-left">
+                  <ul className="space-y-1.5 mb-4">
                     {pkg.features.map((feature, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs md:text-sm text-zinc-600 font-medium">
-                        <Check size={16} className="text-[#2d8a44] shrink-0 mt-0.5" strokeWidth={3} />
+                      <li key={i} className="flex items-start gap-2 text-[9px] md:text-[10px] text-zinc-600 font-bold leading-tight">
+                        <Check size={12} className="text-[#2d8a44] shrink-0 mt-0.5" strokeWidth={4} />
                         {feature}
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-auto pt-6 border-t border-zinc-50 text-center">
-                    <p className="text-zinc-400 text-sm mb-4">Pris: <span className="text-xl font-black text-zinc-900">{pkg.price}</span></p>
-                    <button
-                      onClick={() => setSelectedPackage(pkg.id)}
-                      className={`w-full ${pkg.buttonColor} text-white py-3 rounded-md font-black uppercase text-[10px] md:text-xs tracking-widest shadow-md transition-all active:scale-95`}
-                    >
-                      {pkg.buttonText}
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    className={`mt-auto w-full py-2 rounded-sm font-black uppercase text-[9px] tracking-widest transition-all ${
+                      selectedPackage === pkg.id
+                      ? 'bg-[#003366] text-white'
+                      : 'bg-zinc-100 text-zinc-500 group-hover:bg-zinc-200'
+                    }`}
+                  >
+                    {selectedPackage === pkg.id ? 'Vald' : 'Välj'}
+                  </button>
                 </div>
               </div>
             ))}
@@ -190,62 +201,101 @@ export default function SkapaAnnonsPage() {
 
           {/* Ad Form - Visible after selecting a package */}
           {selectedPackage && (
-            <div className="mt-20 pt-20 border-t border-zinc-100 text-left max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-10">
-              <h3 className="text-2xl font-black text-[#003366] mb-8 uppercase tracking-tighter italic">Fyll i annonsuppgifter</h3>
-              <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="mt-10 pt-10 border-t border-zinc-100 text-left max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-5 duration-500">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="bg-[#a11a2d] p-2 rounded-sm text-white">
+                  <PlusCircle size={20} />
+                </div>
+                <h3 className="text-xl font-black text-[#003366] uppercase tracking-tighter italic">Fyll i annonsuppgifter</h3>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-6">
                   <div className="flex items-center justify-center w-full">
                     {imagePreview ? (
-                      <div className="relative w-full aspect-video rounded-md overflow-hidden border-4 border-zinc-100 shadow-xl">
+                      <div className="relative w-full aspect-video rounded-sm overflow-hidden border-4 border-zinc-100 shadow-lg">
                         <Image src={imagePreview} alt="Preview" fill sizes="(max-width: 768px) 100vw, 600px" className="object-cover" />
                         <button type="button" onClick={() => setImagePreview(null)} className="absolute top-4 right-4 bg-white/90 p-2 rounded-full text-zinc-900 hover:text-red-800 transition-colors shadow-lg z-10"><X size={20} /></button>
                       </div>
                     ) : (
-                      <label className="flex flex-col items-center justify-center w-full aspect-video border-4 border-dashed border-zinc-200 rounded-xl bg-zinc-50 hover:bg-zinc-100 transition-all cursor-pointer group">
+                      <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-zinc-300 rounded-sm bg-zinc-50 hover:bg-zinc-100 transition-all cursor-pointer group">
                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                          <Camera className="w-12 h-12 text-zinc-300 group-hover:text-[#003366] transition-colors mb-4" />
-                          <p className="font-black uppercase tracking-widest text-zinc-400 group-hover:text-zinc-600">Ladda upp huvudbild</p>
+                          <Camera className="w-10 h-10 text-zinc-300 group-hover:text-[#003366] transition-colors mb-3" />
+                          <p className="font-black uppercase tracking-widest text-[10px] text-zinc-400 group-hover:text-zinc-600">Ladda upp huvudbild</p>
                         </div>
                         <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
                       </label>
                     )}
                   </div>
-                  <div className="grid gap-6">
-                    <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Annonsens titel" required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-md focus:border-[#003366] focus:bg-white outline-none font-bold text-lg" />
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <select value={category} onChange={(e) => setCategory(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-md focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-900">
-                        <option value="">Välj kategori</option>
-                        <option value="Jobb">Jobb</option>
-                        <option value="Bostad">Bostad</option>
-                        <option value="Hyra">Hyra</option>
-                        <option value="Sökes">Sökes</option>
-                        <option value="Marketplace">Säljes (Marketplace)</option>
-                        <option value="Bytes">Bytes</option>
-                        <option value="Tjänster">Tjänster</option>
-                        <option value="Övrigt">Övrigt</option>
-                      </select>
-                      <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Pris (t.ex. 500 kr)" className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-md focus:border-[#003366] focus:bg-white outline-none font-bold" />
+
+                  <div className="grid gap-5">
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Annonsens titel</label>
+                      <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Vad erbjuder du?"
+                        required
+                        className="w-full p-4 bg-white border-2 border-zinc-200 rounded-sm focus:border-[#003366] outline-none font-bold text-zinc-950 text-base md:text-lg placeholder:text-zinc-300"
+                      />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-5">
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Kategori</label>
+                        <select
+                          value={category}
+                          onChange={(e) => setCategory(e.target.value)}
+                          required
+                          className="w-full p-4 bg-white border-2 border-zinc-200 rounded-sm focus:border-[#003366] outline-none font-bold text-zinc-950 text-sm"
+                        >
+                          <option value="">Välj kategori</option>
+                          <option value="Leta jobb">Jobb - Sökes</option>
+                          <option value="Jobb">Jobb - Finns</option>
+                          <option value="Bostad">Bostad - Övrigt</option>
+                          <option value="Hyra">Bostad - Hyra ut</option>
+                          <option value="Sökes">Bostad - Sökes</option>
+                          <option value="Lokaler">Bostad - Lokaler</option>
+                          <option value="Köp / Acceptera">Marketplace - Köpes</option>
+                          <option value="Sälj / Bortskänkes">Marketplace - Säljes</option>
+                          <option value="Bytes">Marketplace - Bytes</option>
+                          <option value="Tjänster">Tjänster</option>
+                          <option value="Transport">Transport</option>
+                          <option value="Övrigt">Övrigt</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Pris / Ersättning</label>
+                        <input
+                          type="text"
+                          value={price}
+                          onChange={(e) => setPrice(e.target.value)}
+                          placeholder="t.ex. 500 kr eller Bud"
+                          className="w-full p-4 bg-white border-2 border-zinc-200 rounded-sm focus:border-[#003366] outline-none font-bold text-zinc-950 text-sm placeholder:text-zinc-300"
+                        />
+                      </div>
                     </div>
 
                     {showExtraImages && (
-                      <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Extra bilder (valfritt, max 2)</p>
+                      <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                        <p className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Extra bilder (max 2)</p>
                         <div className="grid grid-cols-2 gap-4">
                           {[0, 1].map((idx) => (
                             <div key={idx} className="relative aspect-video">
                               {extraPreviews[idx] ? (
-                                <div className="relative w-full h-full rounded-md overflow-hidden border-2 border-zinc-100 shadow-sm">
+                                <div className="relative w-full h-full rounded-sm overflow-hidden border-2 border-zinc-200">
                                   <Image src={extraPreviews[idx]!} alt="Extra Preview" fill className="object-cover" />
                                   <button type="button" onClick={() => {
                                     const newF = [...extraFiles]; const newP = [...extraPreviews];
                                     newF[idx] = null; newP[idx] = null;
                                     setExtraFiles(newF); setExtraPreviews(newP);
-                                  }} className="absolute top-2 right-2 bg-white/90 p-1 rounded-full text-zinc-900 hover:text-red-800 transition-colors shadow-sm z-10"><X size={14} /></button>
+                                  }} className="absolute top-1 right-1 bg-white/90 p-1 rounded-full text-zinc-900 shadow-sm z-10"><X size={12} /></button>
                                 </div>
                               ) : (
-                                <label className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed border-zinc-200 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-all cursor-pointer group">
-                                  <Camera className="w-6 h-6 text-zinc-300 group-hover:text-[#003366] transition-colors mb-1" />
-                                  <span className="text-[8px] font-black uppercase text-zinc-400 group-hover:text-zinc-600">Extra bild {idx + 1}</span>
+                                <label className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed border-zinc-200 rounded-sm bg-zinc-50 hover:bg-zinc-100 transition-all cursor-pointer">
+                                  <Camera className="w-5 h-5 text-zinc-300 mb-1" />
+                                  <span className="text-[8px] font-black uppercase text-zinc-400">Bild {idx + 1}</span>
                                   <input type="file" className="hidden" accept="image/*" onChange={(e) => handleExtraImageChange(e, idx)} />
                                 </label>
                               )}
@@ -254,11 +304,34 @@ export default function SkapaAnnonsPage() {
                         </div>
                       </div>
                     )}
-                    <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Stad / Plats" required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-md focus:border-[#003366] focus:bg-white outline-none font-bold" />
-                    <textarea rows={6} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Beskrivning av vad du erbjuder..." required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-md focus:border-[#003366] focus:bg-white outline-none font-bold resize-none" />
+
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Stad / Plats</label>
+                      <input
+                        type="text"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="Var finns varan/tjänsten?"
+                        required
+                        className="w-full p-4 bg-white border-2 border-zinc-200 rounded-sm focus:border-[#003366] outline-none font-bold text-zinc-950 text-sm placeholder:text-zinc-300"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Beskrivning</label>
+                      <textarea
+                        rows={5}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Berätta mer..."
+                        required
+                        className="w-full p-4 bg-white border-2 border-zinc-200 rounded-sm focus:border-[#003366] outline-none font-bold text-zinc-950 text-sm resize-none placeholder:text-zinc-300"
+                      />
+                    </div>
                   </div>
                 </div>
-                <button type="submit" disabled={loading} className="w-full bg-[#003366] text-white py-6 rounded-md font-black uppercase tracking-[0.3em] hover:bg-[#a11a2d] transition-all shadow-2xl shadow-blue-900/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3">
+
+                <button type="submit" disabled={loading} className="w-full bg-[#003366] text-white py-5 rounded-sm font-black uppercase tracking-[0.2em] hover:bg-[#a11a2d] transition-all shadow-xl active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3">
                   {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Publicera Annons Nu"}
                 </button>
               </form>

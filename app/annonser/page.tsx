@@ -18,13 +18,15 @@ const CATEGORIES = [
   "Sälj / Bortskänkes",
   "Bytes",
   "Leta jobb",
-  "Lägenhet sökes",
-  "Lägenheter Hyra ut",
+  "Jobb",
+  "Sökes",
+  "Hyra",
   "Lokaler",
+  "Bostad",
   "Tjänster",
   "Transport",
-  "Tips & Trick",
-  "Meeting Place"
+  "Marketplace",
+  "Övrigt"
 ]
 
 interface Ad {
@@ -132,42 +134,68 @@ function AnnonserList() {
                     Inga annonser hittades i {locationFilter ? locationFilter : 'denna kategori'}.
                   </div>
                 ) : (
-                  <div className="space-y-6">
-                    {ads.map((ad) => (
-                      <Link href={`/annonser/${ad.id}`} key={ad.id} className={`group bg-white p-4 border border-zinc-100 rounded-sm shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row gap-6 ${ad.status === 'finished' ? 'opacity-60' : ''}`}>
-                        <div className="w-full sm:w-40 h-32 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0 relative">
-                          <SafeImage
-                            src={ad.image_url || ""}
-                            alt={ad.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                            fallbackSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"
-                          />
-                          {ad.status === 'finished' && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                              <span className="text-[10px] font-black text-white uppercase tracking-widest rotate-[-15deg] border-2 border-white px-2 py-1">SÅLD / KLAR</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 flex flex-col justify-between py-1">
-                          <div>
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-[9px] font-black uppercase text-[#a11a2d]">{ad.status === 'finished' ? 'AVSLUTAD' : ad.category}</span>
-                              <span className="text-[8px] text-zinc-300 font-bold border-l pl-2">{new Date(ad.created_at).toLocaleDateString()}</span>
-                            </div>
-                            <h3 className={`text-lg font-bold italic group-hover:underline leading-tight mb-2 text-[#003366]`}>
-                              {ad.title}
-                            </h3>
-                            <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tighter flex items-center gap-1"><MapPin size={10} /> {ad.location}</p>
+                  <div className="space-y-12">
+                    {/* Active Ads */}
+                    <div className="space-y-6">
+                      {ads.filter(ad => ad.status !== 'finished').map((ad) => (
+                        <Link href={`/annonser/${ad.id}`} key={ad.id} className="group bg-white p-4 border border-zinc-100 rounded-sm shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row gap-6">
+                          <div className="w-full sm:w-40 h-32 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0">
+                            <SafeImage
+                              src={ad.image_url || ""}
+                              alt={ad.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                              fallbackSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"
+                            />
                           </div>
-                          <div className="flex justify-between items-end mt-4 pt-4 border-t border-zinc-50">
-                            <span className={`text-sm font-black ${ad.is_premium ? 'text-[#D4AF37]' : 'text-zinc-900'}`}>
-                              {ad.price || 'Bud'}
-                            </span>
-                            <span className="text-[9px] font-black text-[#003366] uppercase tracking-widest">Visa info &raquo;</span>
+                          <div className="flex-1 flex flex-col justify-between py-1">
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-[9px] font-black uppercase text-[#a11a2d]">{ad.category}</span>
+                                <span className="text-[8px] text-zinc-300 font-bold border-l pl-2">{new Date(ad.created_at).toLocaleDateString()}</span>
+                              </div>
+                              <h3 className={`text-lg font-bold italic group-hover:underline leading-tight mb-2 text-[#003366]`}>
+                                {ad.title}
+                              </h3>
+                              <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tighter flex items-center gap-1"><MapPin size={10} /> {ad.location}</p>
+                            </div>
+                            <div className="flex justify-between items-end mt-4 pt-4 border-t border-zinc-50">
+                              <span className={`text-sm font-black ${ad.is_premium ? 'text-[#D4AF37]' : 'text-zinc-900'}`}>
+                                {ad.price || 'Bud'}
+                              </span>
+                              <span className="text-[9px] font-black text-[#003366] uppercase tracking-widest">Visa info &raquo;</span>
+                            </div>
                           </div>
+                        </Link>
+                      ))}
+                    </div>
+
+                    {/* Finished Ads - Compact Grid */}
+                    {ads.some(ad => ad.status === 'finished') && (
+                      <div className="pt-8 border-t border-zinc-100">
+                        <h4 className="text-[10px] font-black uppercase text-zinc-400 tracking-[0.2em] mb-6 flex items-center gap-4">
+                          Avslutade affärer <div className="h-px flex-1 bg-zinc-100"></div>
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                          {ads.filter(ad => ad.status === 'finished').map((ad) => (
+                            <Link href={`/annonser/${ad.id}`} key={ad.id} className="group bg-white p-2 border border-zinc-100 rounded-sm opacity-60 hover:opacity-100 transition-all">
+                              <div className="aspect-square bg-zinc-100 rounded-sm overflow-hidden mb-2 relative">
+                                <SafeImage
+                                  src={ad.image_url || ""}
+                                  alt={ad.title}
+                                  className="w-full h-full object-cover grayscale"
+                                  fallbackSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"
+                                />
+                                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                  <span className="text-[8px] font-black text-white uppercase tracking-tighter border border-white px-1">SÅLD</span>
+                                </div>
+                              </div>
+                              <h5 className="text-[10px] font-bold text-zinc-600 truncate">{ad.title}</h5>
+                              <p className="text-[8px] text-zinc-400 font-bold uppercase mt-0.5">{ad.location}</p>
+                            </Link>
+                          ))}
                         </div>
-                      </Link>
-                    ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

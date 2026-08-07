@@ -12,7 +12,7 @@ const MYNDIGHETER = [
   },
   {
     name: "Polska institutet i Stockholm",
-    href: "https://instytutpolski.pl/stockholm/",
+    href: "https://instytutpolski.pl/stockholm/pl/",
     desc: "Främjar polsk kultur, konst och historia i Sverige."
   },
   {
@@ -22,24 +22,24 @@ const MYNDIGHETER = [
   },
   {
     name: "Konsulära avdelningen i Stockholm",
-    href: "https://www.gov.pl/web/szwecja/ambasada-rp-w-ztokholmie",
+    href: "https://www.gov.pl/web/szwecja/informacje-konsularne",
     desc: "Passärenden, visum och juridisk hjälp för polska medborgare."
   },
 ];
 
 const INSTITUTIONER = [
-  { name: "Polska biblioteket i Stockholm", href: "#", icon: <Library size={20} /> },
-  { name: "Göteborgs språkcenter", href: "#", icon: <GraduationCap size={20} /> },
-  { name: "Modersmålscenter - skola", href: "#", icon: <GraduationCap size={20} /> },
-  { name: "Ungdomscenter - Oratorium QUO VADIS", href: "#", icon: <Users size={20} /> },
-  { name: "Kapucinerfädernas kloster i Stockholm", href: "#", icon: <Church size={20} /> },
-  { name: "Polsk-katolska missionen i Göteborg", href: "#", icon: <Church size={20} /> },
-  { name: "Polsk-katolska missionen i Malmö", href: "#", icon: <Church size={20} /> },
-  { name: "Polsk-katolska missionen i Stockholm", href: "#", icon: <Church size={20} /> },
-  { name: "Polsk turistinformation i Stockholm", href: "#", icon: <MapPin size={20} /> },
-  { name: "Society of St. Francis de Sales", href: "#", icon: <Building2 size={20} /> },
-  { name: "Polska lördagsskoleföreningen i Göteborg", href: "#", icon: <GraduationCap size={20} /> },
-  { name: "Polsk skola i Stockholm", href: "#", icon: <GraduationCap size={20} /> },
+  { name: "Polska biblioteket i Stockholm", href: "https://biblioteket.stockholm.se/bibliotek/kungsholmens-bibliotek-internationella-biblioteket", icon: <Library size={20} /> },
+  { name: "Göteborgs språkcenter", href: "https://sites.google.com/utb.goteborg.se/sprakcentrum-jezyk-polski/strona-g%C5%82%C3%B3wna", icon: <GraduationCap size={20} /> },
+  { name: "Modersmålscenter - skola", href: "https://grundskola.stockholm/modersmal", icon: <GraduationCap size={20} /> },
+  { name: "Ungdomscenter - Oratorium QUO VADIS", href: "http://www.pmk-stockholm.com/oratorium", icon: <Users size={20} /> },
+  { name: "Kapucinerfädernas kloster i Stockholm", href: "https://kapucyni.pl/placowki/sztokholm/", icon: <Church size={20} /> },
+  { name: "Polsk-katolska missionen i Göteborg", href: "http://pmk-goteborg.se/", icon: <Church size={20} /> },
+  { name: "Polsk-katolska missionen i Malmö", href: "http://www.pmk-malmo.se/", icon: <Church size={20} /> },
+  { name: "Polsk-katolska missionen i Stockholm", href: "http://www.pmk-stockholm.com/", icon: <Church size={20} /> },
+  { name: "Polsk turistinformation i Stockholm", href: "https://www.polska.travel/pl", icon: <MapPin size={20} /> },
+  { name: "Society of St. Francis de Sales", href: "http://pmk-goteborg.se/salezjanie/", icon: <Building2 size={20} /> },
+  { name: "Polska lördagsskoleföreningen i Göteborg", href: "http://polskaszkola.se/", icon: <GraduationCap size={20} /> },
+  { name: "Polsk skola i Stockholm", href: "http://www.szkolapolska.se/", icon: <GraduationCap size={20} /> },
 ];
 
 export default function InstitutionerPage() {
@@ -100,15 +100,18 @@ export default function InstitutionerPage() {
                   </h3>
                   <div className="grid sm:grid-cols-2 gap-4">
                     {INSTITUTIONER.map((inst) => (
-                      <div
+                      <a
                         key={inst.name}
-                        className="flex items-center gap-4 p-4 border border-zinc-50 rounded-sm hover:border-zinc-200 hover:bg-zinc-50/50 transition-all"
+                        href={inst.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-center gap-4 p-4 border border-zinc-50 rounded-sm hover:border-[#003366] hover:bg-white transition-all shadow-sm"
                       >
-                        <div className="bg-[#003366]/5 p-2 rounded-sm text-[#003366]">
+                        <div className="bg-[#003366]/5 p-2 rounded-sm text-[#003366] group-hover:bg-[#a11a2d] group-hover:text-white transition-colors">
                           {inst.icon}
                         </div>
-                        <span className="text-[11px] font-bold text-zinc-700 leading-tight">{inst.name}</span>
-                      </div>
+                        <span className="text-[11px] font-bold text-zinc-700 leading-tight group-hover:text-[#003366]">{inst.name}</span>
+                      </a>
                     ))}
                   </div>
                 </div>

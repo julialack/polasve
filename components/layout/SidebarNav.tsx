@@ -178,10 +178,10 @@ export default function SidebarNav() {
       {/* Action Button at bottom */}
       <section className="px-3 pt-4">
         <Link
-          href="/skapa-annons"
-          className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#003366] hover:bg-[#a11a2d] text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl hover:shadow-2xl active:scale-95"
+          href="/reklam"
+          className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#a11a2d] hover:bg-[#003366] text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl hover:shadow-2xl active:scale-95"
         >
-          <PlusCircle size={15} /> Lägg annons
+          <Building size={15} /> Lägg reklam
         </Link>
       </section>
     </aside>
