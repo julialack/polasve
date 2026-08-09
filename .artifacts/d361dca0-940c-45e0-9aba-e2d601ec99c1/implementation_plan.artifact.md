@@ -1,31 +1,33 @@
-# Plan för extra bilder i specifika kategorier
+# Plan för Stripe-integration
 
-Jag ska implementera möjligheten att ladda upp 2 extra bilder för kategorierna Säljes (Marketplace), Bytes, Hyra och Sökes.
+Jag ska integrera Stripe för att hantera betalningar för Standard-, Premium- och Featured-annonser.
+
+## Förutsättningar
+- [ ] SQL: `ALTER TABLE ads ADD COLUMN payment_status TEXT DEFAULT 'pending_payment';`
+- [ ] Miljövariabler för Stripe i `.env.local`.
 
 ## Föreslagna ändringar
 
-### 1. Databas och Typer
-- [x] SQL-kommando för `extra_images TEXT[]` förberett.
-- [MODIFY] [types/database.ts](file:///C:/Users/admin/Desktop/polasve/types/database.ts): Lägg till `extra_images: string[] | null` i `Ad`.
+### 1. API-rutten för Checkout
+#### [NEW] [api/checkout/route.ts](file:///C:/Users/admin/Desktop/polasve/app/api/checkout/route.ts)
+- Tar emot annons-ID och paket-typ.
+- Skapar en Stripe Checkout Session med rätt pris (49 kr, 149 kr, eller 299 kr).
+- Returnerar URL till Stripes betalsida.
 
-### 2. Annonsskapande
+### 2. Webhook för bekräftelse
+#### [NEW] [api/webhook/stripe/route.ts](file:///C:/Users/admin/Desktop/polasve/app/api/webhook/stripe/route.ts)
+- Lyssnar på `checkout.session.completed`.
+- Uppdaterar annonsens `payment_status` till `'paid'` i Supabase när betalningen är verifierad.
+
+### 3. Uppdatering av Skapa-sidan
 #### [MODIFY] [app/skapa-annons/page.tsx](file:///C:/Users/admin/Desktop/polasve/app/skapa-annons/page.tsx)
-- Lägg till "Bytes" i kategorivalet.
-- Skapa state för `extraImageFiles` och `extraImagePreviews`.
-- Visa två mindre uppladdningsrutor om kategorin är Marketplace, Bytes, Hyra eller Sökes.
-- Uppdatera `handleSubmit` för att ladda upp och spara dessa bilder.
+- Om användaren väljer ett betalpaket: Skapa annonsen med `payment_status = 'pending_payment'` och skicka sedan användaren direkt till Stripe.
+- Om användaren väljer Gratis: Skapa som vanligt med `payment_status = 'paid'`.
 
-### 3. Redigering
-#### [MODIFY] [app/annonser/[id]/redigera/page.tsx](file:///C:/Users/admin/Desktop/polasve/app/annonser/[id]/redigera/page.tsx)
-- Implementera samma UI för extra bilder som på "skapa"-sidan.
-- Möjliggör uppdatering av befintliga extra bilder.
-
-### 4. Visning
-#### [MODIFY] [app/annonser/[id]/page.tsx](file:///C:/Users/admin/Desktop/polasve/app/annonser/[id]/page.tsx)
-- Lägg till ett bildgalleri under huvudbilden som visar de extra bilderna om de finns.
+### 4. Filtrering av annonser
+- Uppdatera alla flöden (`FeedList`, `CategoryLanding` etc.) att endast visa annonser där `payment_status == 'paid'`.
 
 ## Verifieringsplan
-1. Skapa en annons i kategorin "Marketplace" och ladda upp 3 bilder totalt.
-2. Verifiera att alla 3 bilder syns på annonssidan.
-3. Testa att redigera och byta ut en av de mindre bilderna.
-4. Kontrollera att de extra rutorna *inte* syns för t.ex. kategorin "Jobb".
+1. Skapa en gratis-annons -> Ska dyka upp direkt.
+2. Skapa en Premium-annons -> Ska skickas till Stripe.
+3. Betala med Stripes test-kort -> Annonsen ska dyka upp live efteråt.

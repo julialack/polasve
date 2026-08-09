@@ -123,7 +123,7 @@ export default function SkapaAnnonsPage() {
       }
     }
 
-    const { error } = await supabase.from('ads').insert([{
+    const { data: adData, error } = await supabase.from('ads').insert([{
       title,
       category,
       price,
@@ -132,14 +132,39 @@ export default function SkapaAnnonsPage() {
       is_premium: selectedPackage !== 'free',
       user_id: user.id,
       image_url: imageUrl,
-      extra_images: extraUrls.length > 0 ? extraUrls : null
-    }])
+      extra_images: extraUrls.length > 0 ? extraUrls : null,
+      payment_status: selectedPackage === 'free' ? 'paid' : 'pending_payment'
+    }]).select().single()
 
     if (error) {
       toast.error('Kunde inte skapa annons')
     } else {
-      toast.success('Annonsen har publicerats!')
-      router.push('/annonser')
+      if (selectedPackage === 'free') {
+        toast.success('Annonsen har publicerats!')
+        router.push('/annonser')
+      } else {
+        // Redirect to Stripe for paid packages
+        try {
+          const res = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              adId: adData.id,
+              packageId: selectedPackage,
+              adTitle: title
+            })
+          })
+          const { url } = await res.json()
+          if (url) {
+            window.location.href = url
+          } else {
+            throw new Error('No checkout URL received')
+          }
+        } catch (err) {
+          toast.error('Betalningsflödet misslyckades. Vänligen kontakta support.')
+          console.error(err)
+        }
+      }
     }
     setLoading(false)
   }

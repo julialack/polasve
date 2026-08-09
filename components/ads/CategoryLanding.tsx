@@ -48,6 +48,7 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
     let query = supabase
       .from('ads')
       .select('*')
+      .eq('payment_status', 'paid')
       .order('is_premium', { ascending: false })
       .order('created_at', { ascending: false })
 

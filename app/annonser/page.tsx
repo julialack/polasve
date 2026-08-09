@@ -64,7 +64,7 @@ function AnnonserList() {
     setLoading(true)
 
     // Build Query for main ads
-    let query = supabase.from('ads').select('*').order('created_at', { ascending: false })
+    let query = supabase.from('ads').select('*').eq('payment_status', 'paid').order('created_at', { ascending: false })
 
     // Apply category filter
     if (categoryFilter !== 'Alla') {

@@ -25,6 +25,7 @@ export default function PremiumAdsSidebar() {
         .from('ads')
         .select('id, title, image_url, price, location, status')
         .eq('is_premium', true)
+        .eq('payment_status', 'paid')
         .neq('status', 'finished')
         .order('created_at', { ascending: false })
         .limit(5)

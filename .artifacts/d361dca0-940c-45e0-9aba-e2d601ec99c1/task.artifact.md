@@ -1,4 +1,5 @@
-- [ ] Skapa `app/api/poland-news/route.ts` för att hämta och parsa RSS
-- [ ] Uppdatera `app/nyheter/page.tsx` med den nya sektionen för polska nyheter
-- [ ] Styla nyhetslistan och lägg till käll-markeringar
-- [ ] Verifiera att realtidsuppdateringarna fungerar
+- [x] Lägg till `payment_status` kolumn i Supabase
+- [x] Skapa `app/api/checkout/route.ts` för att initiera betalningar
+- [x] Skapa `app/api/webhook/stripe/route.ts` för att bekräfta betalningar
+- [x] Uppdatera `app/skapa-annons/page.tsx` för att hantera omdirigering till Stripe
+- [x] Filtrera bort obetalda annonser i flöden
