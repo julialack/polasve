@@ -261,7 +261,12 @@ export default function ProfilPage() {
                               )}
                             </div>
                             <div className="flex-1 min-w-0 text-left">
-                              <span className="text-[7px] font-black text-[#a11a2d] uppercase tracking-widest text-left">{ad.category}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[7px] font-black text-[#a11a2d] uppercase tracking-widest text-left">{ad.category}</span>
+                                {ad.payment_status === 'pending_payment' && (
+                                  <span className="bg-amber-100 text-amber-700 text-[6px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-tighter animate-pulse">Väntar på betalning</span>
+                                )}
+                              </div>
                               <h4 className="font-bold text-base text-[#003366] truncate italic group-hover:underline text-left">{ad.title}</h4>
                               <p className="text-sm font-black text-zinc-900 mt-1 text-left">{ad.price || 'Bud'}</p>
                             </div>
