@@ -39,6 +39,7 @@ export default function SidebarNav() {
         .from('ads')
         .select('id, title')
         .eq('is_premium', true)
+        .eq('payment_status', 'paid')
         .order('created_at', { ascending: false })
         .limit(1)
         .single();

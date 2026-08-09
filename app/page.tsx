@@ -10,6 +10,8 @@ import SafeImage from "@/components/ui/SafeImage";
 import { createClient } from "@/utils/supabase/server";
 import { Newspaper, Calendar, Box, Info, ArrowRight, ShieldCheck, ExternalLink } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 const AdBox = ({ title, href, variant = 'gray' }: { title: string, href?: string, variant?: 'gray' | 'gold' }) => {
   const content = (
     <div className="aspect-[4/3] bg-zinc-50 rounded-sm flex flex-col items-center justify-center text-center p-4 border border-zinc-100 group-hover:border-[#a11a2d]/30 transition-all">
