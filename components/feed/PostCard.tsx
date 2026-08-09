@@ -127,9 +127,9 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
   }
 
   return (
-    <div className="bg-white border border-zinc-100 p-4 rounded-sm shadow-sm group text-left">
+    <div className="bg-white border border-zinc-100 p-3 md:p-4 rounded-sm shadow-sm group text-left">
       <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 md:gap-2.5">
           <UserAvatar
             avatarUrl={(post as any).avatar_url}
             userId={post.user_id}
@@ -137,17 +137,17 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
             size="sm"
           />
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-pacifico text-sm text-[#003366] tracking-normal">{formatDisplayName(post.user_name)}</span>
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <span className="font-pacifico text-[13px] md:text-sm text-[#003366] tracking-normal">{formatDisplayName(post.user_name)}</span>
               {post.category && (
-                <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full border ${CATEGORY_STYLES[post.category] || CATEGORY_STYLES.allmänt}`}>
+                <span className={`text-[7px] md:text-[8px] font-black uppercase px-1.5 md:px-2 py-0.5 rounded-full border ${CATEGORY_STYLES[post.category] || CATEGORY_STYLES.allmänt}`}>
                   {post.category}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[9px] text-zinc-400 font-bold">{new Date(post.created_at).toLocaleDateString()}</span>
-              {post.edited && <span className="text-[8px] text-zinc-300 italic">(redigerad)</span>}
+              <span className="text-[8px] md:text-[9px] text-zinc-400 font-bold">{new Date(post.created_at).toLocaleDateString()}</span>
+              {post.edited && <span className="text-[7px] md:text-[8px] text-zinc-300 italic">(redigerad)</span>}
             </div>
           </div>
         </div>

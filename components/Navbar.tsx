@@ -178,17 +178,17 @@ export default function Navbar() {
         </div>
 
         {/* Mobile View */}
-        <div className="md:hidden py-4 flex items-center justify-between">
+        <div className="md:hidden py-3 flex items-center justify-between">
           <button
-            className="p-2 text-zinc-600 hover:bg-zinc-50 rounded-md transition-colors"
+            className="p-2 text-[#003366] hover:bg-zinc-50 rounded-md transition-colors"
             onClick={() => setMenuOpen(!menuOpen)}
           >
-            {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
 
           <Link href="/" className="inline-block">
-            <div className="w-24 h-10 overflow-visible">
-              <svg viewBox="0 0 120 60" className="w-full h-full drop-shadow-[0_4px_6px_rgba(0,0,0,0.1)]">
+            <div className="w-20 h-8 overflow-visible">
+              <svg viewBox="0 0 120 60" className="w-full h-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
                 <g clipPath="url(#wave-path-v2-nav)">
                   <rect x="0" y="0" width="60" height="30" fill="white" />
                   <rect x="0" y="30" width="60" height="30" fill="#a11a2d" />
@@ -200,7 +200,20 @@ export default function Navbar() {
             </div>
           </Link>
 
-          <div className="w-10"></div> {/* Spacer for symmetry */}
+          <div className="flex items-center gap-2">
+            {user ? (
+              <Link href="/meddelanden" className="relative p-2 text-[#003366]">
+                <MessageSquare size={20} className="scale-x-[-1]" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 bg-[#a11a2d] text-white text-[7px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
+            ) : (
+              <div className="w-8"></div>
+            )}
+          </div>
         </div>
       </div>
 

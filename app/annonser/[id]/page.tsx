@@ -39,23 +39,23 @@ export default async function AnnonsDetaljPage({
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col text-left">
       <HomeHero />
 
-      <main className="max-w-7xl mx-auto w-full px-4 md:px-6 py-12">
-        <div className="bg-white border border-zinc-200 rounded-sm shadow-xl overflow-hidden">
+      <main className="max-w-7xl mx-auto w-full px-0 md:px-6 py-4 md:py-12">
+        <div className="bg-white border-y md:border border-zinc-200 shadow-sm md:shadow-xl md:rounded-sm overflow-hidden">
 
           {/* Ad Image Header */}
           {ad.image_url && (
-            <div className="w-full h-[300px] md:h-[500px] relative bg-zinc-100 border-b border-zinc-100">
+            <div className="w-full h-[250px] md:h-[500px] relative bg-zinc-100 border-b border-zinc-100">
               <img
                 src={ad.image_url}
                 alt={ad.title}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-6 left-6 flex gap-3">
-                <span className="bg-[#a11a2d] text-white px-4 py-1.5 rounded-sm text-[10px] font-black uppercase tracking-widest shadow-xl">
+              <div className="absolute top-4 left-4 md:top-6 md:left-6 flex gap-2 md:gap-3">
+                <span className="bg-[#a11a2d] text-white px-3 py-1 md:px-4 md:py-1.5 rounded-sm text-[8px] md:text-[10px] font-black uppercase tracking-widest shadow-xl">
                   {ad.category}
                 </span>
                 {ad.is_premium && (
-                  <span className="bg-[#003366] text-white px-4 py-1.5 rounded-sm text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-2">
+                  <span className="bg-[#003366] text-white px-3 py-1 md:px-4 md:py-1.5 rounded-sm text-[8px] md:text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-1 md:gap-2">
                     <ShieldCheck size={12} /> Premium
                   </span>
                 )}
@@ -63,56 +63,56 @@ export default async function AnnonsDetaljPage({
             </div>
           )}
 
-          <div className="p-6 md:p-12">
-            <div className="grid lg:grid-cols-12 gap-12">
+          <div className="p-4 md:p-12">
+            <div className="grid lg:grid-cols-12 gap-6 md:gap-12">
 
               {/* LEFT: Ad Content */}
-              <div className="lg:col-span-8 space-y-10 text-left">
+              <div className="lg:col-span-8 space-y-8 md:space-y-10 text-left">
                 <div className="text-left">
                   {ad.status === 'finished' && (
-                    <div className="mb-6 bg-red-600 text-white px-6 py-2 rounded-sm font-black uppercase tracking-widest text-center animate-in zoom-in-95 duration-300">
+                    <div className="mb-4 md:mb-6 bg-red-600 text-white px-4 py-2 rounded-sm font-black uppercase text-[10px] md:text-xs tracking-widest text-center animate-in zoom-in-95 duration-300">
                       Denna annons är avslutad (SÅLD / TILLSATT)
                     </div>
                   )}
-                  <div className="flex items-center justify-between gap-4 mb-4">
-                    <div className="flex items-center gap-3 text-zinc-400 text-[10px] font-bold uppercase tracking-widest">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-4 mb-4">
+                    <div className="flex items-center gap-2 md:gap-3 text-zinc-400 text-[9px] md:text-[10px] font-bold uppercase tracking-widest">
                       <Calendar size={14} className="text-[#a11a2d]" /> Publicerad {new Date(ad.created_at).toLocaleDateString()}
                     </div>
                     {isOwner && (
                       <Link
                         href={`/annonser/${id}/redigera`}
-                        className="flex items-center gap-2 bg-zinc-900 text-white px-4 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest hover:bg-[#003366] transition-all"
+                        className="inline-flex items-center gap-2 bg-zinc-900 text-white px-3 py-1 md:px-4 md:py-1.5 rounded-sm text-[8px] md:text-[9px] font-black uppercase tracking-widest hover:bg-[#003366] transition-all w-fit"
                       >
                         <Edit3 size={12} /> Redigera Min Annons
                       </Link>
                     )}
                   </div>
-                  <h1 className="text-3xl md:text-5xl font-black text-[#003366] uppercase tracking-tighter italic mb-6 leading-tight">
+                  <h1 className="text-2xl md:text-5xl font-black text-[#003366] uppercase tracking-tighter italic mb-4 md:mb-6 leading-tight">
                     {ad.title}
                   </h1>
-                  <div className="flex flex-wrap items-center gap-8 border-y border-zinc-50 py-6">
+                  <div className="flex flex-wrap items-center gap-4 md:gap-8 border-y border-zinc-50 py-4 md:py-6">
                     <div className="flex items-center gap-2">
                       <MapPin size={18} className="text-[#a11a2d]" />
-                      <span className="text-zinc-500 font-bold uppercase tracking-widest text-xs">{ad.location}</span>
+                      <span className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] md:text-xs">{ad.location}</span>
                     </div>
-                    <div className="text-2xl font-black text-zinc-900">{ad.price || 'Bud'}</div>
+                    <div className="text-xl md:text-2xl font-black text-zinc-900">{ad.price || 'Bud'}</div>
                   </div>
                 </div>
 
                 <div className="text-left">
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300 mb-6 flex items-center gap-4">
+                  <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300 mb-4 md:mb-6 flex items-center gap-4">
                     Beskrivning <div className="h-px flex-1 bg-zinc-50"></div>
                   </h3>
-                  <p className="text-zinc-600 font-medium text-base md:text-lg leading-relaxed whitespace-pre-wrap px-1 mb-10">
+                  <p className="text-zinc-600 font-medium text-sm md:text-lg leading-relaxed whitespace-pre-wrap px-1 mb-6 md:mb-10">
                     {ad.description}
                   </p>
 
                   {ad.extra_images && ad.extra_images.length > 0 && (
-                    <div className="space-y-6">
-                       <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300 mb-6 flex items-center gap-4">
+                    <div className="space-y-4 md:space-y-6">
+                       <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300 mb-4 md:mb-6 flex items-center gap-4">
                         Fler Bilder <div className="h-px flex-1 bg-zinc-50"></div>
                       </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-2 md:gap-4">
                         {ad.extra_images.map((img: string, idx: number) => (
                           <div key={idx} className="relative aspect-video rounded-sm overflow-hidden border border-zinc-100 shadow-sm group cursor-zoom-in">
                             <img src={img} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />

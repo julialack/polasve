@@ -28,9 +28,9 @@ export default function SwedenMap() {
   }
 
   return (
-    <div className="relative w-full aspect-[3/5] bg-white border border-zinc-200 rounded-sm overflow-hidden p-6 group shadow-inner">
+    <div className="relative w-full aspect-[3/5] bg-white border border-zinc-200 rounded-sm overflow-hidden p-2 md:p-6 group shadow-inner">
       {/* Sweden Detailed Silhouette SVG with Provincial Lines */}
-      <div className="absolute inset-0 flex items-center justify-center p-8 pointer-events-none">
+      <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8 pointer-events-none">
         <svg
           viewBox="0 0 100 250"
           className="h-full w-auto text-[#003366] drop-shadow-2xl"

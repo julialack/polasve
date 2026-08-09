@@ -136,10 +136,10 @@ function AnnonserList() {
                 ) : (
                   <div className="space-y-12">
                     {/* Active Ads */}
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       {ads.filter(ad => ad.status !== 'finished').map((ad) => (
-                        <Link href={`/annonser/${ad.id}`} key={ad.id} className="group bg-white p-4 border border-zinc-100 rounded-sm shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row gap-6">
-                          <div className="w-full sm:w-40 h-32 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0">
+                        <Link href={`/annonser/${ad.id}`} key={ad.id} className="group bg-white p-3 md:p-4 border border-zinc-100 rounded-sm shadow-sm hover:shadow-md transition-all flex flex-row md:flex-row gap-4 md:gap-6">
+                          <div className="w-20 h-20 md:w-40 md:h-32 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0">
                             <SafeImage
                               src={ad.image_url || ""}
                               alt={ad.title}
@@ -147,22 +147,22 @@ function AnnonserList() {
                               fallbackSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"
                             />
                           </div>
-                          <div className="flex-1 flex flex-col justify-between py-1">
+                          <div className="flex-1 flex flex-col justify-between py-0.5 min-w-0">
                             <div>
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-[9px] font-black uppercase text-[#a11a2d]">{ad.category}</span>
-                                <span className="text-[8px] text-zinc-300 font-bold border-l pl-2">{new Date(ad.created_at).toLocaleDateString()}</span>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-[7px] md:text-[9px] font-black uppercase text-[#a11a2d]">{ad.category}</span>
+                                <span className="text-[7px] md:text-[8px] text-zinc-300 font-bold border-l pl-2 hidden md:inline">{new Date(ad.created_at).toLocaleDateString()}</span>
                               </div>
-                              <h3 className={`text-lg font-bold italic group-hover:underline leading-tight mb-2 text-[#003366]`}>
+                              <h3 className="text-[13px] md:text-lg font-bold italic group-hover:underline leading-tight mb-1 truncate text-[#003366]">
                                 {ad.title}
                               </h3>
-                              <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tighter flex items-center gap-1"><MapPin size={10} /> {ad.location}</p>
+                              <p className="text-[8px] md:text-[10px] text-zinc-400 font-bold uppercase tracking-tighter flex items-center gap-1"><MapPin size={8} /> {ad.location}</p>
                             </div>
-                            <div className="flex justify-between items-end mt-4 pt-4 border-t border-zinc-50">
-                              <span className={`text-sm font-black ${ad.is_premium ? 'text-[#D4AF37]' : 'text-zinc-900'}`}>
+                            <div className="flex justify-between items-end mt-1">
+                              <span className={`text-[11px] md:text-sm font-black ${ad.is_premium ? 'text-[#D4AF37]' : 'text-zinc-900'}`}>
                                 {ad.price || 'Bud'}
                               </span>
-                              <span className="text-[9px] font-black text-[#003366] uppercase tracking-widest">Visa info &raquo;</span>
+                              <span className="text-[8px] md:text-[9px] font-black text-[#003366] uppercase tracking-widest hidden md:inline">Visa info &raquo;</span>
                             </div>
                           </div>
                         </Link>

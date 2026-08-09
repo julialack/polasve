@@ -8,7 +8,7 @@ import SidebarNav from "@/components/layout/SidebarNav";
 import SwedenMap from "@/components/map/SwedenMap";
 import SafeImage from "@/components/ui/SafeImage";
 import { createClient } from "@/utils/supabase/server";
-import { Newspaper, Calendar, Box, Info, ArrowRight, ShieldCheck, ExternalLink } from "lucide-react";
+import { Newspaper, Calendar, Box, Info, ArrowRight, ShieldCheck, ExternalLink, Briefcase, Home as HomeIcon, Tag, ShoppingCart, Wrench } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -63,14 +63,38 @@ export default async function Home() {
   const featuredAds = adsData || [];
   const news = newsData || [];
 
+  const quickCategories = [
+    { name: "Jobb", href: "/jobb", icon: <Briefcase size={20} />, color: "bg-blue-50 text-blue-600" },
+    { name: "Bostad", href: "/bostad", icon: <HomeIcon size={20} />, color: "bg-green-50 text-green-600" },
+    { name: "Säljes", href: "/marketplace/salj", icon: <Tag size={20} />, color: "bg-red-50 text-red-600" },
+    { name: "Köpes", href: "/marketplace/kop", icon: <ShoppingCart size={20} />, color: "bg-amber-50 text-amber-600" },
+    { name: "Tjänster", href: "/tjanster", icon: <Wrench size={20} />, color: "bg-purple-50 text-purple-600" },
+  ];
+
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fa]">
       <HomeHero />
       <InfoBar />
 
-      <div className="bg-zinc-50 border-b border-zinc-100 py-6 px-6">
-        <div className="max-w-4xl mx-auto">
+      <div className="bg-zinc-50 border-b border-zinc-100 py-4 md:py-6 px-4 md:px-6">
+        <div className="max-w-4xl mx-auto space-y-6">
           <SearchBar />
+
+          {/* Quick Category Navigation (Mobile Only) */}
+          <div className="flex md:hidden overflow-x-auto gap-4 pb-2 scrollbar-hide">
+            {quickCategories.map((cat) => (
+              <Link
+                key={cat.name}
+                href={cat.href}
+                className="flex flex-col items-center gap-2 min-w-[70px] shrink-0 group"
+              >
+                <div className={`w-12 h-12 ${cat.color} rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform`}>
+                  {cat.icon}
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-[#003366] transition-colors">{cat.name}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -92,14 +116,22 @@ export default async function Home() {
           {/* MAIN CONTENT */}
           <div className="col-span-1 md:col-span-9 lg:col-span-2 space-y-6">
 
-            {/* Bazar - Premium (Moved to center) */}
-            <section className="bg-white border border-zinc-200 shadow-sm overflow-hidden">
-              <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">Bazar - Premium</div>
-              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Bazar - Premium (Mobile: Horizontal Scroll, Desktop: Grid) */}
+            <section className="bg-white border-y md:border border-zinc-200 shadow-sm overflow-hidden rounded-sm">
+              <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider flex justify-between items-center">
+                <span>Bazar - Premium</span>
+                <Link href="/annonser" className="text-[10px] font-bold hover:underline">Visa alla &raquo;</Link>
+              </div>
+
+              <div className="flex md:grid md:grid-cols-2 overflow-x-auto md:overflow-x-visible gap-4 p-4 scrollbar-hide snap-x">
                 {featuredAds.map((ad) => (
-                  <Link href={`/annonser/${ad.id}`} key={ad.id} className={`block group border border-zinc-100 p-3 rounded-sm hover:shadow-md transition-all ${ad.status === 'finished' ? 'opacity-60' : ''}`}>
+                  <Link
+                    href={`/annonser/${ad.id}`}
+                    key={ad.id}
+                    className={`min-w-[85%] md:min-w-0 snap-center block group border border-zinc-100 p-3 rounded-sm hover:shadow-md transition-all ${ad.status === 'finished' ? 'opacity-60' : ''}`}
+                  >
                     <div className="flex gap-4">
-                      <div className="w-16 h-16 bg-zinc-100 relative overflow-hidden border rounded-sm flex-shrink-0">
+                      <div className="w-16 h-16 md:w-20 md:h-20 bg-zinc-100 relative overflow-hidden border rounded-sm flex-shrink-0">
                         <SafeImage
                           src={ad.image_url || ""}
                           alt={ad.title}
@@ -116,7 +148,6 @@ export default async function Home() {
                         <h4 className={`font-bold italic leading-tight truncate text-[11px] ${ad.status === 'finished' ? 'text-zinc-500 line-through' : 'text-[#003366]'}`}>{ad.title}</h4>
                         <p className={`text-[10px] font-black mt-2 ${ad.status === 'finished' ? 'text-zinc-400' : 'text-[#D4AF37]'}`}>{ad.status === 'finished' ? 'Avslutad' : (ad.price || 'Bud')}</p>
                         <p className="text-[9px] text-zinc-500 font-bold uppercase mt-1 italic">{ad.location}</p>
-                        <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-widest mt-1 block">Visa annons &raquo;</span>
                       </div>
                     </div>
                   </Link>
@@ -131,7 +162,16 @@ export default async function Home() {
                 <span>Community Flöde - Realtid</span>
                 <span className="flex h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
               </div>
-              <div className="p-4 md:p-6"><PostBox /><FeedList /></div>
+              <div className="p-4 md:p-6">
+                <PostBox />
+
+                {/* Mobile Ad Injector (Visible only on mobile) */}
+                <div className="md:hidden mb-6">
+                   <AdBox title="Vill du synas här? Kontakta oss!" variant="gold" href="/reklam" />
+                </div>
+
+                <FeedList />
+              </div>
             </section>
           </div>
 

@@ -63,31 +63,31 @@ export default function InstitutionerPage() {
                 <Landmark size={18} /> Anläggningar & Institutioner
               </div>
 
-              <div className="p-6 md:p-10">
-                <h1 className="text-3xl font-black text-[#003366] uppercase tracking-tighter italic mb-4">Polska resurser <span className="text-[#a11a2d]">i Sverige</span></h1>
-                <p className="text-zinc-500 font-medium mb-12 leading-relaxed">
-                  Här har vi samlat viktiga länkar och information om polska myndigheter, skolor, kyrkor och föreningar runt om i landet. Allt för att underlätta din vardag och gemenskap i Sverige.
+              <div className="p-4 md:p-10">
+                <h1 className="text-2xl md:text-3xl font-black text-[#003366] uppercase tracking-tighter italic mb-4">Polska resurser <span className="text-[#a11a2d]">i Sverige</span></h1>
+                <p className="text-sm md:text-base text-zinc-500 font-medium mb-8 md:mb-12 leading-relaxed">
+                  Här har vi samlat viktiga länkar och information om polska myndigheter, skolor, kyrkor och föreningar runt om i landet.
                 </p>
 
                 {/* Section: Myndigheter */}
-                <div className="mb-16">
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a11a2d] mb-8 flex items-center gap-4">
-                    Myndigheter & Diplomati <div className="h-px flex-1 bg-zinc-100"></div>
+                <div className="mb-10 md:mb-16">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a11a2d] mb-6 md:mb-8 flex items-center gap-4">
+                    Myndigheter <div className="h-px flex-1 bg-zinc-100"></div>
                   </h3>
-                  <div className="grid gap-6">
+                  <div className="grid gap-4 md:gap-6">
                     {MYNDIGHETER.map((m) => (
                       <a
                         key={m.name}
                         href={m.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group bg-zinc-50 hover:bg-white p-6 rounded-sm border border-zinc-100 hover:border-[#003366] transition-all flex justify-between items-center shadow-sm"
+                        className="group bg-zinc-50 hover:bg-white p-4 md:p-6 rounded-sm border border-zinc-100 hover:border-[#003366] transition-all flex justify-between items-center shadow-sm"
                       >
                         <div className="flex-1">
-                          <h4 className="font-black text-[#003366] uppercase text-xs mb-1 group-hover:text-[#a11a2d] transition-colors">{m.name}</h4>
-                          <p className="text-[10px] text-zinc-400 font-medium">{m.desc}</p>
+                          <h4 className="font-black text-[#003366] uppercase text-[11px] md:text-xs mb-1 group-hover:text-[#a11a2d] transition-colors leading-tight">{m.name}</h4>
+                          <p className="text-[9px] md:text-[10px] text-zinc-400 font-medium leading-tight">{m.desc}</p>
                         </div>
-                        <ExternalLink size={16} className="text-zinc-300 group-hover:text-[#003366] ml-4 shrink-0" />
+                        <ExternalLink size={14} className="text-zinc-300 group-hover:text-[#003366] ml-4 shrink-0" />
                       </a>
                     ))}
                   </div>
@@ -95,22 +95,22 @@ export default function InstitutionerPage() {
 
                 {/* Section: Gemenskap */}
                 <div>
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a11a2d] mb-8 flex items-center gap-4">
-                    Institutioner & Gemenskap <div className="h-px flex-1 bg-zinc-100"></div>
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a11a2d] mb-6 md:mb-8 flex items-center gap-4">
+                    Institutioner <div className="h-px flex-1 bg-zinc-100"></div>
                   </h3>
-                  <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                     {INSTITUTIONER.map((inst) => (
                       <a
                         key={inst.name}
                         href={inst.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group flex items-center gap-4 p-4 border border-zinc-50 rounded-sm hover:border-[#003366] hover:bg-white transition-all shadow-sm"
+                        className="group flex items-center gap-3 p-3 md:p-4 border border-zinc-50 rounded-sm hover:border-[#003366] hover:bg-white transition-all shadow-sm"
                       >
                         <div className="bg-[#003366]/5 p-2 rounded-sm text-[#003366] group-hover:bg-[#a11a2d] group-hover:text-white transition-colors">
                           {inst.icon}
                         </div>
-                        <span className="text-[11px] font-bold text-zinc-700 leading-tight group-hover:text-[#003366]">{inst.name}</span>
+                        <span className="text-[10px] md:text-[11px] font-bold text-zinc-700 leading-tight group-hover:text-[#003366]">{inst.name}</span>
                       </a>
                     ))}
                   </div>

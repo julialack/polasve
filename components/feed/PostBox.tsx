@@ -68,33 +68,33 @@ export default function PostBox() {
   }
 
   return (
-    <div className="bg-white border border-zinc-100 rounded-sm p-4 mb-6 shadow-sm">
-      <div className="flex gap-4">
+    <div className="bg-white border border-zinc-100 rounded-sm p-3 md:p-4 mb-6 shadow-sm">
+      <div className="flex gap-3 md:gap-4">
         <UserAvatar
           avatarUrl={user?.user_metadata?.avatar_url}
           userId={user?.id}
           userName={user?.user_metadata?.full_name}
-          size="md"
+          size="sm"
         />
-        <div className="flex-1 flex flex-col gap-4">
+        <div className="flex-1 flex flex-col gap-3 md:gap-4">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Dela något med communityt..."
-            className="w-full bg-transparent border-none focus:ring-0 resize-none font-bold text-zinc-900 placeholder:text-zinc-300 py-1 text-sm md:text-base"
-            rows={2}
+            className="w-full bg-transparent border-none focus:ring-0 resize-none font-bold text-zinc-950 placeholder:text-zinc-300 py-1 text-sm md:text-base"
+            rows={1}
             disabled={loading}
           ></textarea>
 
-          <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-zinc-50">
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
-              <TagIcon size={14} className="text-zinc-300 shrink-0" />
-              <div className="flex gap-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 md:pt-3 border-t border-zinc-50">
+            <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto scrollbar-hide pb-1 max-w-[200px] md:max-w-none">
+              <TagIcon size={12} className="text-zinc-300 shrink-0" />
+              <div className="flex gap-1">
                 {FEED_CATEGORIES.map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => setCategory(cat.id)}
-                    className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full transition-all border ${
+                    className={`text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2 md:px-3 py-1 rounded-full transition-all border ${
                       category === cat.id
                       ? 'border-[#003366] bg-[#003366] text-white shadow-md'
                       : 'border-zinc-100 bg-zinc-50 text-zinc-400 hover:border-zinc-200'
@@ -109,9 +109,9 @@ export default function PostBox() {
             <button
               onClick={handlePost}
               disabled={loading || !content.trim()}
-              className="bg-[#003366] text-white px-8 py-2.5 rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-[#a11a2d] transition-all active:scale-95 disabled:bg-zinc-100 disabled:text-zinc-300 flex items-center gap-2 shadow-lg shadow-blue-900/10"
+              className="bg-[#003366] text-white px-5 md:px-8 py-1.5 md:py-2.5 rounded-full font-black text-[9px] md:text-[10px] uppercase tracking-[0.2em] hover:bg-[#a11a2d] transition-all active:scale-95 disabled:bg-zinc-100 disabled:text-zinc-300 flex items-center gap-2 shadow-md"
             >
-              {loading && <Loader2 size={12} className="animate-spin" />}
+              {loading && <Loader2 size={10} className="animate-spin" />}
               Publicera
             </button>
           </div>

@@ -167,8 +167,8 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                     {/* Active Ads */}
                     <div className="space-y-4">
                       {ads.filter(ad => ad.status !== 'finished').map((ad) => (
-                        <Link href={`/annonser/${ad.id}`} key={ad.id} className={`group bg-white p-3 border rounded-sm transition-all flex flex-col sm:flex-row gap-4 ${ad.is_premium ? 'border-amber-100 bg-amber-50/20 shadow-sm' : 'border-zinc-100 shadow-sm hover:shadow-md'}`}>
-                          <div className="w-full sm:w-32 h-24 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0">
+                        <Link href={`/annonser/${ad.id}`} key={ad.id} className={`group bg-white p-2 md:p-3 border rounded-sm transition-all flex flex-row md:flex-row gap-3 md:gap-4 ${ad.is_premium ? 'border-amber-100 bg-amber-50/20 shadow-sm' : 'border-zinc-100 shadow-sm hover:shadow-md'}`}>
+                          <div className="w-20 h-20 md:w-32 md:h-24 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0">
                             <SafeImage
                               src={ad.image_url || ""}
                               alt={ad.title}
@@ -176,24 +176,24 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                               fallbackSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"
                             />
                           </div>
-                          <div className="flex-1 flex flex-col justify-between py-0.5">
+                          <div className="flex-1 flex flex-col justify-between py-0.5 min-w-0">
                             <div>
-                              <div className="flex items-center gap-2 mb-1.5">
-                                <span className={`text-[8px] font-black uppercase ${ad.is_premium ? 'text-amber-600' : 'text-[#a11a2d]'}`}>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className={`text-[7px] md:text-[8px] font-black uppercase ${ad.is_premium ? 'text-amber-600' : 'text-[#a11a2d]'}`}>
                                   {ad.is_premium ? 'Premium' : ad.category}
                                 </span>
-                                <span className="text-[7px] text-zinc-300 font-bold border-l pl-2">{new Date(ad.created_at).toLocaleDateString()}</span>
+                                <span className="text-[7px] text-zinc-300 font-bold border-l pl-2 hidden md:inline">{new Date(ad.created_at).toLocaleDateString()}</span>
                               </div>
-                              <h3 className={`text-base font-bold italic group-hover:underline leading-tight mb-1 ${ad.is_premium ? 'text-amber-900' : 'text-[#003366]'}`}>
+                              <h3 className={`text-[13px] md:text-base font-bold italic group-hover:underline leading-tight mb-1 truncate ${ad.is_premium ? 'text-amber-900' : 'text-[#003366]'}`}>
                                 {ad.title}
                               </h3>
-                              <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tighter flex items-center gap-1"><MapPin size={8} /> {ad.location}</p>
+                              <p className="text-[8px] md:text-[10px] text-zinc-400 font-bold uppercase tracking-tighter flex items-center gap-1"><MapPin size={8} /> {ad.location}</p>
                             </div>
-                            <div className="flex justify-between items-end mt-2">
-                              <span className={`text-xs font-black ${ad.is_premium ? 'text-amber-600' : 'text-zinc-900'}`}>
+                            <div className="flex justify-between items-end mt-1">
+                              <span className={`text-[11px] md:text-xs font-black ${ad.is_premium ? 'text-amber-600' : 'text-zinc-900'}`}>
                                 {ad.price || 'Bud'}
                               </span>
-                              <span className="text-[8px] font-black text-[#003366] opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest">Visa info &raquo;</span>
+                              <span className="text-[8px] font-black text-[#003366] opacity-0 md:group-hover:opacity-100 transition-opacity uppercase tracking-widest hidden md:inline">Visa info &raquo;</span>
                             </div>
                           </div>
                         </Link>

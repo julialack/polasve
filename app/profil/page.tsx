@@ -138,28 +138,28 @@ export default function ProfilPage() {
         <div className="max-w-6xl mx-auto">
 
           {/* Header Section */}
-          <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-200 pb-8 text-left">
+          <div className="mb-8 md:mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-200 pb-6 md:pb-8 text-left">
             <div className="text-left">
-              <h1 className="text-3xl md:text-4xl font-black text-[#003366] uppercase tracking-tight italic text-left">Min <span className="text-[#a11a2d]">Profil</span></h1>
-              <p className="text-zinc-500 mt-2 font-bold uppercase text-[10px] tracking-widest text-left">Hantera din närvaro på Polasve</p>
+              <h1 className="text-2xl md:text-4xl font-black text-[#003366] uppercase tracking-tight italic text-left">Min <span className="text-[#a11a2d]">Profil</span></h1>
+              <p className="text-zinc-500 mt-1 md:mt-2 font-bold uppercase text-[9px] md:text-[10px] tracking-widest text-left">Hantera din närvaro på Polasve</p>
             </div>
             <Link
               href="/skapa-annons"
-              className="flex items-center gap-2 bg-[#003366] text-white px-6 py-3 rounded-sm font-black text-[10px] uppercase tracking-widest hover:bg-[#a11a2d] transition-all shadow-lg active:scale-95 w-fit"
+              className="flex items-center justify-center gap-2 bg-[#003366] text-white px-6 py-3 rounded-sm font-black text-[10px] uppercase tracking-widest hover:bg-[#a11a2d] transition-all shadow-lg active:scale-95 w-full md:w-fit"
             >
               <PlusCircle size={14} /> Skapa Ny Annons
             </Link>
           </div>
 
-          <div className="grid lg:grid-cols-12 gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10">
 
             {/* LEFT: User Card */}
             <div className="lg:col-span-4 space-y-6">
               <div className="bg-zinc-50 border border-zinc-200 rounded-sm shadow-xl overflow-hidden text-left">
-                <div className="h-32 relative bg-gradient-to-r from-[#a11a2d] to-[#003366]">
+                <div className="h-24 md:h-32 relative bg-gradient-to-r from-[#a11a2d] to-[#003366]">
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent to-zinc-50"></div>
-                  <div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
-                    <div className="w-24 h-24 bg-white p-1 rounded-full shadow-2xl overflow-hidden border-4 border-white relative flex items-center justify-center">
+                  <div className="absolute -bottom-8 md:-bottom-10 left-1/2 -translate-x-1/2">
+                    <div className="w-20 h-20 md:w-24 md:h-24 bg-white p-1 rounded-full shadow-2xl overflow-hidden border-4 border-white relative flex items-center justify-center">
                       {avatarSvg ? (
                         <div
                           dangerouslySetInnerHTML={{ __html: avatarSvg }}
