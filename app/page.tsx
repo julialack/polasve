@@ -46,8 +46,18 @@ export default async function Home() {
   const supabase = await createClient();
 
   const [{ data: adsData }, { data: newsData }] = await Promise.all([
-    supabase.from('ads').select('*').eq('is_premium', true).eq('payment_status', 'paid').order('created_at', { ascending: false }).limit(4),
-    supabase.from('news').select('*').order('created_at', { ascending: false }).limit(4)
+    supabase
+      .from('ads')
+      .select('*')
+      .eq('is_premium', true)
+      .eq('payment_status', 'paid')
+      .order('created_at', { ascending: false })
+      .limit(6),
+    supabase
+      .from('news')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(4)
   ]);
 
   const featuredAds = adsData || [];
