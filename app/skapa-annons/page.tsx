@@ -154,15 +154,21 @@ export default function SkapaAnnonsPage() {
               adTitle: title
             })
           })
+
+          if (!res.ok) {
+            const errorData = await res.json().catch(() => ({ error: 'Kunde inte läsa svar från servern' }));
+            throw new Error(errorData.error || `Serverfel: ${res.status}`);
+          }
+
           const { url } = await res.json()
           if (url) {
             window.location.href = url
           } else {
-            throw new Error('No checkout URL received')
+            throw new Error('Ingen betalnings-URL mottogs')
           }
-        } catch (err) {
-          toast.error('Betalningsflödet misslyckades. Vänligen kontakta support.')
-          console.error(err)
+        } catch (err: any) {
+          toast.error(`Betalningen kunde inte startas: ${err.message}`)
+          console.error("Payment flow error:", err)
         }
       }
     }
