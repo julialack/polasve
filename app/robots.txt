@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /profil
+Disallow: /meddelanden
+Disallow: /api/
+
+Sitemap: https://polasve.se/sitemap.xml
