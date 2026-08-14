@@ -10,7 +10,7 @@ import SafeImage from "@/components/ui/SafeImage";
 import { createClient } from "@/utils/supabase/server";
 import { Newspaper, Calendar, Box, Info, ArrowRight, ShieldCheck, ExternalLink, Briefcase, Home as HomeIcon, Tag, ShoppingCart, Wrench } from "lucide-react";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60; // Revalidate every minute
 
 const AdBox = ({ title, href, variant = 'gray' }: { title: string, href?: string, variant?: 'gray' | 'gold' }) => {
   const content = (

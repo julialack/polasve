@@ -1,20 +1,32 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Image from 'next/image'
 
-interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface SafeImageProps {
+  src: string | null | undefined
+  alt: string
+  className?: string
   fallbackSrc?: string
+  sizes?: string
+  priority?: boolean
 }
 
 export default function SafeImage({
   src,
   alt = "",
   fallbackSrc = "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800&auto=format&fit=crop",
-  className,
-  ...props
+  className = "",
+  sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
+  priority = false,
 }: SafeImageProps) {
-  const [imgSrc, setImgSrc] = useState(src || fallbackSrc)
+  const [imgSrc, setImgSrc] = useState<string>(src || fallbackSrc)
   const [hasError, setHasError] = useState(false)
+
+  useEffect(() => {
+    setImgSrc(src || fallbackSrc)
+    setHasError(false)
+  }, [src, fallbackSrc])
 
   const handleError = () => {
     if (!hasError) {
@@ -23,15 +35,19 @@ export default function SafeImage({
     }
   }
 
-  if (!imgSrc && !src) return null
+  if (!imgSrc) return null
 
   return (
-    <img
-      src={imgSrc || fallbackSrc}
-      alt={alt}
-      onError={handleError}
-      className={className}
-      {...props}
-    />
+    <div className={`relative ${className}`}>
+      <Image
+        src={imgSrc}
+        alt={alt}
+        fill
+        className="object-cover"
+        onError={handleError}
+        sizes={sizes}
+        priority={priority}
+      />
+    </div>
   )
 }

@@ -18,6 +18,7 @@ export default function FeedList() {
       .from('posts')
       .select('*')
       .order('created_at', { ascending: false })
+      .limit(20)
 
     if (postsError) {
       console.error("Error fetching posts:", postsError)
