@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface ContactFormProps {
   receiverId: string
@@ -24,13 +25,13 @@ export default function ContactForm({ receiverId, adId, adTitle }: ContactFormPr
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      alert('Du måste vara inloggad för att skicka meddelanden.')
+      toast.error('Du måste vara inloggad för att skicka meddelanden.')
       router.push('/logga-in')
       return
     }
 
     if (user.id === receiverId) {
-      alert('Du kan inte skicka meddelanden till din egen annons.')
+      toast.error('Du kan inte skicka meddelanden till din egen annons.')
       setLoading(false)
       return
     }
@@ -43,14 +44,14 @@ export default function ContactForm({ receiverId, adId, adTitle }: ContactFormPr
           receiver_id: receiverId,
           ad_id: adId,
           content: message,
-          sender_name: user.user_metadata?.full_name || user.email?.split('@')[0],
         }
       ])
 
     if (error) {
-      alert('Kunde inte skicka meddelande: ' + error.message)
+      toast.error('Kunde inte skicka meddelande: ' + error.message)
     } else {
       setSent(true)
+      toast.success('Meddelandet har skickats!')
       setMessage('')
     }
     setLoading(false)

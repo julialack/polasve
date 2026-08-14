@@ -114,8 +114,10 @@ export default function InstallningarPage() {
   const [fullName, setFullName] = useState('')
   const [city, setCity] = useState('')
   const [bio, setBio] = useState('')
+  const [phone, setPhone] = useState('')
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
   const [showEmail, setShowEmail] = useState(false)
+  const [showPhone, setShowPhone] = useState(false)
   const [showNameRequest, setShowNameRequest] = useState(false)
   const [requestedName, setRequestedName] = useState('')
 
@@ -163,8 +165,10 @@ export default function InstallningarPage() {
       setFullName(currentUser.user_metadata?.full_name || '')
       setCity(currentUser.user_metadata?.city || '')
       setBio(currentUser.user_metadata?.bio || '')
+      setPhone(currentUser.user_metadata?.phone || '')
       setSelectedLanguages(currentUser.user_metadata?.languages || [])
       setShowEmail(currentUser.user_metadata?.show_email_publicly || false)
+      setShowPhone(currentUser.user_metadata?.show_phone_publicly || false)
 
       const savedUrl = currentUser.user_metadata?.avatar_url || ''
       let finalConfig = { ...config }
@@ -215,11 +219,33 @@ export default function InstallningarPage() {
           avatar_config: config,
           city,
           bio,
+          phone,
           languages: selectedLanguages,
           show_email_publicly: showEmail,
+          show_phone_publicly: showPhone,
         }
       })
       if (error) throw error
+
+      // Uppdatera även den publika profiltabellen direkt för att säkerställa synkronisering
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          full_name: fullName,
+          avatar_url: avatarUrl,
+          city,
+          bio,
+          phone,
+          show_email_publicly: showEmail,
+          show_phone_publicly: showPhone,
+          // Vi uppdaterar inte e-post här då den vanligtvis hanteras av auth
+        })
+        .eq('id', user.id)
+
+      if (profileError) {
+        console.warn('Kunde inte uppdatera publika profilen:', profileError)
+      }
+
       toast.success('Dina inställningar har sparats!')
       router.refresh()
     } catch (err) {
@@ -467,6 +493,10 @@ export default function InstallningarPage() {
                     <label htmlFor="user-city-settings" className="block text-[8px] font-black uppercase text-zinc-300 mb-1">Stad / Region</label>
                     <input id="user-city-settings" name="city" type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Stad / Region" className="w-full bg-zinc-50 p-4 rounded-sm text-sm font-bold text-zinc-900 outline-none focus:border-[#003366]" />
                   </div>
+                  <div className="text-left">
+                    <label htmlFor="user-phone-settings" className="block text-[8px] font-black uppercase text-zinc-300 mb-1">Telefonnummer</label>
+                    <input id="user-phone-settings" name="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+46 70 000 00 00" className="w-full bg-zinc-50 p-4 rounded-sm text-sm font-bold text-zinc-900 outline-none focus:border-[#003366]" />
+                  </div>
                 </div>
              </div>
 
@@ -501,6 +531,11 @@ export default function InstallningarPage() {
                   <label htmlFor="show-email-toggle-settings" className="flex items-center justify-between p-4 bg-zinc-50 rounded-sm cursor-pointer hover:bg-zinc-100 transition-all text-left border border-zinc-100 text-left">
                     <span className="text-[9px] font-black uppercase text-zinc-600 text-left">Visa e-post offentligt</span>
                     <input id="show-email-toggle-settings" name="show-email" type="checkbox" checked={showEmail} onChange={(e) => setShowEmail(e.target.checked)} className="w-4 h-4 rounded border-zinc-300 text-[#003366]" />
+                  </label>
+
+                  <label htmlFor="show-phone-toggle-settings" className="flex items-center justify-between p-4 bg-zinc-50 rounded-sm cursor-pointer hover:bg-zinc-100 transition-all text-left border border-zinc-100 text-left">
+                    <span className="text-[9px] font-black uppercase text-zinc-600 text-left">Visa telefonnummer offentligt</span>
+                    <input id="show-phone-toggle-settings" name="show-phone" type="checkbox" checked={showPhone} onChange={(e) => setShowPhone(e.target.checked)} className="w-4 h-4 rounded border-zinc-300 text-[#003366]" />
                   </label>
                 </div>
              </div>

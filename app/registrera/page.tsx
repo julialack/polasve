@@ -5,6 +5,7 @@ import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
 export default function RegistreraPage() {
   const [email, setEmail] = useState("");
@@ -30,25 +31,25 @@ export default function RegistreraPage() {
     });
 
     if (error) {
-      alert(error.message);
+      toast.error(error.message);
     } else {
-      alert("Välkommen! Ditt konto har skapats. Du kan nu logga in.");
+      toast.success("Välkommen! Ditt konto har skapats. Du kan nu logga in.");
       router.push("/logga-in");
     }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-center py-12 px-6">
+    <div className="min-h-[100dvh] bg-white flex flex-col justify-center py-8 px-6">
       <div className="max-w-md w-full mx-auto">
-        <div className="text-center mb-10">
-          <Link href="/" className="inline-flex items-center gap-3 text-3xl font-light tracking-widest text-zinc-900 mb-10">
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-3 text-3xl font-light tracking-widest text-zinc-900 mb-6">
             POLA<span className="font-bold text-red-800">SVE</span>
           </Link>
-          <h1 className="text-xl font-bold uppercase tracking-[0.3em] text-zinc-900">Skapa konto</h1>
+          <h1 className="text-xl font-black uppercase tracking-[0.3em] text-zinc-900">Skapa konto</h1>
         </div>
 
-        <div className="bg-white p-10 rounded-sm border border-zinc-100 shadow-2xl shadow-zinc-100">
+        <div className="bg-white p-8 md:p-10 rounded-sm border border-zinc-100 shadow-2xl shadow-zinc-100">
           <form onSubmit={handleSignUp} className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">Namn</label>

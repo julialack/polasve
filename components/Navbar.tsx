@@ -178,16 +178,17 @@ export default function Navbar() {
         </div>
 
         {/* Mobile View */}
-        <div className="md:hidden py-3 flex items-center justify-between">
+        <div className="md:hidden py-4 flex items-center justify-between">
           <button
-            className="p-2 text-[#003366] hover:bg-zinc-50 rounded-md transition-colors"
+            className="p-3 -ml-3 text-[#003366] hover:bg-zinc-50 rounded-md transition-colors"
             onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Meny"
           >
-            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+            {menuOpen ? <X size={26} /> : <Menu size={26} />}
           </button>
 
-          <Link href="/" className="inline-block">
-            <div className="w-20 h-8 overflow-visible">
+          <Link href="/" className="inline-block py-1">
+            <div className="w-24 h-10 overflow-visible">
               <svg viewBox="0 0 120 60" className="w-full h-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
                 <g clipPath="url(#wave-path-v2-nav)">
                   <rect x="0" y="0" width="60" height="30" fill="white" />
@@ -228,38 +229,38 @@ export default function Navbar() {
             <span className="font-black text-[#003366] uppercase tracking-widest text-sm text-left">Meny</span>
             <button onClick={() => setMenuOpen(false)} className="p-2 text-zinc-400"><X size={24} /></button>
           </div>
-          <nav className="flex-1 overflow-y-auto p-6 text-left">
-            <ul className="space-y-4 text-left">
+          <nav className="flex-1 overflow-y-auto p-8 text-left">
+            <ul className="space-y-6 text-left">
               {navLinks.map((link) => (
                 <li key={link.name} className="text-left">
                   <Link
                     href={link.href}
                     onClick={() => setMenuOpen(false)}
-                    className={`text-xl font-bold uppercase tracking-wider block py-3 border-b border-zinc-50 text-left ${pathname === link.href ? 'text-[#a11a2d]' : 'text-zinc-800'}`}
+                    className={`text-2xl font-black uppercase tracking-wider block py-4 border-b border-zinc-50 text-left ${pathname === link.href ? 'text-[#a11a2d]' : 'text-zinc-800'}`}
                   >
                     {link.name}
                   </Link>
                 </li>
               ))}
             </ul>
-            <div className="mt-12 pt-8 border-t border-zinc-100 space-y-6 text-left">
+            <div className="mt-12 pt-10 border-t border-zinc-100 space-y-8 text-left">
               {user ? (
-                <div className="text-left space-y-6">
-                  <Link href="/profil" onClick={() => setMenuOpen(false)} className="flex items-center gap-4 text-lg font-bold text-zinc-800 text-left">
-                    <User size={20} className="text-[#003366]" /> Min Profil
+                <div className="text-left space-y-8">
+                  <Link href="/profil" onClick={() => setMenuOpen(false)} className="flex items-center gap-5 text-xl font-bold text-zinc-800 text-left">
+                    <User size={24} className="text-[#003366]" /> Min Profil
                   </Link>
-                  <Link href="/meddelanden" onClick={() => setMenuOpen(false)} className="flex items-center justify-between text-lg font-bold text-zinc-800 text-left">
-                    <div className="flex items-center gap-4 text-left">
-                      <MessageSquare size={20} className="text-[#003366]" /> Meddelanden
+                  <Link href="/meddelanden" onClick={() => setMenuOpen(false)} className="flex items-center justify-between text-xl font-bold text-zinc-800 text-left">
+                    <div className="flex items-center gap-5 text-left">
+                      <MessageSquare size={24} className="text-[#003366]" /> Meddelanden
                     </div>
-                    {unreadCount > 0 && <span className="bg-red-600 text-white text-xs px-2 py-0.5 rounded-full">{unreadCount}</span>}
+                    {unreadCount > 0 && <span className="bg-red-600 text-white text-sm px-3 py-1 rounded-full font-black shadow-md">{unreadCount}</span>}
                   </Link>
-                  <button onClick={handleLogout} className="w-full text-left text-lg font-bold text-[#a11a2d] pt-4 uppercase tracking-widest text-left">
+                  <button onClick={handleLogout} className="w-full text-left text-xl font-black text-[#a11a2d] pt-6 uppercase tracking-[0.2em] border-t border-zinc-50 mt-4">
                     Logga ut
                   </button>
                 </div>
               ) : (
-                <Link href="/logga-in" onClick={() => setMenuOpen(false)} className="block bg-[#003366] text-white text-center py-4 rounded-sm font-bold uppercase tracking-widest shadow-lg shadow-blue-900/20 text-center">
+                <Link href="/logga-in" onClick={() => setMenuOpen(false)} className="block bg-[#003366] text-white text-center py-5 rounded-sm font-black uppercase tracking-[0.2em] shadow-xl text-sm">
                   Logga in / Bli medlem
                 </Link>
               )}

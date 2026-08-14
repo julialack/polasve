@@ -32,22 +32,6 @@ export default function AdminPage() {
   const supabase = createClient()
   const router = useRouter()
 
-  useEffect(() => {
-    const checkAdmin = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user && user.email === 'julia.lackchristensen@gmail.com') {
-        setIsAdmin(true)
-        fetchRequests()
-        fetchBusinessRequests()
-      } else {
-        toast.error('Endast administratörer har tillgång hit.')
-        router.push('/')
-      }
-      setLoading(false)
-    }
-    checkAdmin()
-  }, [])
-
   const fetchRequests = async () => {
     const { data } = await supabase
       .from('name_change_requests')
@@ -64,6 +48,22 @@ export default function AdminPage() {
       .order('created_at', { ascending: false })
     if (data) setBusinessRequests(data)
   }
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user && user.email === 'julia.lackchristensen@gmail.com') {
+        setIsAdmin(true)
+        fetchRequests()
+        fetchBusinessRequests()
+      } else {
+        toast.error('Endast administratörer har tillgång hit.')
+        router.push('/')
+      }
+      setLoading(false)
+    }
+    checkAdmin()
+  }, [])
 
   const handleApproveRequest = async (request: any) => {
     // 1. Update user metadata (Note: in a real app, this would be a server-side action)

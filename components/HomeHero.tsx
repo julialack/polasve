@@ -37,7 +37,6 @@ export default function HomeHero() {
     }
     getUser()
 
-    // 1. Listen for Auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null
       setUser(currentUser)
@@ -50,23 +49,7 @@ export default function HomeHero() {
       }
     })
 
-    // 2. Listen for Realtime message updates (Unread count) - ONLY for this user
-    const messageChannel = supabase
-      .channel(`unread_count_${currentUser.id}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'messages',
-        filter: `receiver_id=eq.${currentUser.id}`
-      }, () => {
-        fetchUnreadCount(currentUser.id)
-      })
-      .subscribe()
-
-    return () => {
-      subscription.unsubscribe()
-      supabase.removeChannel(messageChannel)
-    }
+    return () => subscription.unsubscribe()
   }, [supabase, fetchUnreadCount])
 
   const handleLogout = async () => {
@@ -95,31 +78,31 @@ export default function HomeHero() {
       </div>
 
       {/* Top Mobile Bar */}
-      <div className="relative z-50 md:hidden flex justify-between items-center px-4 py-3">
-        <button onClick={() => setMenuOpen(true)} className="p-2 -ml-2">
-          <Menu size={24} />
+      <div className="relative z-50 md:hidden flex justify-between items-center px-6 py-4">
+        <button onClick={() => setMenuOpen(true)} className="p-2 -ml-2" aria-label="Meny">
+          <Menu size={28} />
         </button>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {user ? (
             <>
-              <Link href="/meddelanden" className="relative p-2">
-                <MessageSquare size={20} className="scale-x-[-1]" />
-                {unreadCount > 0 && <span className="absolute top-1 right-1 bg-white text-red-600 text-[7px] w-4 h-4 flex items-center justify-center rounded-full font-bold">{unreadCount}</span>}
+              <Link href="/meddelanden" className="relative p-2" aria-label="Meddelanden">
+                <MessageSquare size={24} className="scale-x-[-1]" />
+                {unreadCount > 0 && <span className="absolute top-1 right-1 bg-white text-red-600 text-[8px] w-5 h-5 flex items-center justify-center rounded-full font-black shadow-lg">{unreadCount}</span>}
               </Link>
-              <Link href="/profil" className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-white ml-1">
-                {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[#003366]"><User size={16} /></div>}
+              <Link href="/profil" className="w-10 h-10 rounded-full border-2 border-white overflow-hidden bg-white ml-1 shadow-md">
+                {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[#003366]"><User size={20} /></div>}
               </Link>
             </>
           ) : (
-            <Link href="/logga-in" className="text-[10px] font-black uppercase tracking-widest bg-white/20 backdrop-blur-sm px-4 py-1.5 rounded-sm">Logga in</Link>
+            <Link href="/logga-in" className="text-[11px] font-black uppercase tracking-[0.2em] bg-white/20 backdrop-blur-sm px-5 py-2.5 rounded-sm active:scale-95 transition-all">Logga in</Link>
           )}
         </div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 pt-2 pb-12 md:pt-16 md:pb-32 flex flex-col items-center text-left">
-        <div className="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-16 w-full mb-6 md:mb-10">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-16 md:pt-16 md:pb-32 flex flex-col items-center text-center">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-16 w-full mb-8 md:mb-10">
           {/* Polish Flag */}
-          <div className="w-16 md:w-56 h-auto drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)] transform md:rotate-[-5deg]">
+          <div className="w-20 md:w-56 h-auto drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)] transform md:rotate-[-5deg]">
             <svg viewBox="0 0 120 80" className="w-full h-full">
               <clipPath id="wave-hero-p">
                 <path d="M0 15 C 20 5, 40 25, 60 15 C 80 5, 100 25, 120 15 V 65 C 100 75, 80 35, 60 45 C 40 55, 20 35, 0 45 Z" />
@@ -131,13 +114,13 @@ export default function HomeHero() {
             </svg>
           </div>
 
-          <div className="text-center">
-            <h1 className="text-3xl md:text-7xl font-black uppercase tracking-tight mb-1 md:mb-2 drop-shadow-lg italic">Polacker i Sverige</h1>
-            <p className="text-sm md:text-2xl font-medium tracking-wide opacity-90 drop-shadow-md">Din plats för jobb och annonser i Sverige</p>
+          <div className="text-center px-4">
+            <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter mb-2 md:mb-4 drop-shadow-2xl italic leading-tight">Polacker i Sverige</h1>
+            <p className="text-base md:text-2xl font-bold tracking-widest opacity-95 drop-shadow-lg uppercase">Din portal för jobb & annonser</p>
           </div>
 
           {/* Swedish Flag */}
-          <div className="w-16 md:w-56 h-auto drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)] transform md:rotate-[5deg] scale-x-[-1]">
+          <div className="w-20 md:w-56 h-auto drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)] transform md:rotate-[5deg] scale-x-[-1]">
             <svg viewBox="0 0 120 80" className="w-full h-full">
               <g clipPath="url(#wave-hero-p)">
                 <rect width="120" height="80" fill="#006aa7" />

@@ -98,8 +98,8 @@ export default async function Home() {
         </div>
       </div>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 lg:grid-cols-4 gap-6">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-6 md:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-12 lg:grid-cols-4 gap-4 md:gap-6">
 
           {/* LEFT SIDEBAR */}
           <aside className="hidden md:block md:col-span-3 lg:col-span-1 space-y-6">
@@ -123,12 +123,12 @@ export default async function Home() {
                 <Link href="/annonser" className="text-[10px] font-bold hover:underline">Visa alla &raquo;</Link>
               </div>
 
-              <div className="flex md:grid md:grid-cols-2 overflow-x-auto md:overflow-x-visible gap-4 p-4 scrollbar-hide snap-x">
+              <div className="flex md:grid md:grid-cols-2 overflow-x-auto md:overflow-x-visible gap-4 p-4 scrollbar-hide snap-x scroll-smooth pb-6 md:pb-4">
                 {featuredAds.map((ad) => (
                   <Link
                     href={`/annonser/${ad.id}`}
                     key={ad.id}
-                    className={`min-w-[85%] md:min-w-0 snap-center block group border border-zinc-100 p-3 rounded-sm hover:shadow-md transition-all ${ad.status === 'finished' ? 'opacity-60' : ''}`}
+                    className={`min-w-[280px] md:min-w-0 snap-center block group border border-zinc-100 p-4 rounded-sm hover:shadow-md transition-all ${ad.status === 'finished' ? 'opacity-60' : ''} bg-white`}
                   >
                     <div className="flex gap-4">
                       <div className="w-16 h-16 md:w-20 md:h-20 bg-zinc-100 relative overflow-hidden border rounded-sm flex-shrink-0">

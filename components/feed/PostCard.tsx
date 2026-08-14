@@ -7,7 +7,6 @@ import { Heart, MessageSquare, Loader2, Send, Trash2, Edit2, X, Check, Tag } fro
 import { toast } from 'sonner'
 import { Post, Comment } from '@/types/database'
 import UserAvatar from '../ui/UserAvatar'
-import Link from 'next/link'
 
 interface PostCardProps {
   post: Post & { category?: string }
@@ -130,7 +129,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
   return (
     <div className="bg-white border border-zinc-100 p-3 md:p-4 rounded-sm shadow-sm group text-left">
       <div className="flex justify-between items-start mb-3">
-        <Link href={`/profil/${post.user_id}`} className="flex items-center gap-2 md:gap-2.5 hover:opacity-80 transition-opacity group/author">
+        <div className="flex items-center gap-2 md:gap-2.5">
           <UserAvatar
             avatarUrl={(post as any).avatar_url}
             userId={post.user_id}
@@ -139,7 +138,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
           />
           <div>
             <div className="flex items-center gap-1.5 md:gap-2">
-              <span className="font-pacifico text-[13px] md:text-sm text-[#003366] tracking-normal group-hover/author:underline">{formatDisplayName(post.user_name)}</span>
+              <span className="font-pacifico text-[13px] md:text-sm text-[#003366] tracking-normal">{formatDisplayName(post.user_name)}</span>
               {post.category && (
                 <span className={`text-[7px] md:text-[8px] font-black uppercase px-1.5 md:px-2 py-0.5 rounded-full border ${CATEGORY_STYLES[post.category] || CATEGORY_STYLES.allmänt}`}>
                   {post.category}
@@ -151,7 +150,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
               {post.edited && <span className="text-[7px] md:text-[8px] text-zinc-300 italic">(redigerad)</span>}
             </div>
           </div>
-        </Link>
+        </div>
         {currentUser?.id === post.user_id && !editingPost && (
           <div className="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
             <button onClick={() => { setEditingPost(true); setEditPostContent(post.content) }} className="text-zinc-400 hover:text-blue-600 transition-colors p-1"><Edit2 size={13} /></button>
@@ -184,9 +183,9 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
       </div>
 
       {activeCommentPost && (
-        <div className="mt-4 space-y-4 pl-4 border-l-2 border-zinc-100 animate-in fade-in slide-in-from-top-1">
+        <div className="mt-4 space-y-4 pl-3 md:pl-4 border-l-2 border-zinc-100 animate-in fade-in slide-in-from-top-1">
           {comments.length > 0 && (
-            <div className="space-y-4 mb-4 max-h-60 overflow-y-auto pr-2 scrollbar-hide">
+            <div className="space-y-4 mb-4 max-h-[350px] overflow-y-auto pr-2 scrollbar-hide">
               {comments.map((comment) => (
                 <div key={comment.id} className="group/comment">
                   <div className="flex items-start gap-2.5 mb-1">
@@ -223,15 +222,15 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
             </div>
           )}
 
-          <div className="flex gap-2 pt-2 border-t border-zinc-50 items-center">
+          <div className="flex gap-2 pt-4 border-t border-zinc-50 items-center">
             <UserAvatar
               avatarUrl={currentUser?.user_metadata?.avatar_url}
               userId={currentUser?.id}
               userName={currentUser?.user_metadata?.full_name}
               size="xs"
             />
-            <input value={commentContent} onChange={(e) => setCommentContent(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handlePostComment()} placeholder="Skriv ett svar..." className="flex-1 bg-zinc-100 border border-zinc-200 p-2.5 px-5 rounded-full text-xs text-black font-black outline-none focus:border-[#003366] placeholder:text-zinc-400 placeholder:font-normal" />
-            <button onClick={handlePostComment} className="text-[#003366] hover:text-[#a11a2d] transition-all p-2 active:scale-90"><Send size={18} /></button>
+            <input value={commentContent} onChange={(e) => setCommentContent(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handlePostComment()} placeholder="Skriv ett svar..." className="flex-1 bg-zinc-100 border border-zinc-200 py-3 px-5 rounded-full text-sm text-black font-bold outline-none focus:border-[#003366] placeholder:text-zinc-400 placeholder:font-normal h-11" />
+            <button onClick={handlePostComment} className="text-[#003366] hover:text-[#a11a2d] transition-all p-2 active:scale-90" aria-label="Skicka"><Send size={20} /></button>
           </div>
         </div>
       )}

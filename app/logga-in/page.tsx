@@ -5,6 +5,7 @@ import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
 export default function LoggaInPage() {
   const [email, setEmail] = useState("");
@@ -24,8 +25,9 @@ export default function LoggaInPage() {
     });
 
     if (error) {
-      alert(error.message);
+      toast.error(error.message);
     } else {
+      toast.success("Välkommen tillbaka!");
       router.push("/");
       router.refresh();
     }
@@ -33,13 +35,13 @@ export default function LoggaInPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-center py-20 px-6">
+    <div className="min-h-[100dvh] bg-white flex flex-col justify-center py-10 px-6">
       <div className="max-w-md w-full mx-auto">
-        <div className="text-center mb-16">
-          <Link href="/" className="inline-flex items-center gap-3 text-3xl font-light tracking-widest text-zinc-900 mb-10">
+        <div className="text-center mb-10 md:mb-16">
+          <Link href="/" className="inline-flex items-center gap-3 text-3xl font-light tracking-widest text-zinc-900 mb-8 md:mb-10">
             POLA<span className="font-bold text-red-800">SVE</span>
           </Link>
-          <h1 className="text-xl font-bold uppercase tracking-[0.3em] text-zinc-900">Medlemsinloggning</h1>
+          <h1 className="text-xl font-black uppercase tracking-[0.3em] text-zinc-900">Medlemsinloggning</h1>
           <div className="w-8 h-px bg-red-800 mx-auto mt-4"></div>
         </div>
 

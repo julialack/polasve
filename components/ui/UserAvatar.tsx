@@ -8,7 +8,7 @@ interface UserAvatarProps {
   avatarUrl?: string | null
   userId?: string
   userName?: string
-  size?: 'xs' | 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   className?: string
 }
 
@@ -16,7 +16,8 @@ const sizeClasses = {
   xs: 'w-6 h-6 text-[8px]',
   sm: 'w-8 h-8 text-[10px]',
   md: 'w-10 h-10 text-xs',
-  lg: 'w-12 h-12 text-sm'
+  lg: 'w-12 h-12 text-sm',
+  xl: 'w-full h-full text-lg'
 }
 
 export default function UserAvatar({ avatarUrl, userId, userName, size = 'sm', className = '' }: UserAvatarProps) {
