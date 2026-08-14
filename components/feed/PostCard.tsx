@@ -7,6 +7,7 @@ import { Heart, MessageSquare, Loader2, Send, Trash2, Edit2, X, Check, Tag } fro
 import { toast } from 'sonner'
 import { Post, Comment } from '@/types/database'
 import UserAvatar from '../ui/UserAvatar'
+import Link from 'next/link'
 
 interface PostCardProps {
   post: Post & { category?: string }
@@ -129,7 +130,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
   return (
     <div className="bg-white border border-zinc-100 p-3 md:p-4 rounded-sm shadow-sm group text-left">
       <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center gap-2 md:gap-2.5">
+        <Link href={`/profil/${post.user_id}`} className="flex items-center gap-2 md:gap-2.5 hover:opacity-80 transition-opacity group/author">
           <UserAvatar
             avatarUrl={(post as any).avatar_url}
             userId={post.user_id}
@@ -138,7 +139,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
           />
           <div>
             <div className="flex items-center gap-1.5 md:gap-2">
-              <span className="font-pacifico text-[13px] md:text-sm text-[#003366] tracking-normal">{formatDisplayName(post.user_name)}</span>
+              <span className="font-pacifico text-[13px] md:text-sm text-[#003366] tracking-normal group-hover/author:underline">{formatDisplayName(post.user_name)}</span>
               {post.category && (
                 <span className={`text-[7px] md:text-[8px] font-black uppercase px-1.5 md:px-2 py-0.5 rounded-full border ${CATEGORY_STYLES[post.category] || CATEGORY_STYLES.allmänt}`}>
                   {post.category}
@@ -150,7 +151,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
               {post.edited && <span className="text-[7px] md:text-[8px] text-zinc-300 italic">(redigerad)</span>}
             </div>
           </div>
-        </div>
+        </Link>
         {currentUser?.id === post.user_id && !editingPost && (
           <div className="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
             <button onClick={() => { setEditingPost(true); setEditPostContent(post.content) }} className="text-zinc-400 hover:text-blue-600 transition-colors p-1"><Edit2 size={13} /></button>

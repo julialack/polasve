@@ -37,6 +37,7 @@ export default function HomeHero() {
     }
     getUser()
 
+    // 1. Listen for Auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null
       setUser(currentUser)
@@ -49,7 +50,23 @@ export default function HomeHero() {
       }
     })
 
-    return () => subscription.unsubscribe()
+    // 2. Listen for Realtime message updates (Unread count) - ONLY for this user
+    const messageChannel = supabase
+      .channel(`unread_count_${currentUser.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'messages',
+        filter: `receiver_id=eq.${currentUser.id}`
+      }, () => {
+        fetchUnreadCount(currentUser.id)
+      })
+      .subscribe()
+
+    return () => {
+      subscription.unsubscribe()
+      supabase.removeChannel(messageChannel)
+    }
   }, [supabase, fetchUnreadCount])
 
   const handleLogout = async () => {

@@ -43,6 +43,7 @@ export default function ContactForm({ receiverId, adId, adTitle }: ContactFormPr
           receiver_id: receiverId,
           ad_id: adId,
           content: message,
+          sender_name: user.user_metadata?.full_name || user.email?.split('@')[0],
         }
       ])
 

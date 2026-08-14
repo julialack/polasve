@@ -35,6 +35,7 @@ export default function ProfilPage() {
   const [user, setUser] = useState<any>(null)
   const [ads, setAds] = useState<Ad[]>([])
   const [messages, setMessages] = useState<Message[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [avatarSvg, setAvatarSvg] = useState<string | null>(null)
 
@@ -86,6 +87,15 @@ export default function ProfilPage() {
 
     if (userMessages) setMessages(userMessages)
 
+    // Hämta antal olästa meddelanden (endast mottagna)
+    const { count } = await supabase
+      .from('messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('receiver_id', currentUser.id)
+      .eq('is_read', false)
+
+    setUnreadCount(count || 0)
+
     setLoading(false)
   }, [supabase, router])
 
@@ -120,8 +130,37 @@ export default function ProfilPage() {
   }
 
   useEffect(() => {
+    if (!user) {
+      fetchUserData()
+      return
+    }
+
     fetchUserData()
-  }, [fetchUserData])
+
+    // Listen for Realtime message updates - ONLY for this user
+    const messageChannel = supabase
+      .channel(`profil_messages_${user.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'messages',
+        filter: `receiver_id=eq.${user.id}`
+      }, () => {
+        // Refresh only the data we need (unread count)
+        const refreshUnread = async () => {
+          const { count } = await supabase
+            .from('messages')
+            .select('id', { count: 'exact', head: true })
+            .eq('receiver_id', user.id)
+            .eq('is_read', false)
+          setUnreadCount(count || 0)
+        }
+        refreshUnread()
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(messageChannel) }
+  }, [fetchUserData, supabase, user?.id])
 
   if (loading) return (
     <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center italic text-zinc-400">
@@ -213,10 +252,10 @@ export default function ProfilPage() {
                       <p className="text-2xl font-black text-[#003366]">{ads.length}</p>
                       <p className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">Annonser</p>
                     </div>
-                    <div className="text-center p-3 bg-zinc-50 rounded-sm">
-                      <p className="text-2xl font-black text-[#a11a2d]">{messages.length}</p>
-                      <p className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">Meddelanden</p>
-                    </div>
+                    <Link href="/meddelanden" className="text-center p-3 bg-zinc-50 rounded-sm hover:bg-zinc-100 transition-all cursor-pointer">
+                      <p className="text-2xl font-black text-[#a11a2d]">{unreadCount}</p>
+                      <p className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">Olästa</p>
+                    </Link>
                   </div>
 
                   <Link
