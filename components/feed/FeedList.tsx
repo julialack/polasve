@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import PostCard from './PostCard'
 import Skeleton from '../ui/Skeleton'
@@ -12,8 +12,8 @@ export default function FeedList() {
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
-  const fetchPosts = async () => {
-    setLoading(true)
+  const fetchPosts = useCallback(async () => {
+    // We only show loading on the first fetch
     const { data: postsData, error: postsError } = await supabase
       .from('posts')
       .select('*')
@@ -27,7 +27,6 @@ export default function FeedList() {
     }
 
     if (postsData) {
-      // Fetch profiles for all unique user_ids in the posts
       const userIds = Array.from(new Set(postsData.map(p => p.user_id)))
       const { data: profilesData } = await supabase
         .from('profiles')
@@ -47,13 +46,14 @@ export default function FeedList() {
       setPosts(postsWithProfiles as any)
     }
     setLoading(false)
-  }
+  }, [supabase])
 
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user)
     }
+
     getUser()
     fetchPosts()
 
@@ -64,13 +64,16 @@ export default function FeedList() {
       })
       .subscribe()
 
-    return () => { supabase.removeChannel(postChannel) }
-  }, [])
+    return () => {
+      supabase.removeChannel(postChannel)
+    }
+  }, [supabase, fetchPosts])
 
   const handleDelete = async (id: string) => {
-    // We already have confirmation inside the component if we want, or here
-    await supabase.from('posts').delete().eq('id', id)
-    fetchPosts()
+    const { error } = await supabase.from('posts').delete().eq('id', id)
+    if (!error) {
+      fetchPosts()
+    }
   }
 
   if (loading) {

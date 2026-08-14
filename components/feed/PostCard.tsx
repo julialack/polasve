@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { formatDisplayName } from '@/utils/formatName'
-import { Heart, MessageSquare, Loader2, Send, Trash2, Edit2, X, Check, Tag } from 'lucide-react'
+import { Heart, MessageSquare, Loader2, Send, Trash2, Edit2, X, Check } from 'lucide-react'
 import { toast } from 'sonner'
-import { Post, Comment } from '@/types/database'
+import { Post } from '@/types/database'
 import UserAvatar from '../ui/UserAvatar'
 
 interface PostCardProps {
@@ -30,6 +30,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
   const [comments, setComments] = useState<any[]>([])
   const [commentCount, setCommentCount] = useState(0)
   const [userLikes, setUserLikes] = useState(false)
+  const [localLikes, setLocalLikes] = useState(post.likes_count || 0)
 
   const [editingPost, setEditingPost] = useState(false)
   const [editPostContent, setEditPostContent] = useState(post.content)
@@ -39,7 +40,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
 
   const supabase = createClient()
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     const { data: commentsData, error: commentsError } = await supabase
       .from('comments')
       .select('*')
@@ -66,7 +67,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
       setComments(commentsWithProfiles)
       setCommentCount(commentsData.length)
     }
-  }
+  }, [supabase, post.id])
 
   useEffect(() => {
     const fetchCommentCount = async () => {
@@ -74,25 +75,34 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
       if (count !== null) setCommentCount(count)
     }
     fetchCommentCount()
-  }, [post.id])
+  }, [post.id, supabase])
 
   useEffect(() => {
     if (activeCommentPost) fetchComments()
-  }, [activeCommentPost])
+  }, [activeCommentPost, fetchComments])
+
+  useEffect(() => {
+    setLocalLikes(post.likes_count || 0)
+  }, [post.likes_count])
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     if (!currentUser) return toast.error('Logga in för att gilla')
-    if (userLikes) return
+    if (userLikes || loadingLikes) return
 
+    setLocalLikes(prev => prev + 1)
+    setUserLikes(true)
     setLoadingLikes(true)
+
     const { error } = await supabase.from('posts').update({ likes_count: (post.likes_count || 0) + 1 }).eq('id', post.id)
 
-    if (!error) {
-      setUserLikes(true)
+    if (error) {
+      setLocalLikes(prev => prev - 1)
+      setUserLikes(false)
+      toast.error('Kunde inte gilla inlägget')
+    } else {
       onUpdate()
-      toast.success('Inlägg gillat')
     }
     setLoadingLikes(false)
   }
@@ -173,8 +183,8 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
 
       <div className="flex gap-6 items-center pt-3 border-t border-zinc-50">
         <button onClick={handleLike} disabled={loadingLikes || userLikes} className={`flex items-center gap-1.5 transition-colors ${userLikes ? 'text-[#a11a2d]' : 'text-zinc-400 hover:text-[#a11a2d]'}`}>
-          {loadingLikes ? <Loader2 size={12} className="animate-spin" /> : <Heart size={15} className={userLikes || post.likes_count > 0 ? "fill-current" : ""} />}
-          <span className="text-xs font-black">{post.likes_count || 0}</span>
+          {loadingLikes ? <Loader2 size={12} className="animate-spin" /> : <Heart size={15} className={userLikes || localLikes > 0 ? "fill-current" : ""} />}
+          <span className="text-xs font-black">{localLikes}</span>
         </button>
         <button onClick={() => setActiveCommentPost(!activeCommentPost)} className={`flex items-center gap-1.5 transition-colors ${activeCommentPost ? 'text-[#003366]' : 'text-zinc-400 hover:text-black'}`}>
           <MessageSquare size={15} className="scale-x-[-1]" />
