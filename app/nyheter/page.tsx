@@ -90,27 +90,50 @@ export default function NyheterPage() {
                     {[1, 2, 3, 4].map(i => <div key={i} className="h-10 bg-zinc-50 animate-pulse rounded-sm" />)}
                   </div>
                 ) : (
-                  <div className="grid gap-3">
-                    {polandNews.map((item, idx) => (
-                      <a
-                        key={idx}
-                        href={item.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 hover:bg-zinc-50 transition-colors border-b border-zinc-50 last:border-0 group"
-                      >
-                        <span
-                          className="text-[8px] font-black uppercase px-2 py-0.5 rounded-full text-white shrink-0 shadow-sm"
-                          style={{ backgroundColor: item.color }}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {(() => {
+                      // Filter to ensure variety: Keep max 3 from TVN24 if we have other sources
+                      const tvn24 = polandNews.filter(n => n.source === 'TVN24');
+                      const others = polandNews.filter(n => n.source !== 'TVN24');
+                      const combined = [...others.slice(0, 4), ...tvn24.slice(0, 4)].sort((a, b) =>
+                        new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
+                      ).slice(0, 8);
+
+                      return combined.map((item, idx) => (
+                        <a
+                          key={idx}
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex flex-col bg-zinc-50 hover:bg-white p-3 rounded-sm border border-zinc-100 hover:border-sve-blue transition-all group shadow-sm"
                         >
-                          {item.source}
-                        </span>
-                        <h3 className="text-[11px] md:text-xs font-bold text-[#003366] leading-tight group-hover:underline decoration-[#a11a2d] decoration-2 underline-offset-2">
-                          {item.title}
-                        </h3>
-                        <ArrowRight size={12} className="ml-auto text-zinc-300 group-hover:text-[#a11a2d] transition-colors" />
-                      </a>
-                    ))}
+                          <div className="aspect-video w-full relative mb-3 overflow-hidden rounded-sm bg-white border border-zinc-100">
+                            {item.image ? (
+                              <img src={item.image} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase text-zinc-300 p-4 text-center leading-tight" style={{ color: item.color }}>
+                                {item.source}
+                              </div>
+                            )}
+                            <div className="absolute top-2 left-2">
+                              <span
+                                className="text-[7px] font-black uppercase px-2 py-0.5 rounded-sm text-white shadow-lg"
+                                style={{ backgroundColor: item.color }}
+                              >
+                                {item.source}
+                              </span>
+                            </div>
+                          </div>
+                          <h3 className="text-[11px] font-bold text-sve-blue leading-tight group-hover:text-pola-red transition-colors line-clamp-3 italic">
+                            {item.title}
+                          </h3>
+                          <div className="mt-auto pt-2 flex justify-between items-center">
+                             <span className="text-[7px] text-zinc-400 font-bold uppercase">{new Date(item.pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                             <ArrowRight size={10} className="text-zinc-300 group-hover:text-pola-red transition-all group-hover:translate-x-1" />
+                          </div>
+                        </a>
+                      ));
+                    })()}
                   </div>
                 )}
                 <div className="mt-4 pt-4 border-t border-zinc-50">

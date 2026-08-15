@@ -86,18 +86,18 @@ export default function PostBox() {
             disabled={loading}
           ></textarea>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 md:pt-3 border-t border-zinc-50">
-            <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto scrollbar-hide pb-1 max-w-[200px] md:max-w-none">
-              <TagIcon size={12} className="text-zinc-300 shrink-0" />
-              <div className="flex gap-1">
+          <div className="flex flex-col gap-4 pt-3 md:pt-4 border-t border-zinc-50">
+            <div className="flex items-start gap-2">
+              <TagIcon size={12} className="text-zinc-500 shrink-0 mt-2" />
+              <div className="flex flex-wrap gap-1.5">
                 {FEED_CATEGORIES.map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => setCategory(cat.id)}
-                    className={`text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2 md:px-3 py-1 rounded-full transition-all border ${
+                    className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest px-2.5 md:px-3 py-1 rounded-full transition-all border ${
                       category === cat.id
-                      ? 'border-[#003366] bg-[#003366] text-white shadow-md'
-                      : 'border-zinc-100 bg-zinc-50 text-zinc-400 hover:border-zinc-200'
+                      ? 'border-sve-blue bg-sve-blue text-white shadow-md'
+                      : 'border-zinc-100 bg-zinc-50 text-zinc-600 hover:border-zinc-200'
                     }`}
                   >
                     {cat.label}
@@ -106,14 +106,16 @@ export default function PostBox() {
               </div>
             </div>
 
-            <button
-              onClick={handlePost}
-              disabled={loading || !content.trim()}
-              className="bg-[#003366] text-white px-5 md:px-8 py-1.5 md:py-2.5 rounded-full font-black text-[9px] md:text-[10px] uppercase tracking-[0.2em] hover:bg-[#a11a2d] transition-all active:scale-95 disabled:bg-zinc-100 disabled:text-zinc-300 flex items-center gap-2 shadow-md"
-            >
-              {loading && <Loader2 size={10} className="animate-spin" />}
-              Publicera
-            </button>
+            <div className="flex justify-end pt-2 md:pt-0">
+              <button
+                onClick={handlePost}
+                disabled={loading || !content.trim()}
+                className="bg-sve-blue text-white px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-pola-red transition-all active:scale-95 disabled:bg-zinc-100 disabled:text-zinc-400 flex items-center gap-2 shadow-md w-full md:w-auto justify-center"
+              >
+                {loading && <Loader2 size={12} className="animate-spin" />}
+                Publicera inlägg
+              </button>
+            </div>
           </div>
         </div>
       </div>

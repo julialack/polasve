@@ -15,29 +15,31 @@ export const revalidate = 60; // Revalidate every minute
 
 const AdBox = ({ title, href, variant = 'gray' }: { title: string, href?: string, variant?: 'gray' | 'gold' }) => {
   const content = (
-    <div className="aspect-[4/3] bg-zinc-50 rounded-sm flex flex-col items-center justify-center text-center p-4 border border-zinc-100 group-hover:border-[#a11a2d]/30 transition-all">
-      <ShieldCheck size={20} className={`mb-2 transition-colors ${
-        variant === 'gold' ? 'text-[#D4AF37]' : 'text-zinc-200 group-hover:text-[#a11a2d]/40'
+    <div className={`bg-zinc-50 rounded-sm flex flex-col items-center justify-center text-center p-3 border border-zinc-100 transition-all ${
+      variant === 'gold' ? 'group-hover:border-premium-gold/30' : 'group-hover:border-pola-red/30'
+    }`}>
+      <ShieldCheck size={16} className={`mb-1.5 transition-colors ${
+        variant === 'gold' ? 'text-premium-gold' : 'text-zinc-300 group-hover:text-pola-red/40'
       }`} />
-      <p className={`text-[10px] font-black uppercase tracking-widest leading-tight ${
-        variant === 'gold' ? 'text-[#D4AF37]' : 'text-zinc-500'
+      <p className={`text-[9px] font-black uppercase tracking-tight leading-tight ${
+        variant === 'gold' ? 'text-premium-gold' : 'text-zinc-600'
       }`}>{title}</p>
-      <p className={`text-[8px] font-bold mt-1 ${
-        variant === 'gold' ? 'text-[#D4AF37]/80' : 'text-zinc-400'
-      }`}>Kontakta oss för info</p>
+      <p className={`text-[7px] font-bold mt-1 ${
+        variant === 'gold' ? 'text-premium-gold/80' : 'text-zinc-400'
+      }`}>Klicka för info</p>
     </div>
   );
 
   if (href) {
     return (
-      <Link href={href} className="block bg-white border-2 border-dashed border-zinc-200 p-2 rounded-sm transition-all hover:scale-[1.02] group cursor-pointer">
+      <Link href={href} className="block bg-white border-2 border-dashed border-zinc-200 p-1.5 rounded-sm transition-all hover:scale-[1.01] group cursor-pointer">
         {content}
       </Link>
     );
   }
 
   return (
-    <div className="bg-white border-2 border-dashed border-zinc-200 p-2 rounded-sm transition-colors group">
+    <div className="bg-white border-2 border-dashed border-zinc-200 p-1.5 rounded-sm transition-colors group">
       {content}
     </div>
   );
@@ -124,15 +126,15 @@ export default async function Home() {
                 <Link href="/annonser" className="text-[10px] font-bold hover:underline">Visa alla &raquo;</Link>
               </div>
 
-              <div className="flex md:grid md:grid-cols-2 overflow-x-auto md:overflow-x-visible gap-4 p-4 scrollbar-hide snap-x scroll-smooth pb-6 md:pb-4">
+              <div className="grid grid-rows-2 grid-flow-col md:grid-cols-2 md:grid-rows-none md:grid-flow-row overflow-x-auto md:overflow-x-visible gap-3 md:gap-4 p-4 scrollbar-hide snap-x scroll-smooth pb-6 md:pb-4">
                 {featuredAds.map((ad) => (
                   <Link
                     href={`/annonser/${ad.id}`}
                     key={ad.id}
-                    className={`min-w-[280px] md:min-w-0 snap-center block group border border-zinc-100 p-4 rounded-sm hover:shadow-md transition-all ${ad.status === 'finished' ? 'opacity-60' : ''} bg-white`}
+                    className={`min-w-[160px] md:min-w-0 snap-center block group border border-zinc-100 p-2.5 md:p-4 rounded-sm hover:shadow-md transition-all ${ad.status === 'finished' ? 'opacity-60' : ''} bg-white`}
                   >
-                    <div className="flex gap-4">
-                      <div className="w-16 h-16 md:w-20 md:h-20 bg-zinc-100 relative overflow-hidden border rounded-sm flex-shrink-0">
+                    <div className="flex flex-col md:flex-row gap-2 md:gap-4">
+                      <div className="w-full md:w-20 h-24 md:h-20 bg-zinc-100 relative overflow-hidden border rounded-sm flex-shrink-0">
                         <SafeImage
                           src={ad.image_url || ""}
                           alt={ad.title}
@@ -146,9 +148,9 @@ export default async function Home() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className={`font-bold italic leading-tight truncate text-[11px] ${ad.status === 'finished' ? 'text-zinc-500 line-through' : 'text-[#003366]'}`}>{ad.title}</h4>
-                        <p className={`text-[10px] font-black mt-2 ${ad.status === 'finished' ? 'text-zinc-400' : 'text-[#D4AF37]'}`}>{ad.status === 'finished' ? 'Avslutad' : (ad.price || 'Bud')}</p>
-                        <p className="text-[9px] text-zinc-500 font-bold uppercase mt-1 italic">{ad.location}</p>
+                        <h4 className={`font-bold italic leading-tight truncate text-[10px] md:text-[11px] ${ad.status === 'finished' ? 'text-zinc-500 line-through' : 'text-sve-blue'}`}>{ad.title}</h4>
+                        <p className={`text-[9px] font-black mt-1 md:mt-2 ${ad.status === 'finished' ? 'text-zinc-400' : 'text-premium-gold'}`}>{ad.status === 'finished' ? 'Avslutad' : (ad.price || 'Bud')}</p>
+                        <p className="text-[8px] text-zinc-500 font-bold uppercase mt-0.5 italic">{ad.location}</p>
                       </div>
                     </div>
                   </Link>
