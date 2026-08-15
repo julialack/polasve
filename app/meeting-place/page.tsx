@@ -1,13 +1,13 @@
 import CategoryLanding from "@/components/ads/CategoryLanding";
-import { Users } from "lucide-react";
+import { MapPin, Users } from "lucide-react";
 
 export default function MeetingPlacePage() {
   return (
     <CategoryLanding
       title="Meeting Place"
-      description="Träffa nya vänner och nätverka."
+      description="Nätverk, sociala möten och nya kontakter i Sverige."
       categoryFilter="Meeting Place"
-      icon={<Users size={18} />}
+      icon={<div className="flex items-center gap-2"><MapPin size={16} /><Users size={16} /></div>}
     />
   );
 }

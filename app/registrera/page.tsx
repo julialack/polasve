@@ -18,14 +18,33 @@ export default function RegistreraPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const trimmedName = fullName.trim();
+    const trimmedEmail = email.trim();
+
+    if (trimmedName.length < 2) {
+      toast.error("Skriv in ditt för- och efternamn.");
+      return;
+    }
+
+    if (!trimmedEmail || !trimmedEmail.includes("@")) {
+      toast.error("Ange en giltig e-postadress.");
+      return;
+    }
+
+    if (password.length < 8) {
+      toast.error("Lösenordet måste vara minst 8 tecken långt.");
+      return;
+    }
+
     setLoading(true);
 
     const { error } = await supabase.auth.signUp({
-      email,
+      email: trimmedEmail,
       password,
       options: {
         data: {
-          full_name: fullName,
+          full_name: trimmedName,
         },
       },
     });

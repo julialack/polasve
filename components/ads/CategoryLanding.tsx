@@ -3,8 +3,9 @@
 import { useEffect, useState, useCallback, Suspense } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { MapPin, Box, X, MessageSquare, PlusCircle, ArrowRight, ShieldCheck } from 'lucide-react'
+import { getResetLocationHref } from '@/utils/location'
 import SearchBar from '@/components/search/SearchBar'
 import HomeHero from "@/components/HomeHero";
 import InfoBar from "@/components/layout/InfoBar";
@@ -35,6 +36,7 @@ interface CategoryLandingProps {
 
 function LandingContent({ title, description, categoryFilter, icon }: CategoryLandingProps) {
   const searchParams = useSearchParams()
+  const pathname = usePathname()
   const locationFilter = searchParams.get('location')
 
   const [ads, setAds] = useState<Ad[]>([])
@@ -148,7 +150,7 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                       <span className="text-[10px] font-black uppercase text-amber-800 tracking-widest flex items-center gap-2">
                         <MapPin size={14} /> Region: {locationFilter}
                       </span>
-                      <Link href={window.location.pathname} className="ml-auto text-[8px] font-black uppercase bg-amber-200 text-amber-900 px-2 py-1 rounded-sm flex items-center gap-1 hover:bg-amber-300 transition-colors">
+                      <Link href={getResetLocationHref(pathname)} className="ml-auto text-[8px] font-black uppercase bg-amber-200 text-amber-900 px-2 py-1 rounded-sm flex items-center gap-1 hover:bg-amber-300 transition-colors">
                         Rensa <X size={10} />
                       </Link>
                    </div>
@@ -167,33 +169,48 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                     {/* Active Ads */}
                     <div className="space-y-4">
                       {ads.filter(ad => ad.status !== 'finished').map((ad) => (
-                        <Link href={`/annonser/${ad.id}`} key={ad.id} className={`group bg-white p-2 md:p-3 border rounded-sm transition-all flex flex-row md:flex-row gap-3 md:gap-4 ${ad.is_premium ? 'border-amber-100 bg-amber-50/20 shadow-sm' : 'border-zinc-100 shadow-sm hover:shadow-md'}`}>
-                          <div className="w-20 h-20 md:w-32 md:h-24 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0">
-                            <SafeImage
-                              src={ad.image_url || ""}
-                              alt={ad.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                              fallbackSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"
-                            />
-                          </div>
-                          <div className="flex-1 flex flex-col justify-between py-0.5 min-w-0">
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className={`text-[7px] md:text-[8px] font-black uppercase ${ad.is_premium ? 'text-amber-600' : 'text-[#a11a2d]'}`}>
-                                  {ad.is_premium ? 'Premium' : ad.category}
+                        <Link href={`/annonser/${ad.id}`} key={ad.id} className={`group block overflow-hidden rounded-sm border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${ad.is_premium ? 'border-amber-200 bg-gradient-to-r from-amber-50 to-white shadow-sm' : 'border-zinc-200 bg-white shadow-sm'}`}>
+                          <div className="flex flex-col sm:flex-row gap-3 p-3 md:p-4">
+                            <div className="relative w-full sm:w-28 md:w-36 h-28 sm:h-24 md:h-28 flex-shrink-0 overflow-hidden rounded-sm bg-zinc-100">
+                              <SafeImage
+                                src={ad.image_url || ""}
+                                alt={ad.title}
+                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                fallbackSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"
+                              />
+                              {ad.is_premium && (
+                                <span className="absolute left-2 top-2 rounded-full bg-amber-500 px-2 py-1 text-[7px] font-black uppercase tracking-[0.18em] text-white shadow-sm">
+                                  Premium
                                 </span>
-                                <span className="text-[7px] text-zinc-300 font-bold border-l pl-2 hidden md:inline">{new Date(ad.created_at).toLocaleDateString()}</span>
-                              </div>
-                              <h3 className={`text-[13px] md:text-base font-bold italic group-hover:underline leading-tight mb-1 truncate ${ad.is_premium ? 'text-amber-900' : 'text-[#003366]'}`}>
-                                {ad.title}
-                              </h3>
-                              <p className="text-[8px] md:text-[10px] text-zinc-400 font-bold uppercase tracking-tighter flex items-center gap-1"><MapPin size={8} /> {ad.location}</p>
+                              )}
                             </div>
-                            <div className="flex justify-between items-end mt-1">
-                              <span className={`text-[11px] md:text-xs font-black ${ad.is_premium ? 'text-amber-600' : 'text-zinc-900'}`}>
-                                {ad.price || 'Bud'}
-                              </span>
-                              <span className="text-[8px] font-black text-[#003366] opacity-0 md:group-hover:opacity-100 transition-opacity uppercase tracking-widest hidden md:inline">Visa info &raquo;</span>
+
+                            <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
+                              <div className="space-y-2">
+                                <div className="flex flex-wrap items-center gap-2 text-[7px] md:text-[8px] font-black uppercase tracking-[0.12em]">
+                                  <span className={ad.is_premium ? 'text-amber-700' : 'text-[#a11a2d]'}>{ad.is_premium ? 'Premium' : ad.category}</span>
+                                  <span className="text-zinc-300">•</span>
+                                  <span className="text-zinc-400">{new Date(ad.created_at).toLocaleDateString()}</span>
+                                </div>
+
+                                <h3 className={`text-[13px] md:text-lg font-black italic leading-tight ${ad.is_premium ? 'text-amber-900' : 'text-[#003366]'}`}>
+                                  {ad.title}
+                                </h3>
+
+                                <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-bold uppercase tracking-tighter text-zinc-500">
+                                  <MapPin size={10} className={ad.is_premium ? 'text-amber-700' : 'text-zinc-400'} />
+                                  <span>{ad.location}</span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-end justify-between gap-3 border-t border-zinc-100 pt-2">
+                                <span className={`text-[11px] md:text-sm font-black ${ad.is_premium ? 'text-amber-700' : 'text-zinc-900'}`}>
+                                  {ad.price || 'Bud'}
+                                </span>
+                                <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.18em] text-[#003366] transition-opacity group-hover:text-[#a11a2d]">
+                                  Visa info →
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </Link>
