@@ -3,13 +3,21 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@/utils/supabase/server';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-07-29.dahlia',
-});
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const stripe = stripeSecretKey
+  ? new Stripe(stripeSecretKey, {
+      apiVersion: '2026-07-29.dahlia',
+    })
+  : null;
 
 export async function POST(req: Request) {
+  if (!stripe || !webhookSecret) {
+    console.error('Stripe webhook configuration missing: STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET');
+    return NextResponse.json({ error: 'Stripe is not configured' }, { status: 500 });
+  }
+
   const body = await req.text();
   const signature = (await headers()).get('stripe-signature')!;
 

@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-07-29.dahlia',
-});
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripe = stripeSecretKey
+  ? new Stripe(stripeSecretKey, {
+      apiVersion: '2026-07-29.dahlia',
+    })
+  : null;
 
 const PRICES: Record<string, number> = {
   standard: 4900, // 49 SEK in cents
@@ -13,6 +16,10 @@ const PRICES: Record<string, number> = {
 
 export async function POST(req: Request) {
   try {
+    if (!stripe) {
+      return NextResponse.json({ error: 'Stripe is not configured' }, { status: 500 });
+    }
+
     const { adId, packageId, adTitle } = await req.json();
 
     if (!PRICES[packageId]) {

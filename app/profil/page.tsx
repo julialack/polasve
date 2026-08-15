@@ -257,9 +257,13 @@ function ProfilContent() {
                       <span>{user?.email}</span>
                       <div className="ml-1 pl-2 border-l border-zinc-200">
                         {meta.show_email_publicly ? (
-                          <Eye size={10} className="text-green-500" title="Visas offentligt" />
+                          <span title="Visas offentligt" aria-label="Visas offentligt">
+                            <Eye size={10} className="text-green-500" />
+                          </span>
                         ) : (
-                          <EyeOff size={10} className="text-zinc-300" title="Dold för andra" />
+                          <span title="Dold för andra" aria-label="Dold för andra">
+                            <EyeOff size={10} className="text-zinc-300" />
+                          </span>
                         )}
                       </div>
                     </div>
@@ -269,9 +273,13 @@ function ProfilContent() {
                         <span>{meta.phone}</span>
                         <div className="ml-1 pl-2 border-l border-zinc-200">
                           {meta.show_phone_publicly ? (
-                            <Eye size={10} className="text-green-500" title="Visas offentligt" />
+                            <span title="Visas offentligt" aria-label="Visas offentligt">
+                              <Eye size={10} className="text-green-500" />
+                            </span>
                           ) : (
-                            <EyeOff size={10} className="text-zinc-300" title="Dold för andra" />
+                            <span title="Dold för andra" aria-label="Dold för andra">
+                              <EyeOff size={10} className="text-zinc-300" />
+                            </span>
                           )}
                         </div>
                       </div>
