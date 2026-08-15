@@ -248,7 +248,7 @@ function ProfilContent() {
                   </div>
                 </div>
                 <div className="pt-20 pb-10 px-8 text-center">
-                  <h2 className="text-2xl font-pacifico text-[#003366] italic">
+                  <h2 className="text-2xl font-pacifico text-sve-blue italic">
                     {formatDisplayName(meta.full_name || user?.email?.split('@')[0])}
                   </h2>
                   <div className="flex flex-col items-center gap-2 mt-1 mb-6">
@@ -424,7 +424,7 @@ function ProfilContent() {
                                {conversations.find(c => c.otherId === selectedChat)?.name}
                             </Link>
                           </div>
-                          <span className="text-[8px] font-black uppercase text-green-500 bg-green-50 px-2 py-0.5 rounded-full tracking-widest">Aktiv</span>
+                          <span className="text-[8px] font-black uppercase text-green-500 bg-green-50 px-2 py-0.5 rounded-full tracking-widest hidden">Aktiv</span>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50/20" ref={scrollRef}>
                           {chatMessages.map(msg => (

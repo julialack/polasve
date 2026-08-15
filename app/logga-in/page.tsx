@@ -61,8 +61,8 @@ export default function LoggaInPage() {
 
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">Lösenord</label>
-                <Link href="#" className="text-[10px] font-bold uppercase tracking-widest text-red-800 hover:text-red-600 transition-colors">Glömt?</Link>
+                <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">Lösenord</label>
+                <Link href="/glomt-losenord" className="text-[10px] font-bold uppercase tracking-widest text-pola-red hover:text-red-600 transition-colors">Glömt?</Link>
               </div>
               <div className="relative">
                 <input

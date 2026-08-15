@@ -123,8 +123,10 @@ export default function SkapaAnnonsPage() {
       }
     }
 
+    const capitalizedTitle = title.charAt(0).toUpperCase() + title.slice(1)
+
     const { data: adData, error } = await supabase.from('ads').insert([{
-      title,
+      title: capitalizedTitle,
       category,
       price,
       location,

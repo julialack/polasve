@@ -33,7 +33,7 @@ export default function RegistreraPage() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Välkommen! Ditt konto har skapats. Du kan nu logga in.");
+      toast.success("Välkommen! Kolla din e-post för att verifiera ditt konto innan du loggar in.");
       router.push("/logga-in");
     }
     setLoading(false);
