@@ -18,6 +18,20 @@ function extractTagContent(xml: string, tag: string) {
   return content.trim();
 }
 
+function extractImage(itemContent: string) {
+  // Try to find image in media:content, enclosure or description
+  const mediaMatch = itemContent.match(/<media:content[^>]*url="([^"]+)"/i);
+  if (mediaMatch) return mediaMatch[1];
+
+  const enclosureMatch = itemContent.match(/<enclosure[^>]*url="([^"]+)"/i);
+  if (enclosureMatch) return enclosureMatch[1];
+
+  const imgTagMatch = itemContent.match(/<img[^>]*src="([^"]+)"/i);
+  if (imgTagMatch) return imgTagMatch[1];
+
+  return null;
+}
+
 async function fetchSourceNews(source: typeof SOURCES[0]) {
   try {
     const response = await fetch(source.url, {
@@ -26,17 +40,16 @@ async function fetchSourceNews(source: typeof SOURCES[0]) {
     });
     const xml = await response.text();
 
-    // Split into items using regex to be more robust
     const items = xml.split(/<item[^>]*>/i).slice(1);
 
     return items.slice(0, 5).map(item => {
-      // Ensure we don't pick up tags after the current item
       const itemEnd = item.search(/<\/item>/i);
       const itemContent = itemEnd !== -1 ? item.substring(0, itemEnd) : item;
 
       return {
         title: extractTagContent(itemContent, 'title'),
         link: extractTagContent(itemContent, 'link'),
+        image: extractImage(itemContent),
         source: source.name,
         color: source.color,
         pubDate: extractTagContent(itemContent, 'pubDate')

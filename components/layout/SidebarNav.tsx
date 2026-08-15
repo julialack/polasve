@@ -130,23 +130,23 @@ export default function SidebarNav() {
 
       {/* Sidebar Header */}
       <section className="bg-white shadow-sm overflow-hidden border border-zinc-200 rounded-sm">
-        <div className="bg-[#003366] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">Sido meny</div>
+        <div className="bg-sve-blue text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">Sido meny</div>
       </section>
 
       {/* Navigation Sections */}
       {sections.map((section) => (
         <section key={section.title} className="bg-white border border-zinc-200 shadow-sm relative overflow-hidden rounded-sm">
-          <div className="absolute top-0 left-0 w-1 h-full bg-[#003366]"></div>
+          <div className="absolute top-0 left-0 w-1 h-full bg-sve-blue"></div>
           <div className="p-2">
             {section.href ? (
                 <Link href={section.href} className="block group/title">
-                    <h4 className="text-[8px] font-black uppercase text-zinc-400 mb-1 tracking-[0.2em] group-hover/title:text-[#a11a2d] transition-colors flex justify-between items-center">
+                    <h4 className="text-[8px] font-black uppercase text-zinc-500 mb-1 tracking-[0.2em] group-hover/title:text-pola-red transition-colors flex justify-between items-center">
                         {section.title}
                         <ChevronRight size={8} className="opacity-0 group-hover/title:opacity-100" />
                     </h4>
                 </Link>
             ) : (
-                <h4 className="text-[8px] font-black uppercase text-zinc-400 mb-1 tracking-[0.2em]">{section.title}</h4>
+                <h4 className="text-[8px] font-black uppercase text-zinc-500 mb-1 tracking-[0.2em]">{section.title}</h4>
             )}
             <nav className="flex flex-col space-y-0">
               {section.items.map((item) => {
@@ -157,12 +157,12 @@ export default function SidebarNav() {
                     href={item.href}
                     className={`flex items-center justify-between py-1 px-1 rounded-sm transition-all group ${
                       isActive
-                        ? "bg-zinc-50 text-[#a11a2d]"
-                        : "text-[#003366] hover:bg-zinc-50 hover:text-[#a11a2d]"
+                        ? "bg-zinc-50 text-pola-red"
+                        : "text-sve-blue hover:bg-zinc-50 hover:text-pola-red"
                     }`}
                   >
                     <div className="flex items-center gap-3 text-[10px] font-bold">
-                      <span className={isActive ? "text-[#a11a2d]" : "text-[#003366] opacity-70 group-hover:opacity-100"}>
+                      <span className={isActive ? "text-pola-red" : "text-sve-blue opacity-70 group-hover:opacity-100"}>
                         {item.icon}
                       </span>
                       {item.name}
@@ -180,7 +180,7 @@ export default function SidebarNav() {
       <section className="px-3 pt-4">
         <Link
           href="/reklam"
-          className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#a11a2d] hover:bg-[#003366] text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl hover:shadow-2xl active:scale-95"
+          className="flex items-center justify-center gap-2 w-full py-2.5 bg-pola-red hover:bg-sve-blue text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl hover:shadow-2xl active:scale-95"
         >
           <Building size={15} /> Lägg reklam
         </Link>

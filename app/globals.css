@@ -3,10 +3,25 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --pola-red: #a11a2d;
+  --sve-blue: #003366;
+  --premium-gold: #D4AF37;
 }
 
 html {
   font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-geist-sans), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-weight: 900;
+  text-transform: uppercase;
+  font-style: italic;
 }
 
 @media (max-width: 640px) {
@@ -33,6 +48,9 @@ html {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-pola-red: var(--pola-red);
+  --color-sve-blue: var(--sve-blue);
+  --color-premium-gold: var(--premium-gold);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-pacifico: var(--font-pacifico);

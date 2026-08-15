@@ -7,6 +7,7 @@ import InfoBar from "@/components/layout/InfoBar";
 import SidebarNav from "@/components/layout/SidebarNav";
 import SwedenMap from "@/components/map/SwedenMap";
 import SafeImage from "@/components/ui/SafeImage";
+import ExternalNewsSidebar from "@/components/layout/ExternalNewsSidebar";
 import { createClient } from "@/utils/supabase/server";
 import { Newspaper, Calendar, Box, Info, ArrowRight, ShieldCheck, ExternalLink, Briefcase, Home as HomeIcon, Tag, ShoppingCart, Wrench } from "lucide-react";
 
@@ -199,32 +200,8 @@ export default async function Home() {
               <Link href="/nyheter" className="block text-center py-3 bg-zinc-50 text-[10px] font-black text-zinc-500 hover:text-[#003366] uppercase tracking-widest border-t transition-colors italic">Läs alla nyheter &raquo;</Link>
             </section>
 
-            {/* External News Sources (Compact) */}
-            <section className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm">
-              <div className="bg-zinc-800 text-white px-4 py-1.5 text-[8px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                <Newspaper size={10} /> Polska Medier
-              </div>
-              <div className="p-2 grid grid-cols-2 gap-2">
-                <a
-                  href="https://tvn24.pl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 py-2 px-3 bg-zinc-50 hover:bg-[#005bbb] hover:text-white transition-all border border-zinc-100 rounded-sm group"
-                >
-                  <span className="text-[9px] font-black italic tracking-tighter">TVN24</span>
-                  <ExternalLink size={10} className="opacity-30 group-hover:opacity-100" />
-                </a>
-                <a
-                  href="https://www.onet.pl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 py-2 px-3 bg-zinc-50 hover:bg-[#f7d117] hover:text-black transition-all border border-zinc-100 rounded-sm group"
-                >
-                  <span className="text-[9px] font-black italic tracking-tighter">ONET</span>
-                  <ExternalLink size={10} className="opacity-30 group-hover:opacity-100" />
-                </a>
-              </div>
-            </section>
+            {/* Live Poland News */}
+            <ExternalNewsSidebar />
 
             <section className="bg-white border border-zinc-200 overflow-hidden shadow-sm">
                 <div className="bg-[#003366] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider">Sverigekartan</div>
