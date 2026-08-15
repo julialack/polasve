@@ -25,12 +25,15 @@ import {
   ShieldCheck,
   HelpCircle,
   Mail,
-  Zap
+  Zap,
+  HelpCircle as QuestionIcon
 } from "lucide-react";
+import ContactModal from "@/components/modals/ContactModal";
 
 export default function SidebarNav() {
   const pathname = usePathname();
   const [featuredAd, setFeaturedAd] = useState<any>(null);
+  const [isContactOpen, setIsContactOpen] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -177,7 +180,14 @@ export default function SidebarNav() {
       ))}
 
       {/* Action Button at bottom */}
-      <section className="px-3 pt-4">
+      <section className="px-3 pt-4 space-y-3">
+        <button
+          onClick={() => setIsContactOpen(true)}
+          className="flex items-center justify-center gap-2 w-full py-2.5 bg-white border-2 border-sve-blue text-sve-blue hover:bg-sve-blue hover:text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm active:scale-95"
+        >
+          <QuestionIcon size={15} /> Frågor? Kontakta oss!
+        </button>
+
         <Link
           href="/reklam"
           className="flex items-center justify-center gap-2 w-full py-2.5 bg-pola-red hover:bg-sve-blue text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl hover:shadow-2xl active:scale-95"
@@ -185,6 +195,8 @@ export default function SidebarNav() {
           <Building size={15} /> Lägg reklam
         </Link>
       </section>
+
+      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </aside>
   );
 }

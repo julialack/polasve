@@ -29,6 +29,7 @@ const CATEGORIES = [
   { id: 'mouthType', label: 'Mun', icon: <Smile size={16} /> },
   { id: 'accessoriesType', label: 'Tillbehör', icon: <Glasses size={16} /> },
   { id: 'clotheType', label: 'Kläder', icon: <Shirt size={16} /> },
+  { id: 'graphicType', label: 'Tryck', icon: <Palette size={16} /> },
   { id: 'skinColor', label: 'Hud', icon: <Palette size={16} /> },
   { id: 'circleColor', label: 'Bakgrund', icon: <Palette size={16} /> },
 ]
@@ -44,6 +45,7 @@ interface AvatarConfig {
   accessoriesType: string
   clotheType: string
   clotheColor: string
+  graphicType: string
   skinColor: string
   circleColor: string
   [key: string]: string
@@ -58,6 +60,7 @@ const OPTIONS = {
   accessoriesType: ['Blank', 'Kurt', 'Prescription01', 'Prescription02', 'Round', 'Sunglasses', 'Wayfarers'],
   clotheType: ['BlazerShirt', 'BlazerSweater', 'CollarSweater', 'GraphicShirt', 'Hoodie', 'Overall', 'ShirtCrewNeck', 'ShirtScoopNeck', 'ShirtVNeck'],
   clotheColor: ['Black', 'Blue01', 'Blue02', 'Blue03', 'Gray01', 'Gray02', 'Heather', 'PastelBlue', 'PastelGreen', 'PastelOrange', 'PastelRed', 'PastelYellow', 'Pink', 'Red', 'White'],
+  graphicType: ['Bat', 'Cumbia', 'Deer', 'Diamond', 'Hola', 'Pizza', 'Resist', 'Selena', 'Skull', 'SkullOutline'],
   skinColor: ['Tanned', 'Yellow', 'Pale', 'Light', 'Brown', 'DarkBrown', 'Black'],
   circleColor: ['#65C9FF', '#a11a2d', '#003366', '#D4AF37', '#ffffff', 'transparent'],
 }
@@ -139,6 +142,7 @@ export default function InstallningarPage() {
     accessoriesType: 'Blank',
     clotheType: 'ShirtCrewNeck',
     clotheColor: 'Gray01',
+    graphicType: 'Bat',
     skinColor: 'Light',
     circleColor: '#65C9FF'
   })
@@ -542,6 +546,28 @@ export default function InstallningarPage() {
                              <button key={color} onClick={() => updateConfig('clotheColor', color)} className={`aspect-square rounded-full border-2 transition-all ${config.clotheColor === color ? 'border-[#003366] scale-110 shadow-lg' : 'border-white shadow-sm'}`} style={{ backgroundColor: CLOTHE_COLOR_MAP[color] || color }} title={color} />
                            ))}
                          </div>
+                       </div>
+                    </div>
+                  )}
+
+                  {activeTab === 'graphicType' && (
+                    <div className="space-y-6">
+                       <label className="block text-[10px] font-black uppercase text-zinc-600 mb-4 tracking-widest">Tryck på tröjan</label>
+                       {config.clotheType !== 'GraphicShirt' && (
+                         <div className="bg-amber-50 p-4 border border-amber-100 rounded-sm mb-4">
+                           <p className="text-[10px] font-bold text-amber-700 uppercase italic text-left">Tips: Välj "Graphic Shirt" under Kläder för att se trycket!</p>
+                         </div>
+                       )}
+                       <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-3">
+                         {OPTIONS.graphicType.map(opt => (
+                           <button
+                              key={opt}
+                              onClick={() => updateConfig('graphicType', opt)}
+                              className={`aspect-square rounded-full border-2 overflow-hidden bg-zinc-50 transition-all flex items-center justify-center p-1 ${config.graphicType === opt ? 'border-sve-blue shadow-lg scale-105' : 'border-zinc-100 hover:border-zinc-300'}`}
+                           >
+                              <img src={`/api/avatar?graphicType=${opt}&clotheType=GraphicShirt&topType=NoHair&skinColor=${config.skinColor}&circleColor=${encodeURIComponent(config.circleColor)}`} className="w-full h-full object-contain" alt="" />
+                           </button>
+                         ))}
                        </div>
                     </div>
                   )}

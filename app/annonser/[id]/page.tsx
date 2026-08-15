@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, Phone, MapPin, ShieldCheck, Calendar, User, Edit3 } from 'lucide-react'
 import ContactForm from '@/components/ads/ContactForm'
+import AdActions from '@/components/ads/AdActions'
 import HomeHero from '@/components/HomeHero'
 
 export default async function AnnonsDetaljPage({
@@ -90,12 +91,15 @@ export default async function AnnonsDetaljPage({
                   <h1 className="text-2xl md:text-5xl font-black text-[#003366] uppercase tracking-tighter italic mb-4 md:mb-6 leading-tight">
                     {ad.title}
                   </h1>
-                  <div className="flex flex-wrap items-center gap-4 md:gap-8 border-y border-zinc-50 py-4 md:py-6">
-                    <div className="flex items-center gap-2">
-                      <MapPin size={18} className="text-[#a11a2d]" />
-                      <span className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] md:text-xs">{ad.location}</span>
+                  <div className="flex flex-wrap items-center justify-between gap-6 border-y border-zinc-50 py-4 md:py-6">
+                    <div className="flex flex-wrap items-center gap-4 md:gap-8">
+                      <div className="flex items-center gap-2">
+                        <MapPin size={18} className="text-[#a11a2d]" />
+                        <span className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] md:text-xs">{ad.location}</span>
+                      </div>
+                      <div className="text-xl md:text-2xl font-black text-zinc-900">{ad.price || 'Bud'}</div>
                     </div>
-                    <div className="text-xl md:text-2xl font-black text-zinc-900">{ad.price || 'Bud'}</div>
+                    <AdActions adId={ad.id} adTitle={ad.title} currentUserId={user?.id} />
                   </div>
                 </div>
 

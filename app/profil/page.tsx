@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { formatDisplayName } from '@/utils/formatName'
-import { Package, MessageSquare, ChevronRight, PlusCircle, Settings, Globe, Info, Trash2, CheckCircle, Edit3, Send, Camera, X, Loader2, ChevronLeft, Mail, Phone } from 'lucide-react'
+import { Package, MessageSquare, ChevronRight, PlusCircle, Settings, Globe, Info, Trash2, CheckCircle, Edit3, Send, Camera, X, Loader2, ChevronLeft, Mail, Phone, Eye, EyeOff } from 'lucide-react'
 import HomeHero from '@/components/HomeHero'
 import { toast } from 'sonner'
 import UserAvatar from '@/components/ui/UserAvatar'
@@ -248,16 +248,32 @@ function ProfilContent() {
                   </div>
                 </div>
                 <div className="pt-20 pb-10 px-8 text-center">
-                  <h2 className="text-2xl font-pacifico text-sve-blue italic">
+                  <h2 className="text-3xl font-bold text-sve-blue tracking-tight mb-2">
                     {formatDisplayName(meta.full_name || user?.email?.split('@')[0])}
                   </h2>
-                  <div className="flex flex-col items-center gap-2 mt-1 mb-6">
-                    <div className="flex items-center gap-2 text-zinc-400 text-[9px] font-bold uppercase tracking-widest">
-                      <Mail size={10} className="text-[#a11a2d]" /> {user?.email}
+                  <div className="flex flex-col items-center gap-3 mt-1 mb-6">
+                    <div className="flex items-center gap-2 text-zinc-400 text-[9px] font-bold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full border border-zinc-100 shadow-sm">
+                      <Mail size={10} className="text-[#a11a2d]" />
+                      <span>{user?.email}</span>
+                      <div className="ml-1 pl-2 border-l border-zinc-200">
+                        {meta.show_email_publicly ? (
+                          <Eye size={10} className="text-green-500" title="Visas offentligt" />
+                        ) : (
+                          <EyeOff size={10} className="text-zinc-300" title="Dold för andra" />
+                        )}
+                      </div>
                     </div>
                     {meta.phone && (
-                      <div className="flex items-center gap-2 text-zinc-400 text-[9px] font-bold uppercase tracking-widest">
-                        <Phone size={10} className="text-[#003366]" /> {meta.phone}
+                      <div className="flex items-center gap-2 text-zinc-400 text-[9px] font-bold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full border border-zinc-100 shadow-sm">
+                        <Phone size={10} className="text-[#003366]" />
+                        <span>{meta.phone}</span>
+                        <div className="ml-1 pl-2 border-l border-zinc-200">
+                          {meta.show_phone_publicly ? (
+                            <Eye size={10} className="text-green-500" title="Visas offentligt" />
+                          ) : (
+                            <EyeOff size={10} className="text-zinc-300" title="Dold för andra" />
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>

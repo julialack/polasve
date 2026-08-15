@@ -3,10 +3,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { formatDisplayName } from '@/utils/formatName'
-import { Heart, MessageSquare, Loader2, Send, Trash2, Edit2, X, Check } from 'lucide-react'
+import { Heart, MessageSquare, Loader2, Send, Trash2, Edit2, X, Check, Share2, Flag } from 'lucide-react'
 import { toast } from 'sonner'
 import { Post } from '@/types/database'
 import UserAvatar from '../ui/UserAvatar'
+import ReportModal from '../ui/ReportModal'
 
 interface PostCardProps {
   post: Post & { category?: string }
@@ -38,7 +39,35 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
   const [editingComment, setEditingComment] = useState<string | null>(null)
   const [editCommentContent, setEditCommentContent] = useState('')
 
+  const [reportModalOpen, setReportModalOpen] = useState(false)
+  const [reportTarget, setReportTarget] = useState<{ id: string, type: 'post' | 'comment' } | null>(null)
+
   const supabase = createClient()
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/annonser/${post.id}` // Assuming posts have their own URLs or we use the feed URL
+    // For now, let's just copy the current URL or a specific post link if we had one
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `Inlägg av ${post.user_name}`,
+          text: post.content,
+          url: window.location.href,
+        })
+      } else {
+        await navigator.clipboard.writeText(window.location.href)
+        toast.success('Länk kopierad till urklipp!')
+      }
+    } catch (err) {
+      console.error('Share failed:', err)
+    }
+  }
+
+  const openReport = (id: string, type: 'post' | 'comment') => {
+    if (!currentUser) return toast.error('Logga in för att anmäla')
+    setReportTarget({ id, type })
+    setReportModalOpen(true)
+  }
 
   const fetchComments = useCallback(async () => {
     const { data: commentsData, error: commentsError } = await supabase
@@ -190,7 +219,23 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
           <MessageSquare size={15} className="scale-x-[-1]" />
           <span className="text-xs font-black">{commentCount}</span>
         </button>
+        <button onClick={handleShare} className="flex items-center gap-1.5 text-zinc-400 hover:text-[#003366] transition-colors">
+          <Share2 size={15} />
+          <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">Dela</span>
+        </button>
+        <button onClick={() => openReport(post.id, 'post')} className="flex items-center gap-1.5 text-zinc-300 hover:text-[#a11a2d] transition-colors ml-auto">
+          <Flag size={14} />
+          <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">Anmäl</span>
+        </button>
       </div>
+
+      <ReportModal
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        contentId={reportTarget?.id || ''}
+        contentType={reportTarget?.type || 'post'}
+        reporterId={currentUser?.id}
+      />
 
       {activeCommentPost && (
         <div className="mt-4 space-y-4 pl-3 md:pl-4 border-l-2 border-zinc-100 animate-in fade-in slide-in-from-top-1">
@@ -209,12 +254,17 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start text-xs">
                         <span className="font-pacifico text-[#003366] tracking-normal">{formatDisplayName(comment.user_name)} {comment.edited && <span className="font-sans font-normal text-[8px] text-zinc-300 italic lowercase ml-1">(redigerad)</span>}</span>
-                        {currentUser?.id === comment.user_id && !editingComment && (
-                          <div className="flex gap-2 opacity-0 group-hover/comment:opacity-100 transition-opacity">
-                            <button onClick={() => { setEditingComment(comment.id); setEditCommentContent(comment.content) }} className="text-zinc-300 hover:text-blue-600"><Edit2 size={10} /></button>
-                            <button onClick={() => handleDeleteComment(comment.id)} className="text-zinc-300 hover:text-red-800"><Trash2 size={10} /></button>
-                          </div>
-                        )}
+                        <div className="flex gap-2">
+                          {currentUser?.id === comment.user_id && !editingComment && (
+                            <div className="flex gap-2 opacity-0 group-hover/comment:opacity-100 transition-opacity">
+                              <button onClick={() => { setEditingComment(comment.id); setEditCommentContent(comment.content) }} className="text-zinc-300 hover:text-blue-600"><Edit2 size={10} /></button>
+                              <button onClick={() => handleDeleteComment(comment.id)} className="text-zinc-300 hover:text-red-800"><Trash2 size={10} /></button>
+                            </div>
+                          )}
+                          <button onClick={() => openReport(comment.id, 'comment')} className="text-zinc-200 hover:text-[#a11a2d] transition-colors opacity-0 group-hover/comment:opacity-100">
+                            <Flag size={10} />
+                          </button>
+                        </div>
                       </div>
                       {editingComment === comment.id ? (
                         <div className="flex gap-2 mt-1">

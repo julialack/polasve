@@ -4,17 +4,20 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Newspaper, Calendar, Box, Info, Users, ArrowRight, Clock } from 'lucide-react'
+import { Newspaper, Calendar, Box, Info, Users, ArrowRight, Clock, Share2 } from 'lucide-react'
 import SearchBar from '@/components/search/SearchBar'
 import HomeHero from "@/components/HomeHero";
+import { toast } from 'sonner';
 import SidebarNav from "@/components/layout/SidebarNav";
 import PremiumAdsSidebar from "@/components/ads/PremiumAdsSidebar";
+import ContentActions from '@/components/ui/ContentActions';
 
 export default function NyheterPage() {
   const [news, setNews] = useState<any[]>([])
   const [polandNews, setPolandNews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [polandLoading, setPolandLoading] = useState(true)
+  const [user, setUser] = useState<any>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -23,6 +26,11 @@ export default function NyheterPage() {
       const { data: newsData } = await supabase.from('news').select('*').order('created_at', { ascending: false })
       if (newsData) setNews(newsData)
       setLoading(false)
+    }
+
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
     }
 
     const fetchPolandNews = async () => {
@@ -40,6 +48,7 @@ export default function NyheterPage() {
 
     fetchData()
     fetchPolandNews()
+    fetchUser()
   }, [])
 
   const today = new Date().toLocaleDateString('sv-SE', {
@@ -128,7 +137,24 @@ export default function NyheterPage() {
                             {item.title}
                           </h3>
                           <div className="mt-auto pt-2 flex justify-between items-center">
-                             <span className="text-[7px] text-zinc-400 font-bold uppercase">{new Date(item.pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                             <div className="flex gap-3 items-center">
+                               <span className="text-[7px] text-zinc-400 font-bold uppercase">{new Date(item.pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                               <button
+                                 onClick={(e) => {
+                                   e.preventDefault();
+                                   e.stopPropagation();
+                                   if (navigator.share) {
+                                     navigator.share({ title: item.title, url: item.link });
+                                   } else {
+                                     navigator.clipboard.writeText(item.link);
+                                     toast.success('Länk kopierad!');
+                                   }
+                                 }}
+                                 className="text-zinc-300 hover:text-sve-blue transition-colors"
+                               >
+                                 <Share2 size={10} />
+                               </button>
+                             </div>
                              <ArrowRight size={10} className="text-zinc-300 group-hover:text-pola-red transition-all group-hover:translate-x-1" />
                           </div>
                         </a>
@@ -169,6 +195,15 @@ export default function NyheterPage() {
                           {article.title}
                         </h2>
                         <p className="text-sm md:text-base text-zinc-600 font-medium leading-relaxed mb-6 text-left">{article.description}</p>
+
+                        <div className="flex justify-between items-center mb-8">
+                          <ContentActions
+                            contentId={article.id}
+                            contentTitle={article.title}
+                            contentType="news"
+                            currentUserId={user?.id}
+                          />
+                        </div>
                         <div className="h-px w-full bg-zinc-50"></div>
                       </article>
                     ))}
