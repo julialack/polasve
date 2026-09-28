@@ -30,6 +30,7 @@ const LANGUAGE_LABELS: Record<string, string> = {
 function ProfilContent() {
   const searchParams = useSearchParams()
   const initialView = searchParams.get('view') === 'chat' ? 'chat' : 'ads'
+  const otherIdFromUrl = searchParams.get('otherId')
 
   const [user, setUser] = useState<any>(null)
   const [ads, setAds] = useState<Ad[]>([])
@@ -38,7 +39,7 @@ function ProfilContent() {
 
   const [activeView, setActiveView] = useState<'ads' | 'chat'>(initialView)
   const [conversations, setConversations] = useState<any[]>([])
-  const [selectedChat, setSelectedChat] = useState<string | null>(null)
+  const [selectedChat, setSelectedChat] = useState<string | null>(otherIdFromUrl)
   const [chatMessages, setChatMessages] = useState<any[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [sending, setSending] = useState(false)
@@ -136,11 +137,60 @@ function ProfilContent() {
 
       const { count } = await supabase.from('messages').select('id', { count: 'exact', head: true }).eq('receiver_id', currentUser.id).eq('is_read', false)
       setUnreadCount(count || 0)
-      fetchConversations(currentUser.id)
+
+      // Hämta konversationer
+      const { data: msgData } = await supabase
+        .from('messages')
+        .select('sender_id, receiver_id, content, created_at')
+        .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
+        .order('created_at', { ascending: false })
+
+      const uniqueChats: any[] = []
+      const seenIds = new Set()
+      const otherUserIds: string[] = []
+
+      if (msgData) {
+        msgData.forEach(msg => {
+          const otherId = msg.sender_id === currentUser.id ? msg.receiver_id : msg.sender_id
+          if (!seenIds.has(otherId)) {
+            seenIds.add(otherId)
+            otherUserIds.push(otherId)
+            uniqueChats.push({ otherId, lastMessage: msg.content, time: msg.created_at, name: 'Laddar...' })
+          }
+        })
+      }
+
+      // Tvinga in otherIdFromUrl i listan om den saknas
+      if (otherIdFromUrl && !seenIds.has(otherIdFromUrl)) {
+        otherUserIds.push(otherIdFromUrl)
+        uniqueChats.unshift({ otherId: otherIdFromUrl, lastMessage: 'Ny konversation', time: new Date().toISOString(), name: 'Laddar...' })
+      }
+
+      if (otherUserIds.length > 0) {
+        const { data: profiles } = await supabase.from('profiles').select('id, full_name, avatar_url').in('id', otherUserIds)
+        if (profiles) {
+          const profileMap = profiles.reduce((acc: any, p: any) => {
+            acc[p.id] = { name: p.full_name, avatar: p.avatar_url }
+            return acc
+          }, {})
+          uniqueChats.forEach(chat => {
+            const p = profileMap[chat.otherId]
+            if (p) { chat.name = p.name || 'Medlem'; chat.avatar = p.avatar }
+          })
+        }
+      }
+      setConversations(uniqueChats)
+
+      // Om vi kommer från en profilsida med otherId, se till att rätt chatt öppnas
+      if (otherIdFromUrl) {
+        setActiveView('chat')
+        setSelectedChat(otherIdFromUrl)
+        fetchChatMessages(otherIdFromUrl)
+      }
     } finally {
       setLoading(false)
     }
-  }, [supabase, router, fetchConversations])
+  }, [supabase, router, otherIdFromUrl, fetchChatMessages])
 
   useEffect(() => { fetchUserData() }, [fetchUserData])
 
@@ -236,8 +286,8 @@ function ProfilContent() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
-            {/* LEFT: User Card (Restored original design) */}
-            <div className="lg:col-span-4 space-y-6">
+            {/* LEFT: User Card (Hidden on mobile when chatting) */}
+            <div className={`lg:col-span-4 space-y-6 ${activeView === 'chat' ? 'hidden lg:block' : ''}`}>
               <div className="bg-zinc-50 border border-zinc-200 rounded-sm shadow-xl overflow-hidden text-left">
                 <div className="h-32 relative bg-gradient-to-r from-[#a11a2d] to-[#003366]">
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent to-zinc-50"></div>

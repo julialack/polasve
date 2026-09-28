@@ -143,7 +143,9 @@ export default async function AnnonsDetaljPage({
                       )}
                     </div>
                     <div>
-                      <p className="font-black text-[#003366] uppercase text-xs italic">{seller?.full_name || 'Anonym medlem'}</p>
+                      <Link href={`/profil/${ad.user_id}`} className="hover:underline group">
+                        <p className="font-black text-[#003366] uppercase text-xs italic group-hover:text-[#a11a2d] transition-colors">{seller?.full_name || 'Anonym medlem'}</p>
+                      </Link>
                       <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-tighter">{seller?.city || 'Sverige'}</p>
                     </div>
                   </div>

@@ -21,7 +21,7 @@ export default function FeedList() {
       .limit(20)
 
     if (postsError) {
-      console.error("Error fetching posts:", postsError)
+      console.error("Error fetching posts:", postsError.message, postsError.details, postsError.hint)
       setLoading(false)
       return
     }

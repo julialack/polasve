@@ -6,33 +6,36 @@ import HomeHero from '@/components/HomeHero'
 import UserAvatar from '@/components/ui/UserAvatar'
 import { formatDisplayName } from '@/utils/formatName'
 
-export default async function UserProfilePage({
-  params,
-}: {
+// Force dynamic rendering to ensure the ID is always read correctly
+export const dynamic = 'force-dynamic'
+
+interface PageProps {
   params: Promise<{ id: string }>
-}) {
+}
+
+export default async function UserProfilePage({ params }: PageProps) {
   const { id } = await params
   const supabase = await createClient()
 
-  // 1. Fetch user profile
-  const { data: profile, error: profileError } = await supabase
+  // 1. Fetch profile
+  const { data: profile } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', id)
     .single()
 
-  if (profileError || !profile) {
-    notFound()
+  if (!profile) {
+    return notFound()
   }
 
-  // 2. Fetch user ads
+  // 2. Fetch ads
   const { data: ads } = await supabase
     .from('ads')
     .select('*')
     .eq('user_id', id)
     .order('created_at', { ascending: false })
 
-  const meta = profile || {}
+  const meta = profile
   const displayName = formatDisplayName(meta.full_name || 'Medlem')
 
   return (
@@ -48,7 +51,6 @@ export default async function UserProfilePage({
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* LEFT: User Info Card */}
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white border border-zinc-200 rounded-sm shadow-xl overflow-hidden">
               <div className="h-32 relative bg-gradient-to-r from-[#a11a2d] to-[#003366]">
@@ -100,8 +102,8 @@ export default async function UserProfilePage({
                       <Globe size={10} /> Språk
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {meta.languages && meta.languages.length > 0 ? (
-                        meta.languages.map((l: string) => (
+                      {meta.languages && (meta.languages as any).length > 0 ? (
+                        (meta.languages as string[]).map((l: string) => (
                           <span key={l} className="bg-zinc-50 text-[10px] font-bold text-[#003366] px-3 py-1 rounded-full border border-zinc-100 uppercase">
                             {l}
                           </span>
@@ -123,11 +125,10 @@ export default async function UserProfilePage({
             </div>
           </div>
 
-          {/* RIGHT: Content (User Ads) */}
           <div className="lg:col-span-8">
             <section className="bg-white border border-zinc-200 rounded-sm shadow-sm overflow-hidden min-h-[600px]">
               <div className="bg-[#003366] text-white px-8 py-4 text-xs font-black uppercase tracking-widest flex items-center gap-3">
-                <Package size={18} /> Aktiva Annonser ({ads?.length || 0})
+                <Package size={18} /> Aktiva Annonser ({(ads as any)?.length || 0})
               </div>
 
               <div className="p-6 md:p-10">

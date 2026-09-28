@@ -28,6 +28,7 @@ export default function AdminPage() {
   const [searchUser, setSearchUser] = useState('')
   const [searchAd, setSearchAd] = useState('')
   const [reports, setReports] = useState<any[]>([])
+  const [reportStatusFilter, setReportStatusFilter] = useState<'all' | 'pending' | 'resolved' | 'dismissed'>('all')
   const [announcements, setAnnouncements] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
 
@@ -92,28 +93,140 @@ export default function AdminPage() {
 
   const fetchAds = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: adsData, error } = await supabase
         .from('ads')
-        .select('*, profiles(full_name)')
+        .select('*')
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error("Fel vid hämtning av annonser:", error)
-        toast.error("Kunde inte hämta annonser")
+        console.error("Fel vid hämtning av annonser:", error.message, error.details, error.hint)
+        toast.error("Kunde inte hämta annonser: " + (error.message || 'Ett fel uppstod'))
+        setAds([])
         return
       }
-      if (data) setAds(data)
-    } catch (err) {
-      console.error("Oväntat fel:", err)
+
+      if (adsData && adsData.length > 0) {
+        const userIds = Array.from(new Set(adsData.map(a => a.user_id).filter(Boolean)))
+        let profilesMap: Record<string, any> = {}
+
+        if (userIds.length > 0) {
+          try {
+            const { data: profilesData } = await supabase
+              .from('profiles')
+              .select('id, full_name, email')
+              .in('id', userIds)
+
+            if (profilesData) {
+              profilesData.forEach(p => {
+                profilesMap[p.id] = p
+              })
+            }
+          } catch (pErr) {
+            console.error("Kunde inte hämta säljarprofiler:", pErr)
+          }
+        }
+
+        const adsWithProfiles = adsData.map(ad => ({
+          ...ad,
+          profiles: profilesMap[ad.user_id] || null
+        }))
+
+        setAds(adsWithProfiles)
+      } else {
+        setAds([])
+      }
+    } catch (err: any) {
+      console.error("Oväntat fel vid hämtning av annonser:", err?.message || err)
+      setAds([])
     }
   }
 
   const fetchReports = async () => {
-    const { data } = await supabase
-      .from('reports')
-      .select('*, profiles(full_name, email)')
-      .order('created_at', { ascending: false })
-    if (data) setReports(data)
+    try {
+      const { data, error } = await supabase
+        .from('reports')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error("Fel vid hämtning av anmälningar:", error)
+        return
+      }
+
+      if (data && data.length > 0) {
+        const reporterIds = Array.from(new Set(data.map(r => r.reporter_id).filter(Boolean)))
+        const adIds = data.filter(r => r.content_type === 'ad').map(r => r.content_id)
+        const postIds = data.filter(r => r.content_type === 'post').map(r => r.content_id)
+        const userIds = Array.from(new Set([
+          ...data.filter(r => r.content_type === 'user').map(r => r.content_id),
+          ...reporterIds
+        ]))
+
+        let adsMap: Record<string, any> = {}
+        let postsMap: Record<string, any> = {}
+        let profilesMap: Record<string, any> = {}
+
+        if (adIds.length > 0) {
+          const { data: adsData } = await supabase
+            .from('ads')
+            .select('id, title, description, images, price')
+            .in('id', adIds)
+          if (adsData) adsData.forEach(a => { adsMap[a.id] = a })
+        }
+
+        if (postIds.length > 0) {
+          const { data: postsData } = await supabase
+            .from('posts')
+            .select('id, content, image_url')
+            .in('id', postIds)
+          if (postsData) postsData.forEach(p => { postsMap[p.id] = p })
+        }
+
+        if (userIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, avatar_url')
+            .in('id', userIds)
+          if (profilesData) profilesData.forEach(p => { profilesMap[p.id] = p })
+        }
+
+        const enriched = data.map(rep => {
+          let targetContent = null
+          let contentUrl = '#'
+          let contentExists = false
+
+          if (rep.content_type === 'ad') {
+            targetContent = adsMap[rep.content_id] || null
+            contentExists = !!targetContent
+            contentUrl = `/annonser/${rep.content_id}`
+          } else if (rep.content_type === 'post') {
+            targetContent = postsMap[rep.content_id] || null
+            contentExists = !!targetContent
+            contentUrl = `/community#post-${rep.content_id}`
+          } else if (rep.content_type === 'user') {
+            targetContent = profilesMap[rep.content_id] || null
+            contentExists = !!targetContent
+            contentUrl = `/profil/${rep.content_id}`
+          } else {
+            contentUrl = `/community`
+          }
+
+          return {
+            ...rep,
+            profiles: profilesMap[rep.reporter_id] || null,
+            targetContent,
+            contentExists,
+            contentUrl
+          }
+        })
+
+        setReports(enriched)
+      } else {
+        setReports([])
+      }
+    } catch (err) {
+      console.error("Fel vid hämtning av anmälningar:", err)
+    }
   }
 
   const fetchSystemData = async () => {
@@ -172,28 +285,47 @@ export default function AdminPage() {
     }
   }
 
-  const handleDeleteContent = async (type: 'ad' | 'post', id: string, reportId: string) => {
-    if (!confirm(`Vill du radera detta ${type === 'ad' ? 'annons' : 'inlägg'} permanent?`)) return
+  const handleDeleteContent = async (type: string, id: string, reportId: string) => {
+    if (!confirm(`Vill du radera detta permanent?`)) return
 
-    const table = type === 'ad' ? 'ads' : 'posts'
-    const { error } = await supabase.from(table).delete().eq('id', id)
+    // Optimistically update React state immediately
+    setReports(prev => prev.map(r => r.id === reportId ? { ...r, status: 'resolved', contentExists: false } : r))
 
-    if (!error) {
+    let table = 'ads'
+    if (type === 'post') table = 'posts'
+    else if (type === 'ad') table = 'ads'
+
+    const { error: deleteError } = await supabase.from(table).delete().eq('id', id)
+
+    if (!deleteError) {
       await supabase.from('reports').update({ status: 'resolved' }).eq('id', reportId)
-      toast.success('Innehåll raderat')
+      toast.success('Innehåll raderat och anmälan flyttad till Åtgärdade')
       fetchReports()
       fetchStats()
+      fetchAds()
     } else {
-      toast.error('Kunde inte radera innehåll')
+      toast.error('Kunde inte radera innehåll: ' + deleteError.message)
+      fetchReports()
     }
   }
 
-  const handleHandleReport = async (reportId: string, status: 'resolved' | 'dismissed') => {
+  const handleHandleReport = async (reportId: string, status: 'pending' | 'resolved' | 'dismissed') => {
+    // Optimistically update local state immediately so UI changes without delay
+    setReports(prev => prev.map(r => r.id === reportId ? { ...r, status } : r))
+
     const { error } = await supabase.from('reports').update({ status }).eq('id', reportId)
+
     if (!error) {
-      toast.success(status === 'resolved' ? 'Markerad som löst' : 'Anmälan avfärdad')
-      fetchReports()
+      const msg = status === 'resolved'
+        ? 'Markerad som åtgärdad (flyttad till Åtgärdade)'
+        : status === 'dismissed'
+        ? 'Anmälan avfärdad (flyttad till Avfärdade)'
+        : 'Återställd till väntande'
+      toast.success(msg)
       fetchStats()
+    } else {
+      toast.error('Kunde inte uppdatera anmälan: ' + error.message)
+      fetchReports()
     }
   }
 
@@ -284,7 +416,7 @@ export default function AdminPage() {
           <NavItem icon={<BarChart3 size={18} />} label="Dashboard" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
           <NavItem icon={<Users size={18} />} label="Användare" active={activeTab === 'users'} onClick={() => setActiveTab('users')} />
           <NavItem icon={<Building2 size={18} />} label="Annonser" active={activeTab === 'ads'} onClick={() => setActiveTab('ads')} />
-          <NavItem icon={<ShieldAlert size={18} />} label="Moderering" active={activeTab === 'reports'} badge={stats.reports} onClick={() => setActiveTab('reports')} />
+          <NavItem icon={<ShieldAlert size={18} />} label="Moderering" active={activeTab === 'reports'} badge={reports.filter(r => r.status === 'pending').length} onClick={() => setActiveTab('reports')} />
           <NavItem icon={<Settings size={18} />} label="System" active={activeTab === 'system'} onClick={() => setActiveTab('system')} />
 
           <div className="h-px bg-white/5 my-4" />
@@ -334,7 +466,7 @@ export default function AdminPage() {
             <StatCard
               icon={<AlertTriangle className="text-amber-500" />}
               label="Väntande Anmälningar"
-              value={stats.reports}
+              value={reports.filter(r => r.status === 'pending').length}
               onClick={() => setActiveTab('reports')}
             />
             <StatCard
@@ -456,7 +588,11 @@ export default function AdminPage() {
                           </div>
                         </Link>
                       </td>
-                      <td className="px-6 py-4 text-zinc-400 font-medium">{ad.profiles?.full_name || 'Anonym'}</td>
+                      <td className="px-6 py-4 text-zinc-400 font-medium">
+                        <Link href={`/profil/${ad.user_id}`} className="hover:text-blue-400 transition-colors">
+                          {ad.profiles?.full_name || 'Anonym'}
+                        </Link>
+                      </td>
                       <td className="px-6 py-4 text-zinc-300 font-black italic">{ad.price || 'Bud'}</td>
                       <td className="px-6 py-4">
                         <span className="bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded text-[8px] font-black uppercase border border-white/5">{ad.category}</span>
@@ -487,62 +623,182 @@ export default function AdminPage() {
 
         {activeTab === 'reports' && (
           <div className="space-y-6">
-            {reports.length === 0 ? (
+            {/* Status Filter Tabs */}
+            <div className="flex flex-wrap items-center justify-between gap-4 bg-[#0f172a] border border-white/5 p-4 rounded-xl">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setReportStatusFilter('all')}
+                  className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                    reportStatusFilter === 'all'
+                      ? 'bg-blue-600 text-white shadow-lg'
+                      : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  Alla ({reports.length})
+                </button>
+                <button
+                  onClick={() => setReportStatusFilter('pending')}
+                  className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                    reportStatusFilter === 'pending'
+                      ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                      : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                  Väntande ({reports.filter(r => r.status === 'pending').length})
+                </button>
+                <button
+                  onClick={() => setReportStatusFilter('resolved')}
+                  className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                    reportStatusFilter === 'resolved'
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  Åtgärdade / Raderade ({reports.filter(r => r.status === 'resolved').length})
+                </button>
+                <button
+                  onClick={() => setReportStatusFilter('dismissed')}
+                  className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                    reportStatusFilter === 'dismissed'
+                      ? 'bg-zinc-700 text-zinc-200'
+                      : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  Avfärdade ({reports.filter(r => r.status === 'dismissed').length})
+                </button>
+              </div>
+            </div>
+
+            {/* Filtered Reports Grid */}
+            {reports.filter(rep => reportStatusFilter === 'all' ? true : rep.status === reportStatusFilter).length === 0 ? (
                <div className="bg-[#0f172a] border border-white/5 p-20 rounded-xl text-center">
                  <ShieldAlert className="mx-auto text-zinc-700 mb-4" size={48} />
-                 <p className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">Inga rapporterade ärenden</p>
+                 <p className="text-zinc-500 font-black uppercase text-[10px] tracking-widest">
+                   Inga anmälningar i denna kategori
+                 </p>
                </div>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {reports.map((rep) => (
-                  <div key={rep.id} className={`bg-[#0f172a] border rounded-xl overflow-hidden transition-all ${rep.status === 'pending' ? 'border-red-500/20' : 'border-white/5 opacity-60'}`}>
+                {reports
+                  .filter(rep => reportStatusFilter === 'all' ? true : rep.status === reportStatusFilter)
+                  .map((rep) => (
+                  <div key={rep.id} className={`bg-[#0f172a] border rounded-xl overflow-hidden transition-all ${
+                    rep.status === 'pending' ? 'border-red-500/30 shadow-lg shadow-red-500/5' :
+                    rep.status === 'resolved' ? 'border-emerald-500/20 opacity-80' : 'border-white/5 opacity-60'
+                  }`}>
+                    {/* Header */}
                     <div className="bg-white/5 px-6 py-4 flex justify-between items-center">
                       <div className="flex items-center gap-3">
                          <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
-                           rep.content_type === 'ad' ? 'bg-amber-500/20 text-amber-500' : 'bg-blue-500/20 text-blue-500'
+                           rep.content_type === 'ad' ? 'bg-amber-500/20 text-amber-500' :
+                           rep.content_type === 'user' ? 'bg-purple-500/20 text-purple-400' :
+                           'bg-blue-500/20 text-blue-500'
                          }`}>
-                           {rep.content_type === 'ad' ? 'ANNONS' : 'INLÄGG'}
+                           {rep.content_type === 'ad' ? 'ANNONS' : rep.content_type === 'user' ? 'ANVÄNDARE' : 'INLÄGG'}
                          </span>
                          <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">#{rep.id.slice(0, 8)}</span>
                       </div>
-                      <span className="text-[9px] text-zinc-500 font-bold uppercase">{new Date(rep.created_at).toLocaleString('sv-SE')}</span>
+
+                      {/* Status Badge */}
+                      <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                        rep.status === 'pending' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                        rep.status === 'resolved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                        'bg-zinc-700/50 text-zinc-400'
+                      }`}>
+                        {rep.status === 'pending' ? 'VÄNTANDE' : rep.status === 'resolved' ? 'ÅTGÄRDAD / RADERAD' : 'AVFÄRDAD'}
+                      </span>
                     </div>
-                    <div className="p-6">
-                      <div className="mb-6">
-                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Anmäld av: {rep.profiles?.full_name}</p>
-                        <p className="text-white font-medium italic">&quot;{rep.reason}&quot;</p>
+
+                    {/* Body */}
+                    <div className="p-6 space-y-4">
+                      {/* Anmäld av & Anledning */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <Link href={`/profil/${rep.reporter_id}`} target="_blank" className="text-[10px] font-black text-zinc-400 uppercase tracking-widest hover:text-blue-400 transition-colors">
+                            Anmäld av: {rep.profiles?.full_name || 'Anonym'} ({rep.profiles?.email || 'Ingen e-post'})
+                          </Link>
+                          <span className="text-[9px] text-zinc-500 font-bold uppercase">{new Date(rep.created_at).toLocaleString('sv-SE')}</span>
+                        </div>
+                        <div className="bg-white/5 p-3 rounded-lg border border-white/5">
+                          <p className="text-xs text-zinc-300 font-medium italic">&quot;{rep.reason}&quot;</p>
+                        </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-3 pt-6 border-t border-white/5">
-                        <Link
-                          href={rep.content_type === 'ad' ? `/annonser/${rep.content_id}` : '#'}
-                          className="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
-                        >
-                          <ExternalLink size={12} /> Visa Innehåll
-                        </Link>
-
-                        {rep.status === 'pending' && (
-                          <>
-                            <button
-                              onClick={() => handleDeleteContent(rep.content_type, rep.content_id, rep.id)}
-                              className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border border-red-500/20"
-                            >
-                              <Trash2 size={12} /> Radera Innehåll
-                            </button>
-                            <button
-                              onClick={() => handleHandleReport(rep.id, 'resolved')}
-                              className="bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border border-emerald-500/20"
-                            >
-                              <Check size={12} /> Åtgärdad
-                            </button>
-                          </>
+                      {/* Preview of Reported Item */}
+                      <div className="border-t border-white/5 pt-4">
+                        <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2">Anmält Innehåll Preview:</p>
+                        {rep.contentExists ? (
+                          <div className="bg-black/30 p-3 rounded-lg border border-white/10 space-y-1">
+                            {rep.content_type === 'ad' && (
+                              <>
+                                <p className="text-xs font-bold text-white">{rep.targetContent?.title}</p>
+                                {rep.targetContent?.price && <p className="text-[10px] text-amber-400 font-bold">{rep.targetContent.price} kr</p>}
+                                <p className="text-[11px] text-zinc-400 line-clamp-2">{rep.targetContent?.description}</p>
+                              </>
+                            )}
+                            {rep.content_type === 'post' && (
+                              <p className="text-xs text-zinc-200 line-clamp-3">{rep.targetContent?.content}</p>
+                            )}
+                            {rep.content_type === 'user' && (
+                              <p className="text-xs font-bold text-white">{rep.targetContent?.full_name} ({rep.targetContent?.email})</p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="bg-red-500/10 p-3 rounded-lg border border-red-500/20 text-red-400 text-xs font-medium">
+                            ⚠️ Innehållet har raderats eller hittas inte i databasen.
+                          </div>
                         )}
-                        <button
-                          onClick={() => handleHandleReport(rep.id, 'dismissed')}
-                          className="text-zinc-500 hover:text-zinc-300 px-2 py-2 text-[10px] font-black uppercase tracking-widest"
-                        >
-                          Avfärda
-                        </button>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-white/5">
+                        {rep.contentExists && (
+                          <a
+                            href={rep.contentUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/30 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5"
+                          >
+                            <ExternalLink size={12} /> Visa Innehåll ↗
+                          </a>
+                        )}
+
+                        {rep.contentExists && rep.status !== 'resolved' && (
+                          <button
+                            onClick={() => handleDeleteContent(rep.content_type, rep.content_id, rep.id)}
+                            className="bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 border border-red-500/20"
+                          >
+                            <Trash2 size={12} /> Radera Permanent
+                          </button>
+                        )}
+
+                        {rep.status !== 'resolved' && (
+                          <button
+                            onClick={() => handleHandleReport(rep.id, 'resolved')}
+                            className="bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 border border-emerald-500/20"
+                          >
+                            <Check size={12} /> Åtgärdad
+                          </button>
+                        )}
+
+                        {rep.status !== 'dismissed' && (
+                          <button
+                            onClick={() => handleHandleReport(rep.id, 'dismissed')}
+                            className="bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-white/5"
+                          >
+                            Avfärda
+                          </button>
+                        )}
+
+                        {rep.status !== 'pending' && (
+                          <button
+                            onClick={() => handleHandleReport(rep.id, 'pending')}
+                            className="text-zinc-500 hover:text-zinc-300 text-[9px] font-black uppercase tracking-widest underline ml-auto"
+                          >
+                            Återställ till Väntande
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -8,6 +8,8 @@ import { toast } from 'sonner'
 import { Post } from '@/types/database'
 import UserAvatar from '../ui/UserAvatar'
 import ReportModal from '../ui/ReportModal'
+import SmartText from '../ui/SmartText'
+import Link from 'next/link'
 
 interface PostCardProps {
   post: Post & { category?: string }
@@ -177,7 +179,9 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
           />
           <div>
             <div className="flex items-center gap-1.5 md:gap-2">
-              <span className="font-pacifico text-[13px] md:text-sm text-[#003366] tracking-normal">{formatDisplayName(post.user_name)}</span>
+              <Link href={`/profil/${post.user_id}`} className="hover:underline">
+                <span className="font-pacifico text-[13px] md:text-sm text-[#003366] tracking-normal">{formatDisplayName(post.user_name)}</span>
+              </Link>
               {post.category && (
                 <span className={`text-[7px] md:text-[8px] font-black uppercase px-1.5 md:px-2 py-0.5 rounded-full border ${CATEGORY_STYLES[post.category] || CATEGORY_STYLES.allmänt}`}>
                   {post.category}
@@ -207,7 +211,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
           </div>
         </div>
       ) : (
-        <p className="text-sm text-zinc-800 font-medium mb-4 leading-relaxed px-1">{post.content}</p>
+        <SmartText text={post.content} className="text-sm text-zinc-800 font-medium mb-4 leading-relaxed px-1 break-words overflow-hidden max-w-full" />
       )}
 
       <div className="flex gap-6 items-center pt-3 border-t border-zinc-50">
@@ -253,7 +257,9 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start text-xs">
-                        <span className="font-pacifico text-[#003366] tracking-normal">{formatDisplayName(comment.user_name)} {comment.edited && <span className="font-sans font-normal text-[8px] text-zinc-300 italic lowercase ml-1">(redigerad)</span>}</span>
+                        <Link href={`/profil/${comment.user_id}`} className="hover:underline">
+                          <span className="font-pacifico text-[#003366] tracking-normal">{formatDisplayName(comment.user_name)} {comment.edited && <span className="font-sans font-normal text-[8px] text-zinc-300 italic lowercase ml-1">(redigerad)</span>}</span>
+                        </Link>
                         <div className="flex gap-2">
                           {currentUser?.id === comment.user_id && !editingComment && (
                             <div className="flex gap-2 opacity-0 group-hover/comment:opacity-100 transition-opacity">
@@ -273,7 +279,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
                           <button onClick={() => setEditingComment(null)} className="text-zinc-400 p-1"><X size={14} /></button>
                         </div>
                       ) : (
-                        <p className="text-xs text-zinc-700 font-medium leading-normal bg-zinc-50/50 p-2.5 rounded-sm border border-zinc-100/50">{comment.content}</p>
+                        <SmartText text={comment.content} className="text-xs text-zinc-700 font-medium leading-normal bg-zinc-50/50 p-2.5 rounded-sm border border-zinc-100/50 break-words overflow-hidden max-w-full" />
                       )}
                     </div>
                   </div>

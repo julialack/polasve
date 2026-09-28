@@ -66,8 +66,10 @@ export default function HomeHero() {
     { name: "Om Oss", href: "/om-oss" },
   ]
 
+  const isHome = pathname === '/'
+
   return (
-    <header className="relative bg-gradient-to-r from-[#d60000] to-[#005bbb] text-white overflow-hidden shadow-2xl">
+    <header className={`relative bg-gradient-to-r from-[#d60000] to-[#005bbb] text-white overflow-hidden shadow-2xl transition-all duration-500`}>
       <div className="absolute inset-0 z-0">
         <img
           src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?q=80&w=2000&auto=format&fit=crop"
@@ -78,10 +80,11 @@ export default function HomeHero() {
       </div>
 
       {/* Top Mobile Bar */}
-      <div className="relative z-50 md:hidden flex justify-between items-center px-6 py-4">
+      <div className="relative z-50 md:hidden flex justify-between items-center px-6 py-4 border-b border-white/10">
         <button onClick={() => setMenuOpen(true)} className="p-2 -ml-2" aria-label="Meny">
           <Menu size={28} />
         </button>
+        <Link href="/" className={`${isHome ? 'hidden' : 'block'} font-black italic tracking-tighter text-sm uppercase`}>Polasve</Link>
         <div className="flex items-center gap-4">
           {user ? (
             <>
@@ -99,10 +102,18 @@ export default function HomeHero() {
         </div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-16 md:pt-16 md:pb-32 flex flex-col items-center text-center">
-        <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-16 w-full mb-8 md:mb-10">
+      <div className={`relative z-10 max-w-7xl mx-auto px-4 md:px-6 flex flex-col items-center text-center transition-all duration-500 ${
+        isHome
+          ? 'pt-4 pb-16 md:pt-16 md:pb-32'
+          : 'pt-2 pb-4 md:pt-10 md:pb-16'
+      }`}>
+        <div className={`flex flex-col md:flex-row justify-center items-center gap-6 md:gap-16 w-full transition-all ${
+          isHome ? 'mb-8 md:mb-10' : 'mb-2 md:mb-6'
+        }`}>
           {/* Polish Flag */}
-          <div className="w-20 md:w-56 h-auto drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)] transform md:rotate-[-5deg]">
+          <div className={`drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)] transform md:rotate-[-5deg] transition-all ${
+            isHome ? 'w-20 md:w-56' : 'hidden md:block md:w-32 opacity-40 grayscale-[50%]'
+          }`}>
             <svg viewBox="0 0 120 80" className="w-full h-full">
               <clipPath id="wave-hero-p">
                 <path d="M0 15 C 20 5, 40 25, 60 15 C 80 5, 100 25, 120 15 V 65 C 100 75, 80 35, 60 45 C 40 55, 20 35, 0 45 Z" />
@@ -115,12 +126,18 @@ export default function HomeHero() {
           </div>
 
           <div className="text-center px-4">
-            <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter mb-2 md:mb-4 drop-shadow-2xl italic leading-tight">Polacker i Sverige</h1>
-            <p className="text-base md:text-2xl font-bold tracking-widest opacity-95 drop-shadow-lg uppercase">Din portal för jobb & annonser</p>
+            <h1 className={`font-black uppercase tracking-tighter drop-shadow-2xl italic leading-tight transition-all ${
+              isHome ? 'text-4xl md:text-7xl mb-2 md:mb-4' : 'text-lg md:text-4xl mb-0'
+            }`}>Polacker i Sverige</h1>
+            <p className={`font-bold tracking-widest opacity-95 drop-shadow-lg uppercase transition-all ${
+              isHome ? 'text-base md:text-2xl' : 'text-[8px] md:text-sm'
+            }`}>Din portal för jobb & annonser</p>
           </div>
 
           {/* Swedish Flag */}
-          <div className="w-20 md:w-56 h-auto drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)] transform md:rotate-[5deg] scale-x-[-1]">
+          <div className={`drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)] transform md:rotate-[5deg] scale-x-[-1] transition-all ${
+            isHome ? 'w-20 md:w-56' : 'hidden md:block md:w-32 opacity-40 grayscale-[50%]'
+          }`}>
             <svg viewBox="0 0 120 80" className="w-full h-full">
               <g clipPath="url(#wave-hero-p)">
                 <rect width="120" height="80" fill="#006aa7" />
@@ -132,7 +149,9 @@ export default function HomeHero() {
         </div>
 
         {/* Desktop Nav - Hidden on mobile */}
-        <nav className="hidden md:flex flex-wrap justify-center items-center gap-6 md:gap-10 w-full border-t border-white/10 pt-8">
+        <nav className={`hidden md:flex flex-wrap justify-center items-center gap-6 md:gap-10 w-full border-t border-white/10 transition-all ${
+          isHome ? 'pt-8' : 'pt-6'
+        }`}>
           {navLinks.map((link) => (
             <Link key={link.name} href={link.href} className={`text-[11px] md:text-xs font-black uppercase tracking-[0.2em] hover:text-white/70 transition-all ${pathname === link.href ? 'border-b-2 border-white pb-1' : ''}`}>{link.name}</Link>
           ))}
@@ -220,14 +239,3 @@ export default function HomeHero() {
     </header>
   )
 }
-
-      <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
-        <svg viewBox="0 0 1440 80" className="w-full h-auto translate-y-1">
-          <path fill="white" d="M0,40 C480,80 960,80 1440,40 L1440,80 L0,80 Z" />
-        </svg>
-      </div>
-
-
-
-
-

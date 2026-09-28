@@ -100,15 +100,7 @@ export default function NyheterPage() {
                   </div>
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2">
-                    {(() => {
-                      // Filter to ensure variety: Keep max 3 from TVN24 if we have other sources
-                      const tvn24 = polandNews.filter(n => n.source === 'TVN24');
-                      const others = polandNews.filter(n => n.source !== 'TVN24');
-                      const combined = [...others.slice(0, 4), ...tvn24.slice(0, 4)].sort((a, b) =>
-                        new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
-                      ).slice(0, 8);
-
-                      return combined.map((item, idx) => (
+                    {polandNews.slice(0, 8).map((item, idx) => (
                         <a
                           key={idx}
                           href={item.link}
@@ -158,13 +150,12 @@ export default function NyheterPage() {
                              <ArrowRight size={10} className="text-zinc-300 group-hover:text-pola-red transition-all group-hover:translate-x-1" />
                           </div>
                         </a>
-                      ));
-                    })()}
+                      ))}
                   </div>
                 )}
                 <div className="mt-4 pt-4 border-t border-zinc-50">
                   <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest italic text-center">
-                    Automatiskt uppdaterat från TVN24, Rzeczpospolita, Interia & Onet
+                    Automatiskt uppdaterat från TVN24, Rzeczpospolita, Interia, Onet & Polsat News
                   </p>
                 </div>
               </div>

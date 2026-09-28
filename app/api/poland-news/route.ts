@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 
 const SOURCES = [
   { name: 'TVN24', url: 'https://tvn24.pl/najnowsze.xml', color: '#005bbb' },
-  { name: 'Rzeczpospolita', url: 'https://www.rp.pl/rss', color: '#003366' },
-  { name: 'Interia', url: 'https://fakty.interia.pl/rss', color: '#f7d117' },
-  { name: 'Onet.pl', url: 'https://www.onet.pl/rss', color: '#000000' },
+  { name: 'Rzeczpospolita', url: 'https://www.rp.pl/rss/10', color: '#003366' },
+  { name: 'Interia', url: 'https://wydarzenia.interia.pl/feed', color: '#f7d117' },
+  { name: 'Onet.pl', url: 'https://wiadomosci.onet.pl/.feed', color: '#000000' },
+  { name: 'Polsat News', url: 'https://www.polsatnews.pl/rss/wszystkie.xml', color: '#e60000' },
 ];
 
 function extractTagContent(xml: string, tag: string) {
@@ -36,13 +37,18 @@ async function fetchSourceNews(source: typeof SOURCES[0]) {
   try {
     const response = await fetch(source.url, {
       next: { revalidate: 300 },
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; PolasveBot/1.0)' }
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
     });
-    const xml = await response.text();
 
+    if (!response.ok) {
+      console.warn(`Failed to fetch ${source.name}: status ${response.status}`);
+      return [];
+    }
+
+    const xml = await response.text();
     const items = xml.split(/<item[^>]*>/i).slice(1);
 
-    return items.slice(0, 5).map(item => {
+    return items.slice(0, 10).map(item => {
       const itemEnd = item.search(/<\/item>/i);
       const itemContent = itemEnd !== -1 ? item.substring(0, itemEnd) : item;
 
@@ -61,6 +67,55 @@ async function fetchSourceNews(source: typeof SOURCES[0]) {
   }
 }
 
+/**
+ * Balances the news list so that a dominant source (like TVN24)
+ * accounts for at most `maxRatio` (e.g. 50%) of the total items.
+ */
+function balanceNewsSources(newsList: any[], maxRatio = 0.5, dominantSource = 'TVN24') {
+  const tvn24Items = newsList.filter(item => item.source === dominantSource);
+  const otherItems = newsList.filter(item => item.source !== dominantSource);
+
+  if (otherItems.length === 0) {
+    return newsList;
+  }
+
+  const result: any[] = [];
+  let tvnIdx = 0;
+  let othIdx = 0;
+
+  while (tvnIdx < tvn24Items.length || othIdx < otherItems.length) {
+    const nextTvn = tvn24Items[tvnIdx];
+    const nextOth = otherItems[othIdx];
+
+    const currentTvnCount = result.filter(r => r.source === dominantSource).length;
+    const futureTotal = result.length + 1;
+    const tvnRatioIfAdded = (currentTvnCount + 1) / futureTotal;
+
+    if (nextTvn && nextOth) {
+      const tvnDate = new Date(nextTvn.pubDate || 0).getTime();
+      const othDate = new Date(nextOth.pubDate || 0).getTime();
+
+      if (tvnDate >= othDate && tvnRatioIfAdded <= maxRatio) {
+        result.push(nextTvn);
+        tvnIdx++;
+      } else {
+        result.push(nextOth);
+        othIdx++;
+      }
+    } else if (nextOth) {
+      result.push(nextOth);
+      othIdx++;
+    } else if (nextTvn) {
+      if (tvnRatioIfAdded <= maxRatio) {
+        result.push(nextTvn);
+      }
+      tvnIdx++;
+    }
+  }
+
+  return result;
+}
+
 export async function GET() {
   try {
     const allNewsResults = await Promise.all(SOURCES.map(fetchSourceNews));
@@ -73,8 +128,11 @@ export async function GET() {
       return dateB - dateA;
     });
 
-    // Return the top 20 most recent news across all sources
-    return NextResponse.json(sortedNews.slice(0, 20));
+    // Apply strict 50% maximum limit for TVN24
+    const balancedNews = balanceNewsSources(sortedNews, 0.5, 'TVN24');
+
+    // Return the top 20 most recent balanced news items
+    return NextResponse.json(balancedNews.slice(0, 20));
   } catch (error) {
     console.error("Critical error fetching Poland news:", error);
     return NextResponse.json({ error: 'Failed to fetch news' }, { status: 500 });
