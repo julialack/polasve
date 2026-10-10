@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { capitalizeFirst } from '@/utils/capitalize'
 
 type TabType = 'dashboard' | 'users' | 'ads' | 'reports' | 'system' | 'requests' | 'news' | 'events' | 'contact'
 
@@ -29,6 +30,8 @@ export default function AdminPage() {
   const [searchAd, setSearchAd] = useState('')
   const [reports, setReports] = useState<any[]>([])
   const [reportStatusFilter, setReportStatusFilter] = useState<'all' | 'pending' | 'resolved' | 'dismissed'>('all')
+  const [adStatusFilter, setAdStatusFilter] = useState<'all' | 'active' | 'finished' | 'expired'>('all')
+  const [adPaymentFilter, setAdPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all')
   const [announcements, setAnnouncements] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
 
@@ -553,70 +556,260 @@ export default function AdminPage() {
 
         {activeTab === 'ads' && (
           <div className="space-y-6">
-            <div className="bg-[#0f172a] border border-white/5 p-4 rounded-xl flex items-center gap-4">
-              <Search className="text-zinc-500" size={20} />
-              <input
-                value={searchAd}
-                onChange={(e) => setSearchAd(e.target.value)}
-                placeholder="Sök annonser på titel eller säljare..."
-                className="bg-transparent border-none outline-none text-white w-full font-medium text-sm"
-              />
+            {/* Search & Filter Header */}
+            <div className="flex flex-col gap-4 bg-[#0f172a] border border-white/5 p-4 rounded-xl">
+              <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+                <div className="flex items-center gap-3 bg-white/5 px-4 py-2.5 rounded-lg border border-white/10 flex-1">
+                  <Search className="text-zinc-500" size={18} />
+                  <input
+                    value={searchAd}
+                    onChange={(e) => setSearchAd(e.target.value)}
+                    placeholder="Sök annonser på titel, kategori eller säljare..."
+                    className="bg-transparent border-none outline-none text-white w-full font-medium text-xs placeholder:text-zinc-500"
+                  />
+                </div>
+
+                {/* Payment Status Filter Buttons */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-black uppercase text-zinc-500 tracking-widest mr-1">Betalning:</span>
+                  <button
+                    onClick={() => setAdPaymentFilter('all')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                      adPaymentFilter === 'all' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-white/10'
+                    }`}
+                  >
+                    Alla
+                  </button>
+                  <button
+                    onClick={() => setAdPaymentFilter('paid')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                      adPaymentFilter === 'paid' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-white/10'
+                    }`}
+                  >
+                    <Check size={12} /> Betalda ({ads.filter(a => a.payment_status === 'paid').length})
+                  </button>
+                  <button
+                    onClick={() => setAdPaymentFilter('unpaid')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                      adPaymentFilter === 'unpaid' ? 'bg-red-500/20 text-red-400 border border-red-500/30 shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-white/10'
+                    }`}
+                  >
+                    <X size={12} /> Ej Betalda ({ads.filter(a => a.payment_status !== 'paid').length})
+                  </button>
+                </div>
+              </div>
+
+              {/* Status Filter Tabs */}
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
+                <span className="text-[10px] font-black uppercase text-zinc-500 tracking-widest mr-1">Status:</span>
+                <button
+                  onClick={() => setAdStatusFilter('all')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                    adStatusFilter === 'all' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  Alla ({ads.length})
+                </button>
+
+                <button
+                  onClick={() => setAdStatusFilter('active')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                    adStatusFilter === 'active'
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg'
+                      : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Aktiva / Pågående ({ads.filter(a => a.status !== 'finished' && (Date.now() - new Date(a.created_at).getTime() <= 14 * 24 * 3600 * 1000)).length})
+                </button>
+
+                <button
+                  onClick={() => setAdStatusFilter('finished')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                    adStatusFilter === 'finished'
+                      ? 'bg-red-500/20 text-red-400 border border-red-500/30 shadow-lg'
+                      : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  Raderade / Avslutade av kund ({ads.filter(a => a.status === 'finished').length})
+                </button>
+
+                <button
+                  onClick={() => setAdStatusFilter('expired')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                    adStatusFilter === 'expired'
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-lg'
+                      : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  Utgångna (14d+) ({ads.filter(a => a.status !== 'finished' && (Date.now() - new Date(a.created_at).getTime() > 14 * 24 * 3600 * 1000)).length})
+                </button>
+              </div>
             </div>
 
+            {/* Ads Table */}
             <div className="bg-[#0f172a] border border-white/5 rounded-xl overflow-hidden">
               <table className="w-full text-left text-sm">
-                <thead className="bg-white/5 text-zinc-400 font-black uppercase text-[10px] tracking-widest">
+                <thead className="bg-white/5 text-zinc-400 font-black uppercase text-[10px] tracking-widest border-b border-white/5">
                   <tr>
                     <th className="px-6 py-4">Annons</th>
-                    <th className="px-6 py-4">Säljare</th>
+                    <th className="px-6 py-4">Säljare / Kund</th>
                     <th className="px-6 py-4">Pris</th>
-                    <th className="px-6 py-4">Kategori</th>
+                    <th className="px-6 py-4">Betalning</th>
+                    <th className="px-6 py-4">Kategori & Status</th>
                     <th className="px-6 py-4 text-right">Åtgärd</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {filteredAds.map((ad) => (
-                    <tr key={ad.id} className="hover:bg-white/5 transition-colors group/row">
-                      <td className="px-6 py-4">
-                        <Link href={`/annonser/${ad.id}`} className="flex items-center gap-3 hover:text-blue-400 transition-colors">
-                          <div className="w-12 h-10 bg-white/5 rounded flex items-center justify-center overflow-hidden border border-white/5">
-                            {ad.image_url ? <img src={ad.image_url} className="w-full h-full object-cover" /> : <Building2 size={16} className="text-zinc-700" />}
-                          </div>
-                          <div>
-                            <p className="font-bold text-white line-clamp-1">{ad.title}</p>
-                            <p className="text-[9px] text-zinc-500 font-bold uppercase">{new Date(ad.created_at).toLocaleDateString()}</p>
-                          </div>
-                        </Link>
-                      </td>
-                      <td className="px-6 py-4 text-zinc-400 font-medium">
-                        <Link href={`/profil/${ad.user_id}`} className="hover:text-blue-400 transition-colors">
-                          {ad.profiles?.full_name || 'Anonym'}
-                        </Link>
-                      </td>
-                      <td className="px-6 py-4 text-zinc-300 font-black italic">{ad.price || 'Bud'}</td>
-                      <td className="px-6 py-4">
-                        <span className="bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded text-[8px] font-black uppercase border border-white/5">{ad.category}</span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={async () => {
-                            if(confirm('Radera annonsen permanent?')) {
-                              await supabase.from('ads').delete().eq('id', ad.id)
-                              fetchAds()
-                              fetchStats()
-                              toast.error('Annons raderad')
-                            }
-                          }}
-                          className="text-zinc-600 hover:text-red-500 p-2 transition-colors"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {ads
+                    .filter((ad) => {
+                      const matchesSearch = searchAd === '' ||
+                        ad.title?.toLowerCase().includes(searchAd.toLowerCase()) ||
+                        ad.category?.toLowerCase().includes(searchAd.toLowerCase()) ||
+                        ad.profiles?.full_name?.toLowerCase().includes(searchAd.toLowerCase()) ||
+                        ad.profiles?.email?.toLowerCase().includes(searchAd.toLowerCase())
+                      if (!matchesSearch) return false
+
+                      const isExpired = Date.now() - new Date(ad.created_at).getTime() > 14 * 24 * 3600 * 1000
+                      const isFinished = ad.status === 'finished'
+
+                      if (adStatusFilter === 'active' && (isFinished || isExpired)) return false
+                      if (adStatusFilter === 'finished' && !isFinished) return false
+                      if (adStatusFilter === 'expired' && (!isExpired || isFinished)) return false
+
+                      const isPaid = ad.payment_status === 'paid'
+                      if (adPaymentFilter === 'paid' && !isPaid) return false
+                      if (adPaymentFilter === 'unpaid' && isPaid) return false
+
+                      return true
+                    })
+                    .map((ad) => {
+                      const isExpired = Date.now() - new Date(ad.created_at).getTime() > 14 * 24 * 3600 * 1000
+                      const isFinished = ad.status === 'finished'
+                      const isPaid = ad.payment_status === 'paid'
+
+                      return (
+                        <tr key={ad.id} className="hover:bg-white/5 transition-colors group/row">
+                          <td className="px-6 py-4">
+                            <Link href={`/annonser/${ad.id}`} target="_blank" className="flex items-center gap-3 hover:text-blue-400 transition-colors">
+                              <div className="w-12 h-10 bg-white/5 rounded flex items-center justify-center overflow-hidden border border-white/5 shrink-0">
+                                {ad.image_url ? <img src={ad.image_url} className="w-full h-full object-cover" /> : <Building2 size={16} className="text-zinc-700" />}
+                              </div>
+                              <div>
+                                <p className="font-bold text-white line-clamp-1">{capitalizeFirst(ad.title)}</p>
+                                <p className="text-[9px] text-zinc-500 font-bold uppercase">{new Date(ad.created_at).toLocaleDateString('sv-SE')}</p>
+                              </div>
+                            </Link>
+                          </td>
+                          <td className="px-6 py-4 text-zinc-400 font-medium">
+                            <Link href={`/profil/${ad.user_id}`} target="_blank" className="hover:text-blue-400 transition-colors block">
+                              <p className="font-bold text-white text-xs">{ad.profiles?.full_name || 'Anonym Kund'}</p>
+                              <p className="text-[10px] text-zinc-500">{ad.profiles?.email || 'Ingen e-post'}</p>
+                            </Link>
+                          </td>
+                          <td className="px-6 py-4 text-zinc-300 font-black italic">{ad.price || 'Bud'}</td>
+
+                          {/* Payment Status Column */}
+                          <td className="px-6 py-4">
+                            {isPaid ? (
+                              <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded text-[8px] font-black uppercase flex items-center gap-1 w-fit">
+                                <Check size={10} /> BETALD
+                              </span>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <span className="bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-[8px] font-black uppercase">
+                                  EJ BETALD
+                                </span>
+                                <button
+                                  onClick={async () => {
+                                    const { error } = await supabase.from('ads').update({ payment_status: 'paid' }).eq('id', ad.id)
+                                    if (!error) {
+                                      toast.success('Annons markerad som betald!')
+                                      fetchAds()
+                                    } else {
+                                      toast.error('Kunde inte uppdatera betalstatus: ' + error.message)
+                                    }
+                                  }}
+                                  className="text-[8px] font-black uppercase bg-blue-600/30 hover:bg-blue-600 text-blue-300 hover:text-white px-2 py-0.5 rounded transition-all border border-blue-500/30"
+                                  title="Godkänn betalning manuellt"
+                                >
+                                  Godkänn
+                                </button>
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Category & Status Column */}
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col gap-1">
+                              <span className="bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded text-[8px] font-black uppercase border border-white/5 w-fit">{ad.category}</span>
+                              {isFinished ? (
+                                <span className="bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-[8px] font-black uppercase w-fit">RADERAD / AVSLUTAD AV KUND</span>
+                              ) : isExpired ? (
+                                <span className="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded text-[8px] font-black uppercase w-fit">UTGÅNGEN (14d+)</span>
+                              ) : (
+                                <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[8px] font-black uppercase flex items-center gap-1.5 w-fit">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> AKTIV / PÅGÅENDE
+                                </span>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Actions Column */}
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              {!isFinished ? (
+                                <button
+                                  onClick={async () => {
+                                    if(confirm('Markera denna annons som avslutad/raderad av kund?')) {
+                                      await supabase.from('ads').update({ status: 'finished' }).eq('id', ad.id)
+                                      fetchAds()
+                                      fetchStats()
+                                      toast.success('Annons markerad som avslutad')
+                                    }
+                                  }}
+                                  className="text-zinc-400 hover:text-red-400 px-2 py-1 rounded text-[9px] font-black uppercase border border-white/5 hover:border-red-500/30 transition-colors"
+                                  title="Markera som avslutad"
+                                >
+                                  Avsluta
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={async () => {
+                                    await supabase.from('ads').update({ status: 'active' }).eq('id', ad.id)
+                                    fetchAds()
+                                    fetchStats()
+                                    toast.success('Annons återaktiverad')
+                                  }}
+                                  className="text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded text-[9px] font-black uppercase border border-emerald-500/20 transition-colors"
+                                  title="Återaktivera annons"
+                                >
+                                  Återaktivera
+                                </button>
+                              )}
+
+                              <button
+                                onClick={async () => {
+                                  if(confirm('Radera annonsen permanent ur databasen?')) {
+                                    await supabase.from('ads').delete().eq('id', ad.id)
+                                    fetchAds()
+                                    fetchStats()
+                                    toast.error('Annons raderad permanent')
+                                  }
+                                }}
+                                className="text-zinc-600 hover:text-red-500 p-2 transition-colors"
+                                title="Radera permanent"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
                 </tbody>
               </table>
-              {filteredAds.length === 0 && <p className="text-center py-20 text-zinc-600 italic">Inga annonser hittades.</p>}
+              {ads.length === 0 && <p className="text-center py-20 text-zinc-600 italic">Inga annonser hittades.</p>}
             </div>
           </div>
         )}
