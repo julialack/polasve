@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import LinkPreview from './LinkPreview'
+import { capitalizeFirst } from '@/utils/capitalize'
 
 interface SmartTextProps {
   text: string
@@ -9,27 +9,41 @@ interface SmartTextProps {
 }
 
 export default function SmartText({ text, className = '' }: SmartTextProps) {
-  // Regex to find URLs
-  const urlRegex = /(https?:\/\/[^\s]+)/g
+  const formattedText = capitalizeFirst(text)
 
-  // Find the first URL for the preview
-  const firstUrl = text.match(urlRegex)?.[0]
+  // Advanced Regex matching http://, https://, www., or common TLDs
+  const urlRegex = /((?:https?:\/\/|www\.)[^\s]+|[a-zA-Z0-9-]+\.(?:se|com|pl|nu|net|org|info|eu|io)[^\s]*)/gi
 
-  // Split text by URL and map parts to either text or <a> tags
-  const parts = text.split(urlRegex)
+  const parts = formattedText.split(urlRegex)
 
   return (
     <div className={className}>
       <p className="whitespace-pre-wrap">
         {parts.map((part, i) => {
-          if (part.match(urlRegex)) {
+          if (!part) return null
+
+          const isUrl = /^(https?:\/\/|www\.|[a-zA-Z0-9-]+\.(se|com|pl|nu|net|org|info|eu|io))/i.test(part)
+
+          if (isUrl) {
+            // Strip trailing punctuation (like ., !, ?, ), ], ", ') from the actual href link
+            const cleanUrl = part.replace(/[.,!?:;)"']+$/, '')
+            let href = cleanUrl
+
+            // Fix case-insensitive protocol (e.g. Https:// -> https://)
+            if (/^https?:\/\//i.test(href)) {
+              href = href.replace(/^https?:\/\//i, (match) => match.toLowerCase())
+            } else {
+              href = `https://${href}`
+            }
+
             return (
               <a
                 key={i}
-                href={part}
+                href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline break-all"
+                onClick={(e) => e.stopPropagation()}
+                className="text-blue-600 font-bold hover:underline break-all relative z-10 inline-block cursor-pointer"
               >
                 {part}
               </a>
@@ -38,8 +52,6 @@ export default function SmartText({ text, className = '' }: SmartTextProps) {
           return part
         })}
       </p>
-
-      {firstUrl && <LinkPreview url={firstUrl} />}
     </div>
   )
 }

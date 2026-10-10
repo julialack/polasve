@@ -9,7 +9,8 @@ import SwedenMap from "@/components/map/SwedenMap";
 import SafeImage from "@/components/ui/SafeImage";
 import ExternalNewsSidebar from "@/components/layout/ExternalNewsSidebar";
 import { createClient } from "@/utils/supabase/server";
-import { Newspaper, Calendar, Box, Info, ArrowRight, ShieldCheck, ExternalLink, Briefcase, Home as HomeIcon, Tag, ShoppingCart, Wrench } from "lucide-react";
+import { Newspaper, Calendar, Box, Info, ArrowRight, ShieldCheck, ExternalLink, Briefcase, Home as HomeIcon, Tag, ShoppingCart, Wrench, Heart } from "lucide-react";
+
 
 export const revalidate = 60; // Revalidate every minute
 
@@ -72,7 +73,18 @@ export default async function Home() {
     { name: "Säljes", href: "/marketplace/salj", icon: <Tag size={20} />, color: "bg-red-50 text-red-600" },
     { name: "Köpes", href: "/marketplace/kop", icon: <ShoppingCart size={20} />, color: "bg-amber-50 text-amber-600" },
     { name: "Tjänster", href: "/tjanster", icon: <Wrench size={20} />, color: "bg-purple-50 text-purple-600" },
-  ];
+   {
+       name: "Mötesplats",
+       href: "/meeting-place",
+       icon: (
+         <div className="relative flex items-center justify-center">
+           <Heart size={22} className="text-pink-300 fill-pink-300 absolute scale-125 opacity-80" />
+           <span className="text-xs relative z-10">🤝</span>
+         </div>
+       ),
+       color: "bg-pink-50 text-pink-600"
+     },
+   ];
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fa]">
@@ -180,7 +192,10 @@ export default async function Home() {
 
           {/* RIGHT SIDEBAR */}
           <aside className="hidden lg:block lg:col-span-1 space-y-6">
-            {/* Toppnyheter (Moved to right sidebar) */}
+            {/* Live Poland News */}
+            <ExternalNewsSidebar />
+
+            {/* Toppnyheter */}
             <section className="bg-white border border-zinc-200 shadow-sm overflow-hidden">
               <div className="bg-[#a11a2d] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider">Toppnyheter</div>
               <div className="p-4 space-y-4">
@@ -201,9 +216,6 @@ export default async function Home() {
               </div>
               <Link href="/nyheter" className="block text-center py-3 bg-zinc-50 text-[10px] font-black text-zinc-500 hover:text-[#003366] uppercase tracking-widest border-t transition-colors italic">Läs alla nyheter &raquo;</Link>
             </section>
-
-            {/* Live Poland News */}
-            <ExternalNewsSidebar />
 
             <section className="bg-white border border-zinc-200 overflow-hidden shadow-sm">
                 <div className="bg-[#003366] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider">Sverigekartan</div>

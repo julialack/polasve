@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { User, MessageSquare, ShieldCheck, Menu, X, PlusCircle } from 'lucide-react'
+import { User, MessageSquare, ShieldCheck, Menu, X, PlusCircle, ChevronRight } from 'lucide-react'
 
 export default function HomeHero() {
   const [user, setUser] = useState<any>(null)
@@ -65,6 +65,58 @@ export default function HomeHero() {
     { name: "Event", href: "/evenemang" },
     { name: "Om Oss", href: "/om-oss" },
   ]
+
+  const mobileMenuSections = [
+    {
+      title: "Huvudmeny",
+      items: [
+        { name: "Hem", href: "/" },
+        { name: "Forum / Bazar", href: "/annonser" },
+        { name: "Nyheter", href: "/nyheter" },
+        { name: "Event", href: "/evenemang" },
+      ]
+    },
+    {
+      title: "Marketplace",
+      items: [
+        { name: "Köp / Acceptera", href: "/marketplace/kop" },
+        { name: "Sälj / Bortskänkes", href: "/marketplace/salj" },
+        { name: "Bytes", href: "/marketplace/bytes" },
+      ]
+    },
+    {
+      title: "Jobb & Bostad",
+      items: [
+        { name: "Leta jobb", href: "/jobb" },
+        { name: "Lägenhet sökes", href: "/bostad/sokes" },
+        { name: "Lägenheter Hyra ut", href: "/bostad/uthyres" },
+        { name: "Lokaler", href: "/bostad/lokaler" },
+      ]
+    },
+    {
+      title: "Tjänster & Transport",
+      items: [
+        { name: "Tjänster", href: "/tjanster" },
+        { name: "Transport", href: "/transport" },
+      ]
+    },
+    {
+      title: "Community & Mötesplats",
+      items: [
+        { name: "Mötesplats", href: "/meeting-place" },
+        { name: "Tips & Trick", href: "/tips" },
+      ]
+    },
+    {
+      title: "Information",
+      items: [
+        { name: "Institutioner", href: "/institutioner" },
+        { name: "Om oss", href: "/om-oss" },
+        { name: "Frågor & Svar", href: "/faq" },
+        { name: "Villkor", href: "/villkor" },
+      ]
+    }
+  ];
 
   const isHome = pathname === '/'
 
@@ -200,29 +252,61 @@ export default function HomeHero() {
             <span className="font-black text-[#003366] uppercase tracking-[0.2em] text-xs">Meny</span>
             <button onClick={() => setMenuOpen(false)} className="p-2 text-zinc-400 hover:text-black"><X size={24} /></button>
           </div>
-          <nav className="flex-1 overflow-y-auto p-6">
-            <ul className="space-y-6">
-              {navLinks.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} onClick={() => setMenuOpen(false)} className={`text-2xl font-black uppercase tracking-tighter italic block ${pathname === link.href ? 'text-[#a11a2d]' : 'text-[#003366]'}`}>
-                    {link.name}
+          <nav className="flex-1 overflow-y-auto p-5 space-y-5 text-left">
+            {mobileMenuSections.map((sec) => (
+              <div key={sec.title} className="space-y-1.5 text-left">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#a11a2d] border-b border-zinc-100 pb-1 text-left">
+                  {sec.title}
+                </h4>
+                <div className="grid grid-cols-1 gap-1 text-left">
+                  {sec.items.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className={`text-sm font-bold py-1.5 px-2 rounded-sm transition-colors flex items-center justify-between text-left ${
+                        pathname === item.href ? 'text-[#a11a2d] bg-red-50 font-black' : 'text-zinc-800 hover:text-[#003366]'
+                      }`}
+                    >
+                      <span>{item.name}</span>
+                      <ChevronRight size={14} className="text-zinc-300" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {user?.email === ADMIN_EMAIL && (
+              <div className="pt-2 text-left">
+                <Link
+                  href="/admin"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-xs font-black uppercase text-yellow-600 flex items-center gap-2 bg-yellow-50 p-2 rounded-sm text-left"
+                >
+                  <ShieldCheck size={16} /> Adminportal
+                </Link>
+              </div>
+            )}
+
+            <div className="pt-4 border-t border-zinc-100 space-y-3 text-left">
+              {user ? (
+                <>
+                  <Link href="/profil" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-sm font-black text-[#003366] text-left">
+                    <User size={18} /> Min Profil
                   </Link>
-                </li>
-              ))}
-              {user?.email === ADMIN_EMAIL && (
-                <li>
-                  <Link href="/admin" onClick={() => setMenuOpen(false)} className="text-2xl font-black uppercase tracking-tighter italic text-yellow-600 flex items-center gap-2">
-                    <ShieldCheck size={24} /> Admin
+                  <Link href="/meddelanden" onClick={() => setMenuOpen(false)} className="flex items-center justify-between text-sm font-black text-[#003366] text-left">
+                    <span className="flex items-center gap-3 text-left"><MessageSquare size={18} /> Meddelanden</span>
+                    {unreadCount > 0 && <span className="bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full font-black">{unreadCount}</span>}
                   </Link>
-                </li>
+                  <button onClick={handleLogout} className="w-full text-left text-sm font-black text-[#a11a2d] pt-2 uppercase tracking-widest">
+                    Logga ut
+                  </button>
+                </>
+              ) : (
+                <Link href="/logga-in" onClick={() => setMenuOpen(false)} className="block bg-[#003366] text-white text-center py-3 rounded-sm font-black uppercase tracking-widest shadow-md text-xs">
+                  Logga in / Bli medlem
+                </Link>
               )}
-            </ul>
-            <div className="mt-12 pt-8 border-t border-zinc-100 space-y-8">
-               {user ? (
-                 <button onClick={handleLogout} className="text-lg font-black text-[#a11a2d] uppercase tracking-widest">Logga ut</button>
-               ) : (
-                 <Link href="/logga-in" onClick={() => setMenuOpen(false)} className="block bg-[#003366] text-white text-center py-4 rounded-sm font-bold uppercase tracking-widest shadow-xl">Logga in / Bli medlem</Link>
-               )}
             </div>
           </nav>
           <div className="p-6 bg-zinc-50 text-center">

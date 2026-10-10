@@ -18,6 +18,7 @@ import {
 import { toast } from 'sonner'
 import HomeHero from '@/components/HomeHero'
 import Link from 'next/link'
+import { capitalizeFirst } from '@/utils/capitalize'
 import Image from 'next/image'
 
 const PRICING = [
@@ -73,11 +74,11 @@ export default function AnnonseraForetagPage() {
       const { error } = await supabase
         .from('business_ad_requests')
         .insert([{
-          company_name: companyName,
-          contact_person: contactPerson,
+          company_name: capitalizeFirst(companyName),
+          contact_person: capitalizeFirst(contactPerson),
           email,
           duration,
-          message,
+          message: capitalizeFirst(message),
           image_url: imageUrl,
           status: 'pending'
         }])

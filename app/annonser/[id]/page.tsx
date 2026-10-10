@@ -5,6 +5,8 @@ import { Mail, Phone, MapPin, ShieldCheck, Calendar, User, Edit3 } from 'lucide-
 import ContactForm from '@/components/ads/ContactForm'
 import AdActions from '@/components/ads/AdActions'
 import HomeHero from '@/components/HomeHero'
+import AdImageGallery from '@/components/ads/AdImageGallery'
+import { capitalizeFirst } from '@/utils/capitalize'
 
 export default async function AnnonsDetaljPage({
   params,
@@ -43,26 +45,14 @@ export default async function AnnonsDetaljPage({
       <main className="max-w-7xl mx-auto w-full px-0 md:px-6 py-4 md:py-12">
         <div className="bg-white border-y md:border border-zinc-200 shadow-sm md:shadow-xl md:rounded-sm overflow-hidden">
 
-          {/* Ad Image Header */}
-          {ad.image_url && (
-            <div className="w-full h-[250px] md:h-[500px] relative bg-zinc-100 border-b border-zinc-100">
-              <img
-                src={ad.image_url}
-                alt={ad.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-4 left-4 md:top-6 md:left-6 flex gap-2 md:gap-3">
-                <span className="bg-[#a11a2d] text-white px-3 py-1 md:px-4 md:py-1.5 rounded-sm text-[8px] md:text-[10px] font-black uppercase tracking-widest shadow-xl">
-                  {ad.category}
-                </span>
-                {ad.is_premium && (
-                  <span className="bg-[#003366] text-white px-3 py-1 md:px-4 md:py-1.5 rounded-sm text-[8px] md:text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-1 md:gap-2">
-                    <ShieldCheck size={12} /> Premium
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Ad Interactive Image Gallery Slider */}
+          <AdImageGallery
+            mainImage={ad.image_url}
+            extraImages={ad.extra_images}
+            title={ad.title}
+            category={ad.category}
+            isPremium={ad.is_premium}
+          />
 
           <div className="p-4 md:p-12">
             <div className="grid lg:grid-cols-12 gap-6 md:gap-12">
@@ -77,7 +67,10 @@ export default async function AnnonsDetaljPage({
                   )}
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-4 mb-4">
                     <div className="flex items-center gap-2 md:gap-3 text-zinc-400 text-[9px] md:text-[10px] font-bold uppercase tracking-widest">
-                      <Calendar size={14} className="text-[#a11a2d]" /> Publicerad {new Date(ad.created_at).toLocaleDateString()}
+                      <Calendar size={14} className="text-[#a11a2d]" /> Publicerad {new Date(ad.created_at).toLocaleDateString('sv-SE')}
+                      {ad.edited && (
+                        <span className="italic font-normal lowercase tracking-normal text-zinc-400 ml-1">(redigerad)</span>
+                      )}
                     </div>
                     {isOwner && (
                       <Link
@@ -89,7 +82,7 @@ export default async function AnnonsDetaljPage({
                     )}
                   </div>
                   <h1 className="text-2xl md:text-5xl font-black text-[#003366] uppercase tracking-tighter italic mb-4 md:mb-6 leading-tight">
-                    {ad.title}
+                    {capitalizeFirst(ad.title)}
                   </h1>
                   <div className="flex flex-wrap items-center justify-between gap-6 border-y border-zinc-50 py-4 md:py-6">
                     <div className="flex flex-wrap items-center gap-4 md:gap-8">
@@ -108,7 +101,7 @@ export default async function AnnonsDetaljPage({
                     Beskrivning <div className="h-px flex-1 bg-zinc-50"></div>
                   </h3>
                   <p className="text-zinc-600 font-medium text-sm md:text-lg leading-relaxed whitespace-pre-wrap px-1 mb-6 md:mb-10">
-                    {ad.description}
+                    {capitalizeFirst(ad.description)}
                   </p>
 
                   {ad.extra_images && ad.extra_images.length > 0 && (

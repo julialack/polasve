@@ -190,7 +190,10 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                                 <div className="flex flex-wrap items-center gap-2 text-[7px] md:text-[8px] font-black uppercase tracking-[0.12em]">
                                   <span className={ad.is_premium ? 'text-amber-700' : 'text-[#a11a2d]'}>{ad.is_premium ? 'Premium' : ad.category}</span>
                                   <span className="text-zinc-300">•</span>
-                                  <span className="text-zinc-400">{new Date(ad.created_at).toLocaleDateString()}</span>
+                                  <span className="text-zinc-400 font-bold flex items-center gap-1">
+                                    {new Date(ad.created_at).toLocaleDateString()}
+                                    {(ad as any).edited && <span className="italic font-normal lowercase tracking-normal text-zinc-400">(redigerad)</span>}
+                                  </span>
                                 </div>
 
                                 <h3 className={`text-[13px] md:text-lg font-black italic leading-tight ${ad.is_premium ? 'text-amber-900' : 'text-[#003366]'}`}>
@@ -255,8 +258,8 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                 <span className="text-[8px] font-bold text-zinc-400 italic">Prata fritt om {title.toLowerCase()}</span>
               </div>
               <div className="p-4 md:p-6">
-                <PostBox />
-                <FeedList />
+                <PostBox defaultCategory={title.toLowerCase().includes('meeting') || title.toLowerCase().includes('mötesplats') ? 'mötesplats' : 'allmänt'} />
+                <FeedList categoryFilter={title.toLowerCase().includes('meeting') || title.toLowerCase().includes('mötesplats') ? 'mötesplats' : undefined} />
               </div>
             </div>
           </div>

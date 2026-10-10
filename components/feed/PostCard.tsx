@@ -10,6 +10,7 @@ import UserAvatar from '../ui/UserAvatar'
 import ReportModal from '../ui/ReportModal'
 import SmartText from '../ui/SmartText'
 import Link from 'next/link'
+import { capitalizeFirst } from '@/utils/capitalize'
 
 interface PostCardProps {
   post: Post & { category?: string }
@@ -144,7 +145,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
       post_id: post.id,
       user_id: currentUser.id,
       user_name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0],
-      content: commentContent
+      content: capitalizeFirst(commentContent)
     }])
     if (!error) {
       setCommentContent(''); fetchComments(); onUpdate(); toast.success('Kommentar skickad')
@@ -152,12 +153,12 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
   }
 
   const handleUpdatePost = async () => {
-    const { error } = await supabase.from('posts').update({ content: editPostContent, edited: true }).eq('id', post.id)
+    const { error } = await supabase.from('posts').update({ content: capitalizeFirst(editPostContent), edited: true }).eq('id', post.id)
     if (!error) { setEditingPost(false); onUpdate(); toast.success('Inlägg uppdaterat') }
   }
 
   const handleUpdateComment = async (commentId: string) => {
-    const { error } = await supabase.from('comments').update({ content: editCommentContent, edited: true }).eq('id', commentId)
+    const { error } = await supabase.from('comments').update({ content: capitalizeFirst(editCommentContent), edited: true }).eq('id', commentId)
     if (!error) { setEditingComment(null); fetchComments(); toast.success('Kommentar uppdaterad') }
   }
 

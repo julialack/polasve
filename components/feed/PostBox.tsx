@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Loader2, Tag as TagIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import UserAvatar from '../ui/UserAvatar'
+import { capitalizeFirst } from '@/utils/capitalize'
 
 const FEED_CATEGORIES = [
   { id: 'allmänt', label: 'Allmänt', color: 'bg-zinc-100 text-zinc-600' },
@@ -48,11 +49,11 @@ export default function PostBox() {
       .from('posts')
       .insert([
         {
-          content,
+          content: capitalizeFirst(content),
           user_id: currentUser.id,
           user_name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0],
           edited: false,
-          category: category // New column
+          category: category
         }
       ])
 
