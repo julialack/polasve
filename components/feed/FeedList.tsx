@@ -6,19 +6,36 @@ import PostCard from './PostCard'
 import Skeleton from '../ui/Skeleton'
 import { Post } from '@/types/database'
 
-export default function FeedList() {
+interface FeedListProps {
+  categoryFilter?: string
+}
+
+export default function FeedList({ categoryFilter }: FeedListProps = {}) {
   const [posts, setPosts] = useState<Post[]>([])
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
   const fetchPosts = useCallback(async () => {
-    // We only show loading on the first fetch
-    const { data: postsData, error: postsError } = await supabase
+    let query = supabase
       .from('posts')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(20)
+      .limit(30)
+
+    const isMeetingPlaceFilter = categoryFilter?.toLowerCase() === 'mötesplats' ||
+      categoryFilter?.toLowerCase() === 'meeting place' ||
+      categoryFilter?.toLowerCase() === 'meeting-place'
+
+    if (isMeetingPlaceFilter) {
+      // Show ONLY meeting place posts
+      query = query.or('category.ilike.mötesplats,category.ilike.meeting place,category.ilike.meeting-place')
+    } else {
+      // Main feed: exclude meeting place posts
+      query = query.not('category', 'in', '("mötesplats","meeting place","meeting-place","Mötesplats","Meeting Place")')
+    }
+
+    const { data: postsData, error: postsError } = await query
 
     if (postsError) {
       console.error("Error fetching posts:", postsError.message, postsError.details, postsError.hint)
@@ -28,15 +45,21 @@ export default function FeedList() {
 
     if (postsData) {
       const userIds = Array.from(new Set(postsData.map(p => p.user_id)))
-      const { data: profilesData } = await supabase
-        .from('profiles')
-        .select('id, avatar_url')
-        .in('id', userIds)
+      let profileMap: Record<string, string> = {}
 
-      const profileMap = (profilesData || []).reduce((acc: any, p: any) => {
-        acc[p.id] = p.avatar_url
-        return acc
-      }, {})
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, avatar_url')
+          .in('id', userIds)
+
+        if (profilesData) {
+          profileMap = profilesData.reduce((acc: any, p: any) => {
+            acc[p.id] = p.avatar_url
+            return acc
+          }, {})
+        }
+      }
 
       const postsWithProfiles = postsData.map(post => ({
         ...post,
@@ -44,9 +67,11 @@ export default function FeedList() {
       }))
 
       setPosts(postsWithProfiles as any)
+    } else {
+      setPosts([])
     }
     setLoading(false)
-  }, [supabase])
+  }, [supabase, categoryFilter])
 
   useEffect(() => {
     const getUser = async () => {
@@ -94,9 +119,9 @@ export default function FeedList() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-left">
       {posts.length === 0 ? (
-        <p className="text-center py-10 text-zinc-400 italic text-sm">Inga inlägg ännu...</p>
+        <p className="text-center py-10 text-zinc-400 italic text-sm">Inga inlägg här ännu...</p>
       ) : (
         posts.map((post) => (
           <PostCard

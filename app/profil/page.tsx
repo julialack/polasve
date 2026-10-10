@@ -10,6 +10,7 @@ import HomeHero from '@/components/HomeHero'
 import { toast } from 'sonner'
 import UserAvatar from '@/components/ui/UserAvatar'
 import SafeImage from '@/components/ui/SafeImage'
+import { capitalizeFirst } from '@/utils/capitalize'
 
 interface Ad {
   id: string

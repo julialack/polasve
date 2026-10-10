@@ -8,21 +8,33 @@ import { toast } from 'sonner'
 import UserAvatar from '../ui/UserAvatar'
 import { capitalizeFirst } from '@/utils/capitalize'
 
+interface PostBoxProps {
+  defaultCategory?: string
+  hideCategorySelector?: boolean
+}
+
 const FEED_CATEGORIES = [
   { id: 'allmänt', label: 'Allmänt', color: 'bg-zinc-100 text-zinc-600' },
   { id: 'fråga', label: 'Fråga', color: 'bg-blue-50 text-blue-700' },
   { id: 'tips', label: 'Tips', color: 'bg-green-50 text-green-700' },
   { id: 'varning', label: 'Varning', color: 'bg-red-50 text-red-700' },
-  { id: 'hjälp', label: 'Hjälp', color: 'bg-orange-50 text-orange-700' }
+  { id: 'hjälp', label: 'Hjälp', color: 'bg-orange-50 text-orange-700' },
+  { id: 'mötesplats', label: '🤝 Mötesplats', color: 'bg-pink-50 text-pink-700' }
 ]
 
-export default function PostBox() {
+export default function PostBox({ defaultCategory = 'allmänt', hideCategorySelector = false }: PostBoxProps = {}) {
   const [content, setContent] = useState('')
-  const [category, setCategory] = useState('allmänt')
+  const [category, setCategory] = useState(defaultCategory.toLowerCase())
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState<any>(null)
   const supabase = createClient()
   const router = useRouter()
+
+  useEffect(() => {
+    if (defaultCategory) {
+      setCategory(defaultCategory.toLowerCase())
+    }
+  }, [defaultCategory])
 
   useEffect(() => {
     const getUser = async () => {
@@ -63,13 +75,13 @@ export default function PostBox() {
     } else {
       toast.success('Inlägget har publicerats!')
       setContent('')
-      setCategory('allmänt')
+      setCategory(defaultCategory.toLowerCase())
     }
     setLoading(false)
   }
 
   return (
-    <div className="bg-white border border-zinc-100 rounded-sm p-3 md:p-4 mb-6 shadow-sm">
+    <div className="bg-white border border-zinc-100 rounded-sm p-3 md:p-4 mb-6 shadow-sm text-left">
       <div className="flex gap-3 md:gap-4">
         <UserAvatar
           avatarUrl={user?.user_metadata?.avatar_url}
@@ -81,31 +93,33 @@ export default function PostBox() {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Dela något med communityt..."
-            className="w-full bg-transparent border-none focus:ring-0 resize-none font-bold text-zinc-950 placeholder:text-zinc-300 py-1 text-sm md:text-base"
-            rows={1}
+            placeholder={category === 'mötesplats' ? 'Skriv ett inlägg för Mötesplats...' : 'Dela något med communityt...'}
+            className="w-full bg-transparent border-none focus:ring-0 resize-none font-bold text-zinc-950 placeholder:text-zinc-300 py-1 text-sm md:text-base outline-none"
+            rows={2}
             disabled={loading}
           ></textarea>
 
           <div className="flex flex-col gap-4 pt-3 md:pt-4 border-t border-zinc-50">
-            <div className="flex items-start gap-2">
-              <TagIcon size={12} className="text-zinc-500 shrink-0 mt-2" />
-              <div className="flex flex-wrap gap-1.5">
-                {FEED_CATEGORIES.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setCategory(cat.id)}
-                    className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest px-2.5 md:px-3 py-1 rounded-full transition-all border ${
-                      category === cat.id
-                      ? 'border-sve-blue bg-sve-blue text-white shadow-md'
-                      : 'border-zinc-100 bg-zinc-50 text-zinc-600 hover:border-zinc-200'
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
+            {!hideCategorySelector && (
+              <div className="flex items-start gap-2">
+                <TagIcon size={12} className="text-zinc-500 shrink-0 mt-2" />
+                <div className="flex flex-wrap gap-1.5">
+                  {FEED_CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setCategory(cat.id)}
+                      className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest px-2.5 md:px-3 py-1 rounded-full transition-all border ${
+                        category === cat.id
+                        ? 'border-sve-blue bg-sve-blue text-white shadow-md'
+                        : 'border-zinc-100 bg-zinc-50 text-zinc-600 hover:border-zinc-200'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="flex justify-end pt-2 md:pt-0">
               <button
