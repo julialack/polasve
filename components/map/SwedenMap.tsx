@@ -1,7 +1,9 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/utils/supabase/client'
 
 const CITIES = [
   { name: 'Stockholm', top: '72%', left: '68%', pulse: true },
@@ -22,6 +24,32 @@ const CITIES = [
 
 export default function SwedenMap() {
   const router = useRouter()
+  const [cityCounts, setCityCounts] = useState<Record<string, number>>({})
+  const supabase = createClient()
+
+  useEffect(() => {
+    const fetchCityCounts = async () => {
+      try {
+        const { data } = await supabase.from('ads').select('location')
+        if (data) {
+          const counts: Record<string, number> = {}
+          data.forEach(ad => {
+            if (ad.location) {
+              CITIES.forEach(c => {
+                if (ad.location.toLowerCase().includes(c.name.toLowerCase())) {
+                  counts[c.name] = (counts[c.name] || 0) + 1
+                }
+              })
+            }
+          })
+          setCityCounts(counts)
+        }
+      } catch (err) {
+        console.error('Error fetching city counts:', err)
+      }
+    }
+    fetchCityCounts()
+  }, [supabase])
 
   const handleCityClick = (cityName: string) => {
     router.push(`/sok?q=${encodeURIComponent(cityName)}`)
@@ -45,54 +73,53 @@ export default function SwedenMap() {
 
           {/* Provincial Borders (Internal Lines) */}
           <g fill="none" stroke="currentColor" strokeWidth="0.5" className="opacity-20">
-            {/* Norrland boundaries */}
             <path d="M50,5 L55,30 M55,30 L82,35 M55,30 L42,60 M42,60 L85,75 M42,60 L38,95 M38,95 L80,110" />
-            {/* Svealand boundaries */}
             <path d="M38,95 L32,125 M32,125 L75,140 M32,125 L28,150 M28,150 L70,165" />
-            {/* Götaland boundaries */}
             <path d="M28,150 L25,185 M25,185 L65,195 M25,185 L35,220 M35,220 L50,230" />
-            {/* Detailed internal provincial lines (approximated from image) */}
             <path d="M78,100 L65,105 M72,130 L60,135 M65,160 L50,170 M45,215 L55,210" />
           </g>
 
-          {/* Islands with borders */}
+          {/* Islands */}
           <g fill="currentColor" stroke="currentColor" strokeWidth="0.5" className="opacity-[0.08]">
-            {/* Öland */}
             <path d="M52,185 L54,195 L50,195 Z" />
-            {/* Gotland */}
             <path d="M68,170 L72,185 L65,185 Z" />
           </g>
         </svg>
       </div>
 
-      {/* Interactive Pins */}
-      {CITIES.map((city) => (
-        <button
-          key={city.name}
-          onClick={() => handleCityClick(city.name)}
-          className="absolute -translate-x-1/2 -translate-y-1/2 group/pin z-10 transition-all hover:scale-125"
-          style={{ top: city.top, left: city.left }}
-          title={`Sök i ${city.name}`}
-        >
-          <div className="relative flex items-center justify-center">
-            {city.pulse && (
-              <span className="absolute w-6 h-6 bg-amber-400/30 rounded-full animate-ping"></span>
-            )}
-            <MapPin
-              size={city.pulse ? 20 : 16}
-              className={`${city.pulse ? 'text-[#a11a2d]' : 'text-[#003366]'} group-hover/pin:text-amber-500 transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]`}
-            />
+      {/* Interactive Pins with Live Counts */}
+      {CITIES.map((city) => {
+        const count = cityCounts[city.name] || 0
+        return (
+          <button
+            key={city.name}
+            onClick={() => handleCityClick(city.name)}
+            className="absolute -translate-x-1/2 -translate-y-1/2 group/pin z-10 transition-all hover:scale-125"
+            style={{ top: city.top, left: city.left }}
+            title={`Sök i ${city.name} (${count} annonser)`}
+          >
+            <div className="relative flex items-center justify-center">
+              {city.pulse && (
+                <span className="absolute w-6 h-6 bg-amber-400/30 rounded-full animate-ping"></span>
+              )}
+              <MapPin
+                size={city.pulse ? 20 : 16}
+                className={`${city.pulse ? 'text-[#a11a2d]' : 'text-[#003366]'} group-hover/pin:text-amber-500 transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]`}
+              />
 
-            {/* Tooltip Label */}
-            <div className="absolute left-6 top-1/2 -translate-y-1/2 opacity-0 group-hover/pin:opacity-100 transition-all duration-300 translate-x-2 group-hover/pin:translate-x-0 pointer-events-none">
-              <div className="bg-[#003366] text-white px-2.5 py-1 rounded-sm shadow-xl flex items-center gap-2 whitespace-nowrap">
-                <span className="text-[8px] font-black uppercase tracking-widest">{city.name}</span>
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+              {/* Tooltip Label & Count Badge */}
+              <div className="absolute left-6 top-1/2 -translate-y-1/2 opacity-0 group-hover/pin:opacity-100 transition-all duration-300 translate-x-2 group-hover/pin:translate-x-0 pointer-events-none z-30">
+                <div className="bg-[#003366] text-white px-2.5 py-1 rounded-sm shadow-xl flex items-center gap-2 whitespace-nowrap">
+                  <span className="text-[8px] font-black uppercase tracking-widest">{city.name}</span>
+                  <span className="bg-amber-400 text-zinc-900 text-[7px] font-black px-1.5 py-0.2 rounded-full">
+                    {count}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        </button>
-      ))}
+          </button>
+        )
+      })}
 
       {/* Map Header Overlay */}
       <div className="absolute top-4 left-0 right-0 px-4 flex justify-between items-center pointer-events-none">
@@ -105,7 +132,7 @@ export default function SwedenMap() {
       <div className="absolute bottom-4 left-4 right-4 pointer-events-none">
         <div className="bg-white/90 backdrop-blur-md p-3 border border-zinc-100 shadow-lg rounded-sm text-center transform transition-transform group-hover:-translate-y-1">
           <p className="text-[9px] font-black text-[#003366] uppercase tracking-[0.1em]">Utforska Regioner</p>
-          <p className="text-[7px] text-zinc-400 font-bold uppercase mt-1 tracking-tighter">Hitta lokala annonser & tjänster</p>
+          <p className="text-[7px] text-zinc-400 font-bold uppercase mt-1 tracking-tighter">Klicka på en stad för att se lokala annonser</p>
         </div>
       </div>
 

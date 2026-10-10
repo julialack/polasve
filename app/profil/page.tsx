@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { formatDisplayName } from '@/utils/formatName'
-import { Package, MessageSquare, ChevronRight, PlusCircle, Settings, Globe, Info, Trash2, CheckCircle, Edit3, Send, Camera, X, Loader2, ChevronLeft, Mail, Phone, Eye, EyeOff } from 'lucide-react'
+import { Package, MessageSquare, ChevronRight, PlusCircle, Settings, Globe, Info, Trash2, CheckCircle, Edit3, Send, Camera, X, Loader2, ChevronLeft, Mail, Phone, Eye, EyeOff, Bookmark } from 'lucide-react'
 import HomeHero from '@/components/HomeHero'
 import { toast } from 'sonner'
 import UserAvatar from '@/components/ui/UserAvatar'
@@ -37,7 +37,8 @@ function ProfilContent() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
-  const [activeView, setActiveView] = useState<'ads' | 'chat'>(initialView)
+  const [activeView, setActiveView] = useState<'ads' | 'chat' | 'saved'>(initialView as any)
+  const [savedAds, setSavedAds] = useState<any[]>([])
   const [conversations, setConversations] = useState<any[]>([])
   const [selectedChat, setSelectedChat] = useState<string | null>(otherIdFromUrl)
   const [chatMessages, setChatMessages] = useState<any[]>([])
@@ -372,6 +373,14 @@ function ProfilContent() {
                       <Package size={18} /> Mina Annonser ({ads.length})
                     </button>
                     <button
+                      onClick={() => setActiveView('saved')}
+                      className={`w-full flex items-center justify-between p-3 rounded-sm font-black uppercase text-[10px] tracking-widest transition-all ${activeView === 'saved' ? 'bg-[#003366] text-white shadow-lg' : 'hover:bg-zinc-100 text-zinc-600'}`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <Bookmark size={18} /> Sparade Annonser ({savedAds.length})
+                      </div>
+                    </button>
+                    <button
                       onClick={() => setActiveView('chat')}
                       className={`w-full flex items-center justify-between p-3 rounded-sm font-black uppercase text-[10px] tracking-widest transition-all ${activeView === 'chat' ? 'bg-[#a11a2d] text-white shadow-lg' : 'hover:bg-zinc-100 text-zinc-600'}`}
                     >
@@ -393,7 +402,67 @@ function ProfilContent() {
 
             {/* RIGHT: Content (Restored original design) */}
             <div className="lg:col-span-8">
-              {activeView === 'ads' ? (
+              {activeView === 'saved' ? (
+                <section className="bg-white border border-zinc-200 rounded-sm shadow-sm overflow-hidden text-left min-h-[500px]">
+                  <div className="bg-[#003366] text-white px-6 py-2 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                    <Bookmark size={14} className="text-amber-400" /> Sparade Annonser ({savedAds.length})
+                  </div>
+
+                  <div className="p-4 md:p-6 text-left">
+                    {savedAds.length === 0 ? (
+                      <div className="py-16 text-center opacity-50">
+                        <Bookmark size={40} className="mx-auto mb-4 text-[#003366]" />
+                        <p className="text-zinc-500 font-bold italic text-sm text-center">Du har inga sparade annonser än.</p>
+                        <p className="text-zinc-400 text-xs text-center mt-1">Klicka på knappen "Spara" på någon annons för att spara den här.</p>
+                      </div>
+                    ) : (
+                      <div className="grid gap-4 text-left">
+                        {savedAds.map((ad: any) => (
+                          <div key={ad.id} className="group relative flex flex-col md:flex-row items-center gap-6 p-4 border border-zinc-100 rounded-sm hover:border-[#003366]/20 transition-all bg-white">
+                            <Link href={`/annonser/${ad.id}`} className="flex flex-1 items-center gap-6 min-w-0">
+                              <div className="w-16 h-16 md:w-20 md:h-20 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border text-left relative">
+                                {ad.image_url ? (
+                                  <img src={ad.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[8px] font-bold uppercase text-left">Ingen bild</div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0 text-left">
+                                <span className="text-[7px] font-black text-[#a11a2d] uppercase tracking-widest text-left">{ad.category}</span>
+                                <h4 className="font-bold text-base text-[#003366] truncate italic group-hover:underline text-left">{capitalizeFirst(ad.title)}</h4>
+                                <p className="text-xs text-zinc-400 font-bold uppercase mt-0.5">📍 {ad.location}</p>
+                                <p className="text-sm font-black text-zinc-900 mt-1 text-left">{ad.price || 'Bud'}</p>
+                              </div>
+                            </Link>
+
+                            <div className="flex items-center gap-3 md:border-l border-zinc-100 md:pl-6 w-full md:w-auto justify-end">
+                              <Link
+                                href={`/annonser/${ad.id}`}
+                                className="bg-[#003366] text-white px-4 py-2 rounded-sm text-[9px] font-black uppercase tracking-widest hover:bg-[#a11a2d] transition-all shadow-sm"
+                              >
+                                Visa Annons
+                              </Link>
+                              <button
+                                onClick={async () => {
+                                  setSavedAds(prev => prev.filter(a => a.id !== ad.id))
+                                  const localSaved = JSON.parse(localStorage.getItem(`saved_ads_${user?.id}`) || '[]')
+                                  localStorage.setItem(`saved_ads_${user?.id}`, JSON.stringify(localSaved.filter((id: string) => id !== ad.id)))
+                                  await supabase.from('saved_ads').delete().eq('user_id', user?.id).eq('ad_id', ad.id)
+                                  toast.success('Borttagen från sparade annonser')
+                                }}
+                                className="p-2 text-zinc-400 hover:text-red-500 transition-colors"
+                                title="Ta bort från sparade"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </section>
+              ) : activeView === 'ads' ? (
                 <section className="bg-white border border-zinc-200 rounded-sm shadow-sm overflow-hidden text-left min-h-[500px]">
                   <div className="bg-[#a11a2d] text-white px-6 py-2 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                     <Package size={14} /> Mina Aktiva Annonser
