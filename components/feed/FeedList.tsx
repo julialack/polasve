@@ -22,20 +22,23 @@ export default function FeedList({ categoryFilter }: FeedListProps = {}) {
   const supabase = createClient()
 
   const fetchPosts = useCallback(async () => {
-    const isMeetingPlaceCategory = (value?: string | null) => {
-      const normalized = (value ?? '')
-        .trim()
-        .toLowerCase()
-        .replace(/[-\s]/g, '')
-
-      return normalized.includes('motesplats') || normalized.includes('meetingplace')
-    }
-
-    const { data: postsData, error: postsError } = await supabase
+    let query = supabase
       .from('posts')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(30)
+
+    const isMeetingPlaceFilter = categoryFilter?.toLowerCase().includes('mötesplats') ||
+      categoryFilter?.toLowerCase().includes('motesplats') ||
+      categoryFilter?.toLowerCase().includes('meeting')
+
+    if (isMeetingPlaceFilter) {
+      query = query.or('category.ilike.%mötesplats%,category.ilike.%motesplats%,category.ilike.%meeting%')
+    } else {
+      query = query.not('category', 'in', '("mötesplats","motesplats","meeting-place","meeting place","Mötesplats","Meeting Place")')
+    }
+
+    const { data: postsData, error: postsError } = await query
 
     if (postsError) {
       console.error('Error fetching posts:', postsError.message, postsError.details, postsError.hint)
@@ -43,17 +46,8 @@ export default function FeedList({ categoryFilter }: FeedListProps = {}) {
       return
     }
 
-    const isMeetingPlaceFilter = categoryFilter?.toLowerCase() === 'mötesplats' ||
-      categoryFilter?.toLowerCase() === 'meeting place' ||
-      categoryFilter?.toLowerCase() === 'meeting-place'
-
-    const filteredPosts = (postsData ?? []).filter((post) => {
-      const matchesMeetingPlace = isMeetingPlaceCategory(post.category)
-      return isMeetingPlaceFilter ? matchesMeetingPlace : !matchesMeetingPlace
-    })
-
-    if (filteredPosts.length > 0) {
-      const userIds = Array.from(new Set(filteredPosts.map(post => post.user_id)))
+    if (postsData && postsData.length > 0) {
+      const userIds = Array.from(new Set(postsData.map(post => post.user_id)))
       let profileMap: Record<string, string | null> = {}
 
       if (userIds.length > 0) {
@@ -70,7 +64,7 @@ export default function FeedList({ categoryFilter }: FeedListProps = {}) {
         }
       }
 
-      const postsWithProfiles: Post[] = filteredPosts.map(post => ({
+      const postsWithProfiles: Post[] = postsData.map(post => ({
         ...post,
         avatar_url: profileMap[post.user_id]
       }))

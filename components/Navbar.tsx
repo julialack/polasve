@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
 import { User, MessageSquare, Menu, X, ChevronRight } from "lucide-react";
+import LanguageSelector from "@/components/ui/LanguageSelector";
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
@@ -130,6 +131,7 @@ export default function Navbar() {
     '/institutioner',
     '/annonsera-foretag',
     '/reklam',
+    '/stod-oss',
     '/villkor',
     '/faq',
     '/admin'
@@ -201,7 +203,8 @@ export default function Navbar() {
               </ul>
 
               {/* Action Icons positioned relative to the container */}
-              <div className="absolute right-0 flex items-center gap-4 lg:gap-6">
+              <div className="absolute right-0 flex items-center gap-3 lg:gap-4">
+                <LanguageSelector variant="navbar" />
                 {!user ? (
                   <Link href="/logga-in" className="text-[11px] font-black text-[#003366] uppercase tracking-[0.2em] border-b-2 border-transparent hover:border-[#003366] transition-all py-1">
                     Bli medlem / Logga in

@@ -8,6 +8,7 @@ import SidebarNav from "@/components/layout/SidebarNav";
 import SwedenMap from "@/components/map/SwedenMap";
 import SafeImage from "@/components/ui/SafeImage";
 import ExternalNewsSidebar from "@/components/layout/ExternalNewsSidebar";
+import DonationCard from "@/components/ui/DonationCard";
 import { createClient } from "@/utils/supabase/server";
 import { ShieldCheck, Briefcase, Home as HomeIcon, Tag, ShoppingCart, Wrench, Heart } from "lucide-react";
 
@@ -216,6 +217,9 @@ export default async function Home() {
 
           {/* RIGHT SIDEBAR */}
           <aside className="hidden lg:block lg:col-span-1 space-y-6">
+            {/* Voluntary Donation / Support Community Card */}
+            <DonationCard />
+
             {/* Live Poland News */}
             <ExternalNewsSidebar />
 

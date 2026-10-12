@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { User, MessageSquare, ShieldCheck, Menu, X, PlusCircle, ChevronRight } from 'lucide-react'
+import LanguageSelector from '@/components/ui/LanguageSelector'
 
 export default function HomeHero() {
   const [user, setUser] = useState<any>(null)
@@ -137,19 +138,20 @@ export default function HomeHero() {
           <Menu size={28} />
         </button>
         <Link href="/" className={`${isHome ? 'hidden' : 'block'} font-black italic tracking-tighter text-sm uppercase`}>Polasve</Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <LanguageSelector />
           {user ? (
             <>
               <Link href="/meddelanden" className="relative p-2" aria-label="Meddelanden">
                 <MessageSquare size={24} className="scale-x-[-1]" />
                 {unreadCount > 0 && <span className="absolute top-1 right-1 bg-white text-red-600 text-[8px] w-5 h-5 flex items-center justify-center rounded-full font-black shadow-lg">{unreadCount}</span>}
               </Link>
-              <Link href="/profil" className="w-10 h-10 rounded-full border-2 border-white overflow-hidden bg-white ml-1 shadow-md">
+              <Link href="/profil" className="w-10 h-10 rounded-full border-2 border-white overflow-hidden bg-white shadow-md">
                 {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[#003366]"><User size={20} /></div>}
               </Link>
             </>
           ) : (
-            <Link href="/logga-in" className="text-[11px] font-black uppercase tracking-[0.2em] bg-white/20 backdrop-blur-sm px-5 py-2.5 rounded-sm active:scale-95 transition-all">Logga in</Link>
+            <Link href="/logga-in" className="text-[11px] font-black uppercase tracking-[0.2em] bg-white/20 backdrop-blur-sm px-4 py-2 rounded-sm active:scale-95 transition-all">Logga in</Link>
           )}
         </div>
       </div>
@@ -211,7 +213,8 @@ export default function HomeHero() {
             <Link href="/admin" className={`text-[11px] md:text-xs font-black uppercase tracking-[0.2em] text-yellow-300 hover:text-white flex items-center gap-2 transition-all ${pathname === '/admin' ? 'border-b-2 border-white pb-1' : ''}`}><ShieldCheck size={16} /> Admin</Link>
           )}
 
-          <div className="flex items-center gap-5 ml-2">
+          <div className="flex items-center gap-4 ml-2">
+            <LanguageSelector />
             {user ? (
               <>
                 <Link href="/profil" className="hover:opacity-70 transition-opacity">
