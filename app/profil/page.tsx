@@ -5,11 +5,10 @@ import { createClient } from '@/utils/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { formatDisplayName } from '@/utils/formatName'
-import { Package, MessageSquare, ChevronRight, PlusCircle, Settings, Globe, Info, Trash2, CheckCircle, Edit3, Send, Camera, X, Loader2, ChevronLeft, Mail, Phone, Eye, EyeOff, Bookmark } from 'lucide-react'
+import { Package, MessageSquare, PlusCircle, Settings, Globe, Info, Trash2, CheckCircle, Edit3, Send, Camera, X, Loader2, ChevronLeft, Mail, Phone, Eye, EyeOff, Bookmark } from 'lucide-react'
 import HomeHero from '@/components/HomeHero'
 import { toast } from 'sonner'
 import UserAvatar from '@/components/ui/UserAvatar'
-import SafeImage from '@/components/ui/SafeImage'
 import { capitalizeFirst } from '@/utils/capitalize'
 
 interface Ad {
@@ -300,13 +299,13 @@ function ProfilContent() {
                   </div>
                 </div>
                 <div className="pt-20 pb-10 px-8 text-center">
-                  <h2 className="text-3xl font-bold text-sve-blue tracking-tight mb-2">
+                  <h2 className="break-words text-2xl md:text-3xl font-bold text-sve-blue tracking-tight mb-2">
                     {formatDisplayName(meta.full_name || user?.email?.split('@')[0])}
                   </h2>
                   <div className="flex flex-col items-center gap-3 mt-1 mb-6">
-                    <div className="flex items-center gap-2 text-zinc-400 text-[9px] font-bold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full border border-zinc-100 shadow-sm">
-                      <Mail size={10} className="text-[#a11a2d]" />
-                      <span>{user?.email}</span>
+                    <div className="flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 text-zinc-400 text-[9px] font-bold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full border border-zinc-100 shadow-sm">
+                      <Mail size={10} className="shrink-0 text-[#a11a2d]" />
+                      <span className="min-w-0 break-all">{user?.email}</span>
                       <div className="ml-1 pl-2 border-l border-zinc-200">
                         {meta.show_email_publicly ? (
                           <span title="Visas offentligt" aria-label="Visas offentligt">
@@ -320,8 +319,8 @@ function ProfilContent() {
                       </div>
                     </div>
                     {meta.phone && (
-                      <div className="flex items-center gap-2 text-zinc-400 text-[9px] font-bold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full border border-zinc-100 shadow-sm">
-                        <Phone size={10} className="text-[#003366]" />
+                      <div className="flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 text-zinc-400 text-[9px] font-bold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full border border-zinc-100 shadow-sm">
+                        <Phone size={10} className="shrink-0 text-[#003366]" />
                         <span>{meta.phone}</span>
                         <div className="ml-1 pl-2 border-l border-zinc-200">
                           {meta.show_phone_publicly ? (
@@ -538,10 +537,10 @@ function ProfilContent() {
                   </div>
                 </section>
               ) : (
-                <div className="bg-white border border-zinc-200 shadow-xl rounded-sm flex flex-col md:flex-row h-[600px] overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
-                  <aside className={`${selectedChat ? 'hidden md:flex' : 'flex'} w-full md:w-64 flex-col border-r border-zinc-100 bg-zinc-50/50`}>
+                <div className="bg-white border border-zinc-200 shadow-xl rounded-sm flex flex-col md:flex-row h-[600px] md:h-[600px] overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500 max-w-full">
+                  <aside className={`${selectedChat ? 'hidden md:flex' : 'flex'} w-full md:w-64 flex-col border-r border-zinc-100 bg-zinc-50/50 min-w-0`}>
                     <div className="p-4 border-b border-zinc-100 bg-white font-black text-[10px] uppercase text-[#003366] tracking-widest text-left">Inkorg</div>
-                    <div className="flex-1 overflow-y-auto">
+                    <div className="flex-1 overflow-y-auto min-h-0">
                       {conversations.length === 0 ? <div className="p-10 text-center text-zinc-400 text-[10px] uppercase italic">Inga chatter än</div> : conversations.map(chat => (
                         <button key={chat.otherId} onClick={() => { setSelectedChat(chat.otherId); fetchChatMessages(chat.otherId) }} className={`w-full p-4 flex gap-3 hover:bg-white border-b border-zinc-100 text-left ${selectedChat === chat.otherId ? 'bg-white border-l-4 border-l-[#a11a2d]' : ''}`}>
                           <div className="w-8 h-8 rounded-full overflow-hidden bg-zinc-100 flex-shrink-0 border border-zinc-200 shadow-inner">
@@ -555,44 +554,44 @@ function ProfilContent() {
                       ))}
                     </div>
                   </aside>
-                  <main className={`${selectedChat ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-white min-w-0`}>
+                  <main className={`${selectedChat ? 'flex' : 'hidden md:flex'} flex-1 min-h-0 flex-col bg-white min-w-0 w-full`}>
                     {selectedChat ? (
                       <>
                         <div className="p-3 border-b flex items-center justify-between bg-zinc-50/50">
-                          <div className="flex items-center gap-3">
-                            <button onClick={() => setSelectedChat(null)} className="md:hidden p-1 text-zinc-400"><ChevronLeft size={20} /></button>
-                            <Link href={`/profil/${selectedChat}`} className="font-black text-[10px] uppercase tracking-widest text-[#003366] hover:underline flex items-center gap-2">
-                               <div className="w-6 h-6 rounded-full overflow-hidden bg-[#003366] flex items-center justify-center text-white text-[8px] font-bold">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <button onClick={() => setSelectedChat(null)} className="md:hidden p-1 text-zinc-400 shrink-0"><ChevronLeft size={20} /></button>
+                            <Link href={`/profil/${selectedChat}`} className="font-black text-[10px] uppercase tracking-widest text-[#003366] hover:underline flex items-center gap-2 min-w-0">
+                               <div className="w-6 h-6 rounded-full overflow-hidden bg-[#003366] flex items-center justify-center text-white text-[8px] font-bold shrink-0">
                                  {conversations.find(c => c.otherId === selectedChat)?.avatar ? <img src={conversations.find(c => c.otherId === selectedChat)?.avatar} className="w-full h-full object-cover" /> : conversations.find(c => c.otherId === selectedChat)?.name?.[0]}
                                </div>
-                               {conversations.find(c => c.otherId === selectedChat)?.name}
+                               <span className="truncate">{conversations.find(c => c.otherId === selectedChat)?.name}</span>
                             </Link>
                           </div>
                           <span className="text-[8px] font-black uppercase text-green-500 bg-green-50 px-2 py-0.5 rounded-full tracking-widest hidden">Aktiv</span>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50/20" ref={scrollRef}>
+                        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 bg-zinc-50/20" ref={scrollRef}>
                           {chatMessages.map(msg => (
                             <div key={msg.id} className={`flex ${msg.sender_id === user.id ? 'justify-end' : 'justify-start'}`}>
                               <div className={`max-w-[85%] p-3 rounded-xl text-xs shadow-sm ${msg.sender_id === user.id ? 'bg-[#003366] text-white rounded-br-none' : 'bg-white border text-zinc-800 rounded-bl-none'}`}>
                                 {msg.image_url && <div className="mb-2 rounded-lg overflow-hidden border"><img src={msg.image_url} className="max-w-full h-auto" /></div>}
-                                <p className="font-medium leading-relaxed">{msg.content}</p>
+                                <p className="font-medium leading-relaxed break-words">{msg.content}</p>
                                 <span className={`text-[7px] mt-1 block opacity-50 text-right ${msg.sender_id === user.id ? 'text-white/70' : 'text-zinc-400'}`}>{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <form onSubmit={handleSendMessage} className="p-3 border-t">
+                        <form onSubmit={handleSendMessage} className="border-t bg-white p-3 w-full">
                           {imagePreview && (
                             <div className="mb-2 relative w-12 h-12 rounded-sm overflow-hidden border border-zinc-200">
                               <img src={imagePreview} className="w-full h-full object-cover" />
                               <button type="button" onClick={() => { setImagePreview(null); setImageFile(null) }} className="absolute top-0 right-0 bg-black/50 text-white p-0.5"><X size={10} /></button>
                             </div>
                           )}
-                          <div className="flex gap-2 bg-zinc-50 rounded-full px-3 py-1 border items-center shadow-inner focus-within:border-[#003366] transition-colors">
-                            <button type="button" onClick={() => fileInputRef.current?.click()} className="text-zinc-400 hover:text-[#003366] p-1.5 transition-colors"><Camera size={16} /></button>
+                          <div className="flex w-full items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 shadow-inner transition-colors focus-within:border-[#003366] min-w-0">
+                            <button type="button" onClick={() => fileInputRef.current?.click()} className="shrink-0 text-zinc-400 hover:text-[#003366] p-1.5 transition-colors"><Camera size={16} /></button>
                             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageSelect} />
-                            <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(e as any) } }} placeholder="Skriv svar..." className="flex-1 bg-transparent border-none py-2 text-[11px] font-bold outline-none text-zinc-950 placeholder:text-zinc-400" />
-                            <button type="submit" disabled={sending || (!newMessage.trim() && !imageFile)} className="text-[#a11a2d] hover:text-[#003366] p-1.5 transition-all active:scale-90">{sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}</button>
+                            <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(e as any) } }} placeholder="Skriv svar..." className="min-w-0 w-full flex-1 bg-transparent border-none py-2 text-[11px] font-bold outline-none text-zinc-950 placeholder:text-zinc-400" />
+                            <button type="submit" disabled={sending || (!newMessage.trim() && !imageFile)} className="shrink-0 text-[#a11a2d] hover:text-[#003366] p-1.5 transition-all active:scale-90 disabled:opacity-50">{sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}</button>
                           </div>
                         </form>
                       </>

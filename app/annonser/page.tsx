@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { MapPin, Box, Users, ArrowRight, X } from 'lucide-react'
+import { MapPin, Users, ArrowRight, X } from 'lucide-react'
 import SearchBar from '@/components/search/SearchBar'
 import HomeHero from "@/components/HomeHero";
 import InfoBar from "@/components/layout/InfoBar";
@@ -94,13 +94,13 @@ function AnnonserList() {
       <HomeHero />
       <InfoBar />
 
-      <div className="bg-zinc-50 border-b border-zinc-100 py-6 px-6">
+      <div className="bg-zinc-50 border-b border-zinc-100 py-4 md:py-6 px-4 md:px-6">
         <div className="max-w-4xl mx-auto">
           <SearchBar />
         </div>
       </div>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-8">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-4 md:px-6 py-5 md:py-8">
         <div className="grid grid-cols-1 md:grid-cols-12 lg:grid-cols-4 gap-6">
 
           <aside className="hidden md:block md:col-span-3 lg:col-span-1 space-y-6">
@@ -115,11 +115,11 @@ function AnnonserList() {
 
               <div className="p-4 md:p-6">
                 {locationFilter && (
-                   <div className="mb-6 flex items-center gap-3 bg-red-50 border border-red-100 p-3 rounded-sm">
-                      <span className="text-[10px] font-black uppercase text-[#a11a2d] tracking-widest flex items-center gap-2">
-                        <MapPin size={14} /> Filtrerat på: {locationFilter}
+                   <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 bg-red-50 border border-red-100 p-3 rounded-sm">
+                      <span className="min-w-0 break-words text-[10px] font-black uppercase text-[#a11a2d] tracking-widest flex items-center gap-2">
+                        <MapPin size={14} className="shrink-0" /> Filtrerat på: {locationFilter}
                       </span>
-                      <Link href="/annonser" className="ml-auto text-[8px] font-black uppercase bg-[#a11a2d] text-white px-2 py-1 rounded-sm flex items-center gap-1 hover:bg-[#003366] transition-colors">
+                      <Link href="/annonser" className="ml-auto shrink-0 self-end sm:self-auto text-[8px] font-black uppercase bg-[#a11a2d] text-white px-2 py-1 rounded-sm flex items-center gap-1 hover:bg-[#003366] transition-colors">
                         Rensa <X size={10} />
                       </Link>
                    </div>
@@ -138,7 +138,7 @@ function AnnonserList() {
                     {/* Active Ads */}
                     <div className="space-y-4">
                       {ads.filter(ad => ad.status !== 'finished').map((ad) => (
-                        <Link href={`/annonser/${ad.id}`} key={ad.id} className="group bg-white p-3 md:p-4 border border-zinc-100 rounded-sm shadow-sm hover:shadow-md transition-all flex flex-row md:flex-row gap-4 md:gap-6">
+                        <Link href={`/annonser/${ad.id}`} key={ad.id} className="group bg-white p-3 sm:p-4 border border-zinc-100 rounded-sm shadow-sm hover:shadow-md transition-all flex flex-row gap-3 sm:gap-4 md:gap-6">
                           <div className="w-20 h-20 md:w-40 md:h-32 bg-zinc-100 rounded-sm overflow-hidden flex-shrink-0">
                             <SafeImage
                               src={ad.image_url || ""}
@@ -150,13 +150,13 @@ function AnnonserList() {
                           <div className="flex-1 flex flex-col justify-between py-0.5 min-w-0">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="text-[7px] md:text-[9px] font-black uppercase text-[#a11a2d]">{ad.category}</span>
+                                <span className="text-[8px] md:text-[9px] font-black uppercase text-[#a11a2d]">{ad.category}</span>
                                 <span className="text-[7px] md:text-[8px] text-zinc-300 font-bold border-l pl-2 hidden md:inline">{new Date(ad.created_at).toLocaleDateString()}</span>
                               </div>
-                              <h3 className="text-[13px] md:text-lg font-bold italic group-hover:underline leading-tight mb-1 truncate text-[#003366]">
+                              <h3 className="line-clamp-2 md:line-clamp-1 text-sm md:text-lg font-bold italic group-hover:underline leading-tight mb-1 text-[#003366]">
                                 {ad.title}
                               </h3>
-                              <p className="text-[8px] md:text-[10px] text-zinc-400 font-bold uppercase tracking-tighter flex items-center gap-1"><MapPin size={8} /> {ad.location}</p>
+                              <p className="min-w-0 break-words text-[9px] md:text-[10px] text-zinc-400 font-bold uppercase tracking-tighter flex items-start gap-1"><MapPin size={10} className="shrink-0 mt-0.5" /> {ad.location}</p>
                             </div>
                             <div className="flex justify-between items-end mt-1">
                               <span className={`text-[11px] md:text-sm font-black ${ad.is_premium ? 'text-[#D4AF37]' : 'text-zinc-900'}`}>

@@ -10,42 +10,51 @@ interface FeedListProps {
   categoryFilter?: string
 }
 
+type Profile = {
+  id: string
+  avatar_url: string | null
+}
+
 export default function FeedList({ categoryFilter }: FeedListProps = {}) {
   const [posts, setPosts] = useState<Post[]>([])
-  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
   const fetchPosts = useCallback(async () => {
-    let query = supabase
+    const isMeetingPlaceCategory = (value?: string | null) => {
+      const normalized = (value ?? '')
+        .trim()
+        .toLowerCase()
+        .replace(/[-\s]/g, '')
+
+      return normalized.includes('motesplats') || normalized.includes('meetingplace')
+    }
+
+    const { data: postsData, error: postsError } = await supabase
       .from('posts')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(30)
 
-    const isMeetingPlaceFilter = categoryFilter?.toLowerCase() === 'mötesplats' ||
-      categoryFilter?.toLowerCase() === 'meeting place' ||
-      categoryFilter?.toLowerCase() === 'meeting-place'
-
-    if (isMeetingPlaceFilter) {
-      // Show ONLY meeting place posts
-      query = query.or('category.ilike.mötesplats,category.ilike.meeting place,category.ilike.meeting-place')
-    } else {
-      // Main feed: exclude meeting place posts
-      query = query.not('category', 'in', '("mötesplats","meeting place","meeting-place","Mötesplats","Meeting Place")')
-    }
-
-    const { data: postsData, error: postsError } = await query
-
     if (postsError) {
-      console.error("Error fetching posts:", postsError.message, postsError.details, postsError.hint)
+      console.error('Error fetching posts:', postsError.message, postsError.details, postsError.hint)
       setLoading(false)
       return
     }
 
-    if (postsData) {
-      const userIds = Array.from(new Set(postsData.map(p => p.user_id)))
-      let profileMap: Record<string, string> = {}
+    const isMeetingPlaceFilter = categoryFilter?.toLowerCase() === 'mötesplats' ||
+      categoryFilter?.toLowerCase() === 'meeting place' ||
+      categoryFilter?.toLowerCase() === 'meeting-place'
+
+    const filteredPosts = (postsData ?? []).filter((post) => {
+      const matchesMeetingPlace = isMeetingPlaceCategory(post.category)
+      return isMeetingPlaceFilter ? matchesMeetingPlace : !matchesMeetingPlace
+    })
+
+    if (filteredPosts.length > 0) {
+      const userIds = Array.from(new Set(filteredPosts.map(post => post.user_id)))
+      let profileMap: Record<string, string | null> = {}
 
       if (userIds.length > 0) {
         const { data: profilesData } = await supabase
@@ -54,19 +63,19 @@ export default function FeedList({ categoryFilter }: FeedListProps = {}) {
           .in('id', userIds)
 
         if (profilesData) {
-          profileMap = profilesData.reduce((acc: any, p: any) => {
-            acc[p.id] = p.avatar_url
+          profileMap = profilesData.reduce<Record<string, string | null>>((acc, profile: Profile) => {
+            acc[profile.id] = profile.avatar_url
             return acc
           }, {})
         }
       }
 
-      const postsWithProfiles = postsData.map(post => ({
+      const postsWithProfiles: Post[] = filteredPosts.map(post => ({
         ...post,
         avatar_url: profileMap[post.user_id]
       }))
 
-      setPosts(postsWithProfiles as any)
+      setPosts(postsWithProfiles)
     } else {
       setPosts([])
     }
@@ -74,13 +83,21 @@ export default function FeedList({ categoryFilter }: FeedListProps = {}) {
   }, [supabase, categoryFilter])
 
   useEffect(() => {
+    let isMounted = true
+
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      setCurrentUser(user)
+      if (isMounted) {
+        setCurrentUser(user)
+      }
     }
 
-    getUser()
-    fetchPosts()
+    const loadData = async () => {
+      await getUser()
+      await fetchPosts()
+    }
+
+    loadData()
 
     const postChannel = supabase
       .channel('realtime_posts_all')
@@ -90,6 +107,7 @@ export default function FeedList({ categoryFilter }: FeedListProps = {}) {
       .subscribe()
 
     return () => {
+      isMounted = false
       supabase.removeChannel(postChannel)
     }
   }, [supabase, fetchPosts])
@@ -119,7 +137,7 @@ export default function FeedList({ categoryFilter }: FeedListProps = {}) {
   }
 
   return (
-    <div className="space-y-4 text-left">
+    <div className="w-full max-w-full space-y-4 text-left overflow-x-hidden">
       {posts.length === 0 ? (
         <p className="text-center py-10 text-zinc-400 italic text-sm">Inga inlägg här ännu...</p>
       ) : (

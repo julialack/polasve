@@ -9,10 +9,28 @@ import SwedenMap from "@/components/map/SwedenMap";
 import SafeImage from "@/components/ui/SafeImage";
 import ExternalNewsSidebar from "@/components/layout/ExternalNewsSidebar";
 import { createClient } from "@/utils/supabase/server";
-import { Newspaper, Calendar, Box, Info, ArrowRight, ShieldCheck, ExternalLink, Briefcase, Home as HomeIcon, Tag, ShoppingCart, Wrench, Heart } from "lucide-react";
-
+import { ShieldCheck, Briefcase, Home as HomeIcon, Tag, ShoppingCart, Wrench, Heart } from "lucide-react";
 
 export const revalidate = 60; // Revalidate every minute
+
+type SafeQueryResult<T> = {
+  data: T | null
+  error?: { message?: string; details?: string; hint?: string } | null
+  status?: number
+  statusText?: string
+  count?: number | null
+}
+
+async function safeQuery<T>(query: PromiseLike<SafeQueryResult<T>>, fallback: SafeQueryResult<T>): Promise<SafeQueryResult<T>> {
+  try {
+    return await Promise.race([
+      query,
+      new Promise<SafeQueryResult<T>>((resolve) => setTimeout(() => resolve(fallback), 5000)),
+    ]);
+  } catch {
+    return fallback;
+  }
+}
 
 const AdBox = ({ title, href, variant = 'gray' }: { title: string, href?: string, variant?: 'gray' | 'gold' }) => {
   const content = (
@@ -50,18 +68,24 @@ export default async function Home() {
   const supabase = await createClient();
 
   const [{ data: adsData }, { data: newsData }] = await Promise.all([
-    supabase
+    safeQuery(
+      supabase
       .from('ads')
       .select('*')
       .eq('is_premium', true)
       .eq('payment_status', 'paid')
       .order('created_at', { ascending: false })
       .limit(6),
-    supabase
+      { data: null }
+    ),
+    safeQuery(
+      supabase
       .from('news')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(4)
+      .limit(4),
+      { data: null }
+    )
   ]);
 
   const featuredAds = adsData || [];
@@ -73,18 +97,18 @@ export default async function Home() {
     { name: "Säljes", href: "/marketplace/salj", icon: <Tag size={20} />, color: "bg-red-50 text-red-600" },
     { name: "Köpes", href: "/marketplace/kop", icon: <ShoppingCart size={20} />, color: "bg-amber-50 text-amber-600" },
     { name: "Tjänster", href: "/tjanster", icon: <Wrench size={20} />, color: "bg-purple-50 text-purple-600" },
-   {
-       name: "Mötesplats",
-       href: "/meeting-place",
-       icon: (
-         <div className="relative flex items-center justify-center">
-           <Heart size={22} className="text-pink-300 fill-pink-300 absolute scale-125 opacity-80" />
-           <span className="text-xs relative z-10">🤝</span>
-         </div>
-       ),
-       color: "bg-pink-50 text-pink-600"
-     },
-   ];
+    {
+      name: "Mötesplats",
+      href: "/meeting-place",
+      icon: (
+        <div className="relative flex items-center justify-center">
+          <Heart size={22} className="text-pink-300 fill-pink-300 absolute scale-125 opacity-80" />
+          <span className="text-xs relative z-10">🤝</span>
+        </div>
+      ),
+      color: "bg-pink-50 text-pink-600"
+    },
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fa]">
@@ -113,8 +137,8 @@ export default async function Home() {
         </div>
       </div>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-6 md:py-12">
-        <div className="grid grid-cols-1 md:grid-cols-12 lg:grid-cols-4 gap-4 md:gap-6">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-4 md:px-6 py-4 md:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-12 lg:grid-cols-4 gap-3 md:gap-6">
 
           {/* LEFT SIDEBAR */}
           <aside className="hidden md:block md:col-span-3 lg:col-span-1 space-y-6">
@@ -133,12 +157,12 @@ export default async function Home() {
 
             {/* Bazar - Premium (Mobile: Horizontal Scroll, Desktop: Grid) */}
             <section className="bg-white border-y md:border border-zinc-200 shadow-sm overflow-hidden rounded-sm">
-              <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider flex justify-between items-center">
+              <div className="bg-[#a11a2d] text-white px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider flex justify-between items-center gap-2">
                 <span>Bazar - Premium</span>
-                <Link href="/annonser" className="text-[10px] font-bold hover:underline">Visa alla &raquo;</Link>
+                <Link href="/annonser" className="text-[9px] sm:text-[10px] font-bold hover:underline">Visa alla &raquo;</Link>
               </div>
 
-              <div className="grid grid-rows-2 grid-flow-col md:grid-cols-2 md:grid-rows-none md:grid-flow-row overflow-x-auto md:overflow-x-visible gap-3 md:gap-4 p-4 scrollbar-hide snap-x scroll-smooth pb-6 md:pb-4">
+              <div className="grid grid-rows-2 grid-flow-col md:grid-cols-2 md:grid-rows-none md:grid-flow-row overflow-x-auto md:overflow-x-visible gap-3 md:gap-4 p-3 sm:p-4 scrollbar-hide snap-x scroll-smooth pb-5 md:pb-4">
                 {featuredAds.map((ad) => (
                   <Link
                     href={`/annonser/${ad.id}`}
@@ -168,16 +192,16 @@ export default async function Home() {
                   </Link>
                 ))}
               </div>
-              <Link href="/annonser" className="block text-center py-3 bg-zinc-50 text-[10px] font-black text-zinc-500 hover:text-red-800 uppercase tracking-widest border-t transition-colors italic">Visa hela bazaren &gt;&gt;</Link>
+              <Link href="/annonser" className="block text-center py-3 bg-zinc-50 text-[9px] sm:text-[10px] font-black text-zinc-500 hover:text-red-800 uppercase tracking-widest border-t transition-colors italic">Visa hela bazaren &gt;&gt;</Link>
             </section>
 
             {/* Community Feed */}
             <section className="bg-white border border-zinc-200 shadow-sm overflow-hidden">
-              <div className="bg-[#003366] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider flex justify-between items-center">
+              <div className="bg-[#003366] text-white px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider flex justify-between items-center gap-2">
                 <span>Community Flöde - Realtid</span>
                 <span className="flex h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
               </div>
-              <div className="p-4 md:p-6">
+              <div className="p-3 sm:p-4 md:p-6">
                 <PostBox />
 
                 {/* Mobile Ad Injector (Visible only on mobile) */}
@@ -192,10 +216,7 @@ export default async function Home() {
 
           {/* RIGHT SIDEBAR */}
           <aside className="hidden lg:block lg:col-span-1 space-y-6">
-            {/* Live Poland News */}
-            <ExternalNewsSidebar />
-
-            {/* Toppnyheter */}
+            {/* Toppnyheter (Moved to right sidebar) */}
             <section className="bg-white border border-zinc-200 shadow-sm overflow-hidden">
               <div className="bg-[#a11a2d] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider">Toppnyheter</div>
               <div className="p-4 space-y-4">
@@ -216,6 +237,9 @@ export default async function Home() {
               </div>
               <Link href="/nyheter" className="block text-center py-3 bg-zinc-50 text-[10px] font-black text-zinc-500 hover:text-[#003366] uppercase tracking-widest border-t transition-colors italic">Läs alla nyheter &raquo;</Link>
             </section>
+
+            {/* Live Poland News */}
+            <ExternalNewsSidebar />
 
             <section className="bg-white border border-zinc-200 overflow-hidden shadow-sm">
                 <div className="bg-[#003366] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider">Sverigekartan</div>

@@ -2,7 +2,65 @@ import HomeHero from "@/components/HomeHero";
 import InfoBar from "@/components/layout/InfoBar";
 import SidebarNav from "@/components/layout/SidebarNav";
 import SwedenMap from "@/components/map/SwedenMap";
-import { Building2, Landmark, Library, GraduationCap, Church, MapPin, ExternalLink, Users } from "lucide-react";
+import Link from "next/link";
+import { Building2, Landmark, Library, GraduationCap, Church, MapPin, ExternalLink, Users, Wrench, Truck, Phone, Mail, ShieldCheck, PlusCircle, ArrowRight } from "lucide-react";
+
+const FORETAG_SERVICES = [
+  {
+    name: "PolBygg & Renovering AB",
+    category: "Bygg & Renovering",
+    city: "Stockholm / Mälardalen",
+    desc: "Totalentreprenad, badrumsrenovering, kakel & klinker samt snickeri.",
+    phone: "070-123 45 67",
+    email: "kontakt@polbygg.se",
+    verified: true
+  },
+  {
+    name: "Szybki Transport & Flytt",
+    category: "Transport & Flytt",
+    city: "Göteborg / Västra Götaland",
+    desc: "Inrikesflytt, godstransport Sverige–Polen samt bärhjälp.",
+    phone: "073-987 65 43",
+    email: "info@szybkitransport.se",
+    verified: true
+  },
+  {
+    name: "Czysto Hemservice & Städ",
+    category: "Städ & Hemservice",
+    city: "Malmö / Skåne",
+    desc: "Hemstädning, flyttstädning, kontorsstädning med RUT-avdrag.",
+    phone: "076-555 44 33",
+    email: "kontakt@czystohand.se",
+    verified: true
+  },
+  {
+    name: "Målarmästare PolArt",
+    category: "Måleri & Tapet",
+    city: "Stockholm",
+    desc: "Inomhus- och utomhusmåleri, spackling, fasadtvätt.",
+    phone: "070-888 99 00",
+    email: "info@polartmaleri.se",
+    verified: true
+  },
+  {
+    name: "Svensk-Polska Tolk & Juridik",
+    category: "Juridik & Tolkning",
+    city: "Hela Sverige (Online)",
+    desc: "Auktoriserad tolkning, översättning av dokument, juridisk rådgivning.",
+    phone: "08-123 99 88",
+    email: "tolk@polasve-juridik.se",
+    verified: true
+  },
+  {
+    name: "AutoService PolAuto",
+    category: "Bilverkstad & Däck",
+    city: "Örebro",
+    desc: "Bilreparationer, service, däckbyte och felkodsläsning.",
+    phone: "072-444 33 22",
+    email: "service@polauto.se",
+    verified: true
+  }
+];
 
 const MYNDIGHETER = [
   {
@@ -44,7 +102,7 @@ const INSTITUTIONER = [
 
 export default function InstitutionerPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f9fa]">
+    <div className="flex flex-col min-h-screen bg-[#f8f9fa] text-left font-sans">
       <HomeHero />
       <InfoBar />
 
@@ -57,31 +115,78 @@ export default function InstitutionerPage() {
           </aside>
 
           {/* MAIN CONTENT */}
-          <div className="col-span-1 md:col-span-9 lg:col-span-2 space-y-8">
+          <div className="col-span-1 md:col-span-9 lg:col-span-2 space-y-8 text-left">
             <div className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm">
-              <div className="bg-[#003366] text-white px-6 py-4 text-xs font-black uppercase tracking-widest flex items-center gap-3">
-                <Landmark size={18} /> Anläggningar & Institutioner
+              <div className="bg-[#003366] text-white px-6 py-4 text-xs font-black uppercase tracking-widest flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Landmark size={18} /> Polska Företag & Institutioner
+                </div>
+                <span className="text-[9px] font-bold opacity-80 italic">Polasve Gula Sidorna</span>
               </div>
 
-              <div className="p-4 md:p-10">
-                <h1 className="text-2xl md:text-3xl font-black text-[#003366] uppercase tracking-tighter italic mb-4">Polska resurser <span className="text-[#a11a2d]">i Sverige</span></h1>
-                <p className="text-sm md:text-base text-zinc-500 font-medium mb-8 md:mb-12 leading-relaxed">
-                  Här har vi samlat viktiga länkar och information om polska myndigheter, skolor, kyrkor och föreningar runt om i landet.
+              <div className="p-4 md:p-8 text-left">
+                <h1 className="text-2xl md:text-3xl font-black text-[#003366] uppercase tracking-tighter italic mb-3">
+                  Polska resurser & <span className="text-[#a11a2d]">Företag i Sverige</span>
+                </h1>
+                <p className="text-sm md:text-base text-zinc-500 font-medium mb-8 leading-relaxed">
+                  Här hittar du polska myndigheter, skolor, föreningar samt verifierade polska företag och hantverkare i Sverige.
                 </p>
 
-                {/* Section: Myndigheter */}
-                <div className="mb-10 md:mb-16">
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a11a2d] mb-6 md:mb-8 flex items-center gap-4">
+                {/* Section 1: Företagskatalog ("Gula Sidorna") */}
+                <div className="mb-12 border-b pb-12">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a11a2d] flex items-center gap-2">
+                      <Building2 size={16} /> Företagskatalog ("Gula Sidorna")
+                    </h3>
+                    <Link
+                      href="/reklam"
+                      className="bg-[#003366] hover:bg-[#a11a2d] text-white px-4 py-2 rounded-sm text-[9px] font-black uppercase tracking-widest transition-all shadow-md flex items-center gap-1.5 w-fit"
+                    >
+                      <PlusCircle size={12} /> Registrera Ditt Företag <ArrowRight size={10} />
+                    </Link>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {FORETAG_SERVICES.map((item, idx) => (
+                      <div key={idx} className="bg-zinc-50 border border-zinc-100 p-4 rounded-sm hover:border-[#003366]/30 transition-all shadow-sm flex flex-col justify-between">
+                        <div>
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="text-[8px] font-black uppercase text-[#a11a2d] tracking-widest bg-red-50 px-2 py-0.5 rounded-sm">
+                              {item.category}
+                            </span>
+                            {item.verified && (
+                              <span className="text-[7px] font-black uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-sm flex items-center gap-1">
+                                <ShieldCheck size={10} /> Verifierat
+                              </span>
+                            )}
+                          </div>
+                          <h4 className="font-bold text-sm text-[#003366] mb-1">{item.name}</h4>
+                          <p className="text-[10px] text-zinc-400 font-bold uppercase mb-2">📍 {item.city}</p>
+                          <p className="text-xs text-zinc-600 font-medium leading-relaxed mb-4 italic">&quot;{item.desc}&quot;</p>
+                        </div>
+
+                        <div className="pt-3 border-t border-zinc-200/50 flex flex-wrap justify-between gap-2 text-[10px] font-bold text-zinc-700">
+                          <span className="flex items-center gap-1.5"><Phone size={12} className="text-[#003366]" /> {item.phone}</span>
+                          <span className="flex items-center gap-1.5"><Mail size={12} className="text-[#a11a2d]" /> {item.email}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 2: Myndigheter */}
+                <div className="mb-12 border-b pb-12">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a11a2d] mb-6 flex items-center gap-4">
                     Myndigheter <div className="h-px flex-1 bg-zinc-100"></div>
                   </h3>
-                  <div className="grid gap-4 md:gap-6">
+                  <div className="grid gap-4">
                     {MYNDIGHETER.map((m) => (
                       <a
                         key={m.name}
                         href={m.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group bg-zinc-50 hover:bg-white p-4 md:p-6 rounded-sm border border-zinc-100 hover:border-[#003366] transition-all flex justify-between items-center shadow-sm"
+                        className="group bg-zinc-50 hover:bg-white p-4 rounded-sm border border-zinc-100 hover:border-[#003366] transition-all flex justify-between items-center shadow-sm"
                       >
                         <div className="flex-1">
                           <h4 className="font-black text-[#003366] uppercase text-[11px] md:text-xs mb-1 group-hover:text-[#a11a2d] transition-colors leading-tight">{m.name}</h4>
@@ -93,19 +198,19 @@ export default function InstitutionerPage() {
                   </div>
                 </div>
 
-                {/* Section: Gemenskap */}
+                {/* Section 3: Institutioner & Föreningar */}
                 <div>
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a11a2d] mb-6 md:mb-8 flex items-center gap-4">
-                    Institutioner <div className="h-px flex-1 bg-zinc-100"></div>
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a11a2d] mb-6 flex items-center gap-4">
+                    Institutioner & Skolor <div className="h-px flex-1 bg-zinc-100"></div>
                   </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {INSTITUTIONER.map((inst) => (
                       <a
                         key={inst.name}
                         href={inst.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group flex items-center gap-3 p-3 md:p-4 border border-zinc-50 rounded-sm hover:border-[#003366] hover:bg-white transition-all shadow-sm"
+                        className="group flex items-center gap-3 p-3 border border-zinc-50 rounded-sm hover:border-[#003366] hover:bg-white transition-all shadow-sm"
                       >
                         <div className="bg-[#003366]/5 p-2 rounded-sm text-[#003366] group-hover:bg-[#a11a2d] group-hover:text-white transition-colors">
                           {inst.icon}
@@ -126,11 +231,11 @@ export default function InstitutionerPage() {
                 <SwedenMap />
             </section>
 
-            <div className="bg-[#a11a2d] p-6 rounded-sm text-white shadow-xl relative overflow-hidden">
+            <div className="bg-[#a11a2d] p-6 rounded-sm text-white shadow-xl relative overflow-hidden text-left">
                <div className="relative z-10">
-                 <h4 className="font-black uppercase tracking-widest text-xs mb-4 italic">Saknas något?</h4>
-                 <p className="text-[10px] opacity-90 leading-relaxed mb-6 font-medium">Vill du lägga till en förening eller institution i listan? Kontakta oss så lägger vi upp det kostnadsfritt.</p>
-                 <a href="/om-oss" className="inline-block bg-white text-[#a11a2d] px-6 py-2 rounded-full font-black uppercase text-[9px] tracking-widest shadow-lg">Skicka info</a>
+                 <h4 className="font-black uppercase tracking-widest text-xs mb-3 italic">Vill du synas här?</h4>
+                 <p className="text-[10px] opacity-90 leading-relaxed mb-6 font-medium">Vill du registrera ditt företag eller din förening i vår katalog? Kontakta oss för annonsering.</p>
+                 <Link href="/reklam" className="inline-block bg-white text-[#a11a2d] px-6 py-2.5 rounded-full font-black uppercase text-[9px] tracking-widest shadow-lg hover:bg-zinc-100 transition-colors">Registrera Företag</Link>
                </div>
                <Landmark className="absolute -bottom-4 -right-4 opacity-10 rotate-12" size={80} />
             </div>

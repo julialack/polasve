@@ -169,9 +169,9 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
   }
 
   return (
-    <div className="bg-white border border-zinc-100 p-3 md:p-4 rounded-sm shadow-sm group text-left">
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center gap-2 md:gap-2.5">
+    <div className="w-full max-w-full overflow-hidden bg-white border border-zinc-100 p-3 md:p-4 rounded-sm shadow-sm group text-left">
+      <div className="flex justify-between items-start gap-3 mb-3">
+        <div className="flex items-center gap-2 md:gap-2.5 min-w-0 flex-1">
           <UserAvatar
             avatarUrl={(post as any).avatar_url}
             userId={post.user_id}
@@ -212,10 +212,10 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
           </div>
         </div>
       ) : (
-        <SmartText text={post.content} className="text-sm text-zinc-800 font-medium mb-4 leading-relaxed px-1 break-words overflow-hidden max-w-full" />
+        <SmartText text={post.content} className="text-sm text-zinc-800 font-medium mb-4 leading-relaxed px-1 break-words overflow-hidden max-w-full whitespace-pre-wrap" />
       )}
 
-      <div className="flex gap-6 items-center pt-3 border-t border-zinc-50">
+      <div className="flex items-center gap-3 sm:gap-6 pt-3 border-t border-zinc-50 min-w-0">
         <button onClick={handleLike} disabled={loadingLikes || userLikes} className={`flex items-center gap-1.5 transition-colors ${userLikes ? 'text-[#a11a2d]' : 'text-zinc-400 hover:text-[#a11a2d]'}`}>
           {loadingLikes ? <Loader2 size={12} className="animate-spin" /> : <Heart size={15} className={userLikes || localLikes > 0 ? "fill-current" : ""} />}
           <span className="text-xs font-black">{localLikes}</span>
@@ -226,11 +226,11 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
         </button>
         <button onClick={handleShare} className="flex items-center gap-1.5 text-zinc-400 hover:text-[#003366] transition-colors">
           <Share2 size={15} />
-          <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">Dela</span>
+          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Dela</span>
         </button>
         <button onClick={() => openReport(post.id, 'post')} className="flex items-center gap-1.5 text-zinc-300 hover:text-[#a11a2d] transition-colors ml-auto">
           <Flag size={14} />
-          <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">Anmäl</span>
+          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Anmäl</span>
         </button>
       </div>
 
@@ -289,15 +289,15 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
             </div>
           )}
 
-          <div className="flex gap-2 pt-4 border-t border-zinc-50 items-center">
+          <div className="flex gap-2 pt-4 border-t border-zinc-50 items-center min-w-0">
             <UserAvatar
               avatarUrl={currentUser?.user_metadata?.avatar_url}
               userId={currentUser?.id}
               userName={currentUser?.user_metadata?.full_name}
               size="xs"
             />
-            <input value={commentContent} onChange={(e) => setCommentContent(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handlePostComment()} placeholder="Skriv ett svar..." className="flex-1 bg-zinc-100 border border-zinc-200 py-3 px-5 rounded-full text-sm text-black font-bold outline-none focus:border-[#003366] placeholder:text-zinc-400 placeholder:font-normal h-11" />
-            <button onClick={handlePostComment} className="text-[#003366] hover:text-[#a11a2d] transition-all p-2 active:scale-90" aria-label="Skicka"><Send size={20} /></button>
+            <input value={commentContent} onChange={(e) => setCommentContent(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handlePostComment()} placeholder="Skriv ett svar..." className="flex-1 min-w-0 bg-zinc-100 border border-zinc-200 py-3 px-4 sm:px-5 rounded-full text-sm text-black font-bold outline-none focus:border-[#003366] placeholder:text-zinc-400 placeholder:font-normal h-11 w-full" />
+            <button onClick={handlePostComment} className="shrink-0 text-[#003366] hover:text-[#a11a2d] transition-all p-2 active:scale-90" aria-label="Skicka"><Send size={20} /></button>
           </div>
         </div>
       )}
