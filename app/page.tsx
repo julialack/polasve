@@ -216,7 +216,10 @@ export default async function Home() {
 
           {/* RIGHT SIDEBAR */}
           <aside className="hidden lg:block lg:col-span-1 space-y-6">
-            {/* Toppnyheter (Moved to right sidebar) */}
+            {/* Live Poland News */}
+            <ExternalNewsSidebar />
+
+            {/* Toppnyheter */}
             <section className="bg-white border border-zinc-200 shadow-sm overflow-hidden">
               <div className="bg-[#a11a2d] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider">Toppnyheter</div>
               <div className="p-4 space-y-4">
@@ -237,9 +240,6 @@ export default async function Home() {
               </div>
               <Link href="/nyheter" className="block text-center py-3 bg-zinc-50 text-[10px] font-black text-zinc-500 hover:text-[#003366] uppercase tracking-widest border-t transition-colors italic">Läs alla nyheter &raquo;</Link>
             </section>
-
-            {/* Live Poland News */}
-            <ExternalNewsSidebar />
 
             <section className="bg-white border border-zinc-200 overflow-hidden shadow-sm">
                 <div className="bg-[#003366] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider">Sverigekartan</div>
