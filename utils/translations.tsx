@@ -8,6 +8,7 @@ export interface TranslationDict {
   // Navigation & Menus
   heroTitle: string
   heroSubtitle: string
+  welcomeMsg: string
   navHome: string
   navForum: string
   navNews: string
@@ -125,6 +126,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
   pl: {
     heroTitle: 'Polacy w Szwecji',
     heroSubtitle: 'Twój portal z pracą, mieszkaniami i społecznością',
+    welcomeMsg: 'Witamy w PolaSve',
     navHome: 'Strona Główna',
     navForum: 'Forum / Bazar',
     navNews: 'Wiadomości',
@@ -232,6 +234,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
   sv: {
     heroTitle: 'Polacker i Sverige',
     heroSubtitle: 'Din portal för jobb, bostäder och community',
+    welcomeMsg: 'Välkommen till PolaSve',
     navHome: 'Hem',
     navForum: 'Forum / Bazar',
     navNews: 'Nyheter',
@@ -339,6 +342,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
   ua: {
     heroTitle: 'Поляки в Швеції',
     heroSubtitle: 'Ваш портал для роботи, житла та спільноти',
+    welcomeMsg: 'Ласкаво просимо до PolaSve',
     navHome: 'Головна',
     navForum: 'Форум / Базар',
     navNews: 'Новини',
@@ -446,6 +450,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
   en: {
     heroTitle: 'Poles in Sweden',
     heroSubtitle: 'Your portal for jobs, housing, and community',
+    welcomeMsg: 'Welcome to PolaSve',
     navHome: 'Home',
     navForum: 'Forum / Marketplace',
     navNews: 'News',
