@@ -10,6 +10,7 @@ import SafeImage from "@/components/ui/SafeImage";
 import ExternalNewsSidebar from "@/components/layout/ExternalNewsSidebar";
 import DonationCard from "@/components/ui/DonationCard";
 import QuickCategoryNavigation from "@/components/home/QuickCategoryNavigation";
+import MobileDonationBanner from "@/components/home/MobileDonationBanner";
 import { createClient } from "@/utils/supabase/server";
 import { ShieldCheck } from "lucide-react";
 
@@ -105,6 +106,8 @@ export default async function Home() {
           <QuickCategoryNavigation />
         </div>
       </div>
+
+      <MobileDonationBanner />
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-4 md:px-6 py-4 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-12 lg:grid-cols-4 gap-3 md:gap-6">

@@ -9,8 +9,12 @@ import SearchBar from '@/components/search/SearchBar'
 import HomeHero from "@/components/HomeHero";
 import SidebarNav from "@/components/layout/SidebarNav";
 import PremiumAdsSidebar from "@/components/ads/PremiumAdsSidebar";
+import { useTranslation } from "@/utils/translations";
+import { getMenuPageCopy } from "@/utils/menu-page-copy";
 
 export default function EvenemangPage() {
+  const { lang } = useTranslation()
+  const pageText = getMenuPageCopy(lang)
   const [events, setEvents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
@@ -25,7 +29,8 @@ export default function EvenemangPage() {
     fetchData()
   }, [])
 
-  const today = new Date().toLocaleDateString('sv-SE', {
+  const dateLocale = { pl: 'pl-PL', sv: 'sv-SE', ua: 'uk-UA', en: 'en-US' }[lang]
+  const today = new Date().toLocaleDateString(dateLocale, {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
 
@@ -38,8 +43,8 @@ export default function EvenemangPage() {
         <div className="max-w-7xl mx-auto flex justify-between items-center text-[10px] md:text-xs text-zinc-500 font-medium">
           <div className="capitalize font-bold text-[#003366]">{today}</div>
           <div className="flex gap-4">
-            <span className="flex items-center gap-1"><Users size={12} /> 142 online</span>
-            <span className="hidden sm:inline border-l pl-4 font-bold text-[#a11a2d]">Välkommen!</span>
+            <span className="flex items-center gap-1"><Users size={12} /> 142 {pageText.common.online}</span>
+            <span className="hidden sm:inline border-l pl-4 font-bold text-[#a11a2d]">{pageText.common.welcome}</span>
           </div>
         </div>
       </div>
@@ -60,7 +65,7 @@ export default function EvenemangPage() {
           <div className="col-span-1 md:col-span-9 lg:col-span-2 space-y-6 text-left">
             <div className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm text-left">
               <div className="bg-[#003366] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-left">
-                Kommande Evenemang
+                {pageText.events.upcoming}
               </div>
 
               <div className="p-4 md:p-6 text-left">
@@ -70,6 +75,7 @@ export default function EvenemangPage() {
                   </div>
                 ) : (
                   <div className="space-y-8 text-left">
+                    {events.length === 0 && <p className="text-center py-10 text-zinc-400">{pageText.events.empty}</p>}
                     {events.map((event) => (
                       <div key={event.id} className="bg-white border border-zinc-100 rounded-sm overflow-hidden shadow-sm flex flex-col sm:flex-row group hover:shadow-md transition-all text-left">
                         <div className="w-full sm:w-56 aspect-video sm:aspect-auto relative overflow-hidden flex-shrink-0">

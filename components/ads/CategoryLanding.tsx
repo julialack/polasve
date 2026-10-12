@@ -14,6 +14,8 @@ import SafeImage from "@/components/ui/SafeImage";
 import PremiumAdsSidebar from "@/components/ads/PremiumAdsSidebar";
 import PostBox from "@/components/feed/PostBox";
 import FeedList from "@/components/feed/FeedList";
+import { useTranslation } from "@/utils/translations";
+import { CATEGORY_LANDING_UI, getCategoryLandingCopy, translateCategoryLabel } from "@/utils/category-landing-translations";
 
 interface Ad {
   id: string
@@ -38,6 +40,11 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const locationFilter = searchParams.get('location')
+  const { lang } = useTranslation()
+  const copy = getCategoryLandingCopy(lang, title, { title, description })
+  const ui = CATEGORY_LANDING_UI[lang]
+  const isHousing = /bostad|lägenhet/i.test(title)
+  const isMeetingPlace = title === 'Meeting Place'
 
   const [ads, setAds] = useState<Ad[]>([])
   const [loading, setLoading] = useState(true)
@@ -100,8 +107,8 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                 <div className="flex items-center gap-3">
                   {icon || <Box size={18} />}
                   <div className="flex flex-col">
-                      <span className="text-xs font-black uppercase tracking-widest">{title}</span>
-                      <span className="text-[9px] font-bold opacity-70 italic">{description}</span>
+                      <span className="text-xs font-black uppercase tracking-widest">{copy.title}</span>
+                      <span className="text-[9px] font-bold opacity-70 italic">{copy.description}</span>
                   </div>
                 </div>
               </div>
@@ -122,36 +129,32 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                       </div>
                       <div className="text-center sm:text-left">
                         <h4 className="text-[10px] font-black text-amber-900 uppercase italic leading-tight tracking-wide">
-                          {title.toLowerCase().includes('bostad') || title.toLowerCase().includes('lägenhet')
-                            ? 'Leta eller sök lägenhet?'
-                            : 'Vill du synas längst upp?'}
+                          {isHousing ? ui.housingPrompt : ui.generalPrompt}
                         </h4>
                         <p className="text-[8px] text-amber-700 font-bold uppercase tracking-tight mt-0.5 opacity-80">
-                          {title.toLowerCase().includes('bostad') || title.toLowerCase().includes('lägenhet')
-                            ? 'Lägg en Premium-annons för att nå fler.'
-                            : 'Lägg en Premium-annons och hamna först.'}
+                          {isHousing ? ui.housingPremium : ui.generalPremium}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 bg-amber-500 text-white px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-[0.2em] shadow-sm group-hover:bg-[#a11a2d] transition-colors shrink-0">
-                      Börja här <ArrowRight size={10} />
+                      {ui.startHere} <ArrowRight size={10} />
                     </div>
                   </div>
                 </Link>
 
                 <div className="mb-6 flex items-center gap-3">
                   <div className="h-px flex-1 bg-zinc-100"></div>
-                  <span className="text-[9px] font-black uppercase text-zinc-300 tracking-[0.2em]">Aktuella Annonser</span>
+                  <span className="text-[9px] font-black uppercase text-zinc-300 tracking-[0.2em]">{ui.currentAds}</span>
                   <div className="h-px flex-1 bg-zinc-100"></div>
                 </div>
 
                 {locationFilter && (
                    <div className="mb-6 flex items-center gap-3 bg-amber-50 border border-amber-100 p-3 rounded-sm">
                       <span className="text-[10px] font-black uppercase text-amber-800 tracking-widest flex items-center gap-2">
-                        <MapPin size={14} /> Region: {locationFilter}
+                        <MapPin size={14} /> {ui.region}: {locationFilter}
                       </span>
                       <Link href={getResetLocationHref(pathname)} className="ml-auto text-[8px] font-black uppercase bg-amber-200 text-amber-900 px-2 py-1 rounded-sm flex items-center gap-1 hover:bg-amber-300 transition-colors">
-                        Rensa <X size={10} />
+                        {ui.clear} <X size={10} />
                       </Link>
                    </div>
                 )}
@@ -162,7 +165,7 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                   </div>
                 ) : ads.length === 0 ? (
                   <div className="text-center py-10 italic text-zinc-400 text-xs">
-                    Inga annonser i denna kategori ännu.
+                    {ui.noAds}
                   </div>
                 ) : (
                   <div className="space-y-10">
@@ -188,11 +191,11 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                             <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
                               <div className="space-y-2">
                                 <div className="flex flex-wrap items-center gap-2 text-[7px] md:text-[8px] font-black uppercase tracking-[0.12em]">
-                                  <span className={ad.is_premium ? 'text-amber-700' : 'text-[#a11a2d]'}>{ad.is_premium ? 'Premium' : ad.category}</span>
+                                  <span className={ad.is_premium ? 'text-amber-700' : 'text-[#a11a2d]'}>{ad.is_premium ? 'Premium' : translateCategoryLabel(lang, ad.category)}</span>
                                   <span className="text-zinc-300">•</span>
                                   <span className="text-zinc-400 font-bold flex items-center gap-1">
                                     {new Date(ad.created_at).toLocaleDateString()}
-                                    {(ad as any).edited && <span className="italic font-normal lowercase tracking-normal text-zinc-400">(redigerad)</span>}
+                                    {(ad as any).edited && <span className="italic font-normal lowercase tracking-normal text-zinc-400">{ui.edited}</span>}
                                   </span>
                                 </div>
 
@@ -208,10 +211,10 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
 
                               <div className="flex items-end justify-between gap-3 border-t border-zinc-100 pt-2">
                                 <span className={`text-[11px] md:text-sm font-black ${ad.is_premium ? 'text-amber-700' : 'text-zinc-900'}`}>
-                                  {ad.price || 'Bud'}
+                                  {ad.price || ui.bid}
                                 </span>
                                 <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.18em] text-[#003366] transition-opacity group-hover:text-[#a11a2d]">
-                                  Visa info →
+                                  {ui.viewInfo} →
                                 </span>
                               </div>
                             </div>
@@ -223,7 +226,7 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                     {/* Finished Ads - Compact Grid */}
                     {ads.some(ad => ad.status === 'finished') && (
                       <div className="pt-6 border-t border-zinc-100">
-                        <h4 className="text-[9px] font-black uppercase text-zinc-400 tracking-[0.2em] mb-4">Avslutade</h4>
+                        <h4 className="text-[9px] font-black uppercase text-zinc-400 tracking-[0.2em] mb-4">{ui.completed}</h4>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                           {ads.filter(ad => ad.status === 'finished').map((ad) => (
                             <Link href={`/annonser/${ad.id}`} key={ad.id} className="group bg-white p-2 border border-zinc-100 rounded-sm opacity-50 hover:opacity-100 transition-all">
@@ -234,7 +237,7 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                                   className="w-full h-full object-cover grayscale"
                                 />
                                 <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
-                                  <span className="text-[6px] font-black text-white uppercase tracking-tighter border border-white/50 px-1">SÅLD</span>
+                                  <span className="text-[6px] font-black text-white uppercase tracking-tighter border border-white/50 px-1">{ui.sold}</span>
                                 </div>
                               </div>
                               <h5 className="text-[9px] font-bold text-zinc-500 truncate">{ad.title}</h5>
@@ -253,13 +256,13 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
               <div className="bg-zinc-50 border-b border-zinc-100 px-6 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <MessageSquare size={14} className="text-[#a11a2d]" />
-                  <span className="text-[10px] font-black uppercase text-[#003366] tracking-widest">Community-diskussion</span>
+                  <span className="text-[10px] font-black uppercase text-[#003366] tracking-widest">{ui.communityDiscussion}</span>
                 </div>
-                <span className="text-[8px] font-bold text-zinc-400 italic">Prata fritt om {title.toLowerCase()}</span>
+                <span className="text-[8px] font-bold text-zinc-400 italic">{ui.discussPrefix} {copy.title.toLowerCase()}</span>
               </div>
               <div className="p-4 md:p-6">
-                <PostBox defaultCategory={title.toLowerCase().includes('meeting') || title.toLowerCase().includes('mötesplats') ? 'mötesplats' : 'allmänt'} />
-                <FeedList categoryFilter={title.toLowerCase().includes('meeting') || title.toLowerCase().includes('mötesplats') ? 'mötesplats' : undefined} />
+                <PostBox defaultCategory={isMeetingPlace ? 'mötesplats' : 'allmänt'} />
+                <FeedList categoryFilter={isMeetingPlace ? 'mötesplats' : undefined} />
               </div>
             </div>
           </div>
@@ -273,7 +276,7 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
 
 export default function CategoryLanding(props: CategoryLandingProps) {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center italic text-zinc-400">Laddar sida...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center italic text-zinc-400">Loading...</div>}>
       <LandingContent {...props} />
     </Suspense>
   )

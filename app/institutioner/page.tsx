@@ -1,9 +1,13 @@
+'use client'
+
 import HomeHero from "@/components/HomeHero";
 import InfoBar from "@/components/layout/InfoBar";
 import SidebarNav from "@/components/layout/SidebarNav";
 import SwedenMap from "@/components/map/SwedenMap";
 import Link from "next/link";
 import { Building2, Landmark, Library, GraduationCap, Church, MapPin, ExternalLink, Users, Wrench, Truck, Phone, Mail, ShieldCheck, PlusCircle, ArrowRight } from "lucide-react";
+import { useTranslation } from "@/utils/translations";
+import { getMenuPageCopy } from "@/utils/menu-page-copy";
 
 const FORETAG_SERVICES = [
   {
@@ -101,6 +105,8 @@ const INSTITUTIONER = [
 ];
 
 export default function InstitutionerPage() {
+  const { lang } = useTranslation()
+  const pageText = getMenuPageCopy(lang)
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fa] text-left font-sans">
       <HomeHero />
@@ -119,30 +125,30 @@ export default function InstitutionerPage() {
             <div className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm">
               <div className="bg-[#003366] text-white px-6 py-4 text-xs font-black uppercase tracking-widest flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Landmark size={18} /> Polska Företag & Institutioner
+                  <Landmark size={18} /> {pageText.directory.heading}
                 </div>
-                <span className="text-[9px] font-bold opacity-80 italic">Polasve Gula Sidorna</span>
+                <span className="text-[9px] font-bold opacity-80 italic">{pageText.directory.tagline}</span>
               </div>
 
               <div className="p-4 md:p-8 text-left">
                 <h1 className="text-2xl md:text-3xl font-black text-[#003366] uppercase tracking-tighter italic mb-3">
-                  Polska resurser & <span className="text-[#a11a2d]">Företag i Sverige</span>
+                  {pageText.directory.title}
                 </h1>
                 <p className="text-sm md:text-base text-zinc-500 font-medium mb-8 leading-relaxed">
-                  Här hittar du polska myndigheter, skolor, föreningar samt verifierade polska företag och hantverkare i Sverige.
+                  {pageText.directory.intro}
                 </p>
 
                 {/* Section 1: Företagskatalog ("Gula Sidorna") */}
                 <div className="mb-12 border-b pb-12">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a11a2d] flex items-center gap-2">
-                      <Building2 size={16} /> Företagskatalog ("Gula Sidorna")
+                      <Building2 size={16} /> {pageText.directory.businessList}
                     </h3>
                     <Link
                       href="/reklam"
                       className="bg-[#003366] hover:bg-[#a11a2d] text-white px-4 py-2 rounded-sm text-[9px] font-black uppercase tracking-widest transition-all shadow-md flex items-center gap-1.5 w-fit"
                     >
-                      <PlusCircle size={12} /> Registrera Ditt Företag <ArrowRight size={10} />
+                      <PlusCircle size={12} /> {pageText.directory.register} <ArrowRight size={10} />
                     </Link>
                   </div>
 
@@ -156,7 +162,7 @@ export default function InstitutionerPage() {
                             </span>
                             {item.verified && (
                               <span className="text-[7px] font-black uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-sm flex items-center gap-1">
-                                <ShieldCheck size={10} /> Verifierat
+                                <ShieldCheck size={10} /> {pageText.directory.verified}
                               </span>
                             )}
                           </div>
@@ -177,7 +183,7 @@ export default function InstitutionerPage() {
                 {/* Section 2: Myndigheter */}
                 <div className="mb-12 border-b pb-12">
                   <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a11a2d] mb-6 flex items-center gap-4">
-                    Myndigheter <div className="h-px flex-1 bg-zinc-100"></div>
+                    {pageText.directory.authorities} <div className="h-px flex-1 bg-zinc-100"></div>
                   </h3>
                   <div className="grid gap-4">
                     {MYNDIGHETER.map((m) => (
@@ -201,7 +207,7 @@ export default function InstitutionerPage() {
                 {/* Section 3: Institutioner & Föreningar */}
                 <div>
                   <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#a11a2d] mb-6 flex items-center gap-4">
-                    Institutioner & Skolor <div className="h-px flex-1 bg-zinc-100"></div>
+                    {pageText.directory.schools} <div className="h-px flex-1 bg-zinc-100"></div>
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {INSTITUTIONER.map((inst) => (
@@ -227,15 +233,15 @@ export default function InstitutionerPage() {
           {/* RIGHT SIDEBAR */}
           <aside className="hidden lg:block lg:col-span-1 space-y-6">
             <section className="bg-white border border-zinc-200 overflow-hidden shadow-sm">
-                <div className="bg-[#003366] text-white px-4 py-2 text-[10px] font-black uppercase tracking-wider">Regioner</div>
+                <div className="bg-[#003366] text-white px-4 py-2 text-[10px] font-black uppercase tracking-wider">{pageText.directory.regions}</div>
                 <SwedenMap />
             </section>
 
             <div className="bg-[#a11a2d] p-6 rounded-sm text-white shadow-xl relative overflow-hidden text-left">
                <div className="relative z-10">
-                 <h4 className="font-black uppercase tracking-widest text-xs mb-3 italic">Vill du synas här?</h4>
-                 <p className="text-[10px] opacity-90 leading-relaxed mb-6 font-medium">Vill du registrera ditt företag eller din förening i vår katalog? Kontakta oss för annonsering.</p>
-                 <Link href="/reklam" className="inline-block bg-white text-[#a11a2d] px-6 py-2.5 rounded-full font-black uppercase text-[9px] tracking-widest shadow-lg hover:bg-zinc-100 transition-colors">Registrera Företag</Link>
+                 <h4 className="font-black uppercase tracking-widest text-xs mb-3 italic">{pageText.directory.promoteHeading}</h4>
+                 <p className="text-[10px] opacity-90 leading-relaxed mb-6 font-medium">{pageText.directory.promoteText}</p>
+                 <Link href="/reklam" className="inline-block bg-white text-[#a11a2d] px-6 py-2.5 rounded-full font-black uppercase text-[9px] tracking-widest shadow-lg hover:bg-zinc-100 transition-colors">{pageText.directory.promoteAction}</Link>
                </div>
                <Landmark className="absolute -bottom-4 -right-4 opacity-10 rotate-12" size={80} />
             </div>

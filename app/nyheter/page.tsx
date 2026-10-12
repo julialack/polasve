@@ -11,8 +11,12 @@ import { toast } from 'sonner';
 import SidebarNav from "@/components/layout/SidebarNav";
 import PremiumAdsSidebar from "@/components/ads/PremiumAdsSidebar";
 import ContentActions from '@/components/ui/ContentActions';
+import { useTranslation } from '@/utils/translations';
+import { getMenuPageCopy } from '@/utils/menu-page-copy';
 
 export default function NyheterPage() {
+  const { lang } = useTranslation()
+  const pageText = getMenuPageCopy(lang)
   const [news, setNews] = useState<any[]>([])
   const [polandNews, setPolandNews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -51,7 +55,8 @@ export default function NyheterPage() {
     fetchUser()
   }, [])
 
-  const today = new Date().toLocaleDateString('sv-SE', {
+  const dateLocale = { pl: 'pl-PL', sv: 'sv-SE', ua: 'uk-UA', en: 'en-US' }[lang]
+  const today = new Date().toLocaleDateString(dateLocale, {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
 
@@ -64,8 +69,8 @@ export default function NyheterPage() {
         <div className="max-w-7xl mx-auto flex justify-between items-center text-[10px] md:text-xs text-zinc-500 font-medium">
           <div className="capitalize font-bold text-[#003366]">{today}</div>
           <div className="flex gap-4">
-            <span className="flex items-center gap-1"><Users size={12} /> 142 online</span>
-            <span className="hidden sm:inline border-l pl-4 font-bold text-[#a11a2d]">Välkommen!</span>
+            <span className="flex items-center gap-1"><Users size={12} /> 142 {pageText.common.online}</span>
+            <span className="hidden sm:inline border-l pl-4 font-bold text-[#a11a2d]">{pageText.common.welcome}</span>
           </div>
         </div>
       </div>
@@ -90,7 +95,7 @@ export default function NyheterPage() {
             {/* Poland Real-time News Section */}
             <div className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm text-left">
               <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider flex justify-between items-center text-left">
-                <span>Senaste nytt från Polen (Realtid)</span>
+                <span>{pageText.news.polandLive}</span>
                 <span className="flex h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
               </div>
               <div className="p-4 md:p-6 text-left">
@@ -139,7 +144,7 @@ export default function NyheterPage() {
                                      navigator.share({ title: item.title, url: item.link });
                                    } else {
                                      navigator.clipboard.writeText(item.link);
-                                     toast.success('Länk kopierad!');
+                                     toast.success(pageText.news.linkCopied);
                                    }
                                  }}
                                  className="text-zinc-300 hover:text-sve-blue transition-colors"
@@ -155,7 +160,7 @@ export default function NyheterPage() {
                 )}
                 <div className="mt-4 pt-4 border-t border-zinc-50">
                   <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest italic text-center">
-                    Automatiskt uppdaterat från TVN24, Rzeczpospolita, Interia, Onet & Polsat News
+                    {pageText.news.automaticSources}
                   </p>
                 </div>
               </div>
@@ -163,7 +168,7 @@ export default function NyheterPage() {
 
             <div className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm text-left">
               <div className="bg-[#003366] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-left">
-                Officiella Uppdateringar
+                {pageText.news.officialUpdates}
               </div>
 
               <div className="p-4 md:p-8 text-left">
@@ -179,7 +184,7 @@ export default function NyheterPage() {
                           <Image src={article.image_url} alt="" fill sizes="(max-width: 768px) 100vw, 800px" className="object-cover group-hover:scale-105 transition-transform duration-700" />
                         </div>
                         <div className="flex items-center gap-3 mb-3 text-left">
-                          <span className="text-[9px] font-black uppercase text-[#a11a2d] bg-red-50 px-2 py-0.5 rounded-sm">Nyhet</span>
+                          <span className="text-[9px] font-black uppercase text-[#a11a2d] bg-red-50 px-2 py-0.5 rounded-sm">{pageText.news.newsLabel}</span>
                           <span className="text-[9px] text-zinc-400 font-bold uppercase flex items-center gap-1"><Clock size={10} /> {article.date}</span>
                         </div>
                         <h2 className="text-2xl md:text-3xl font-black text-[#003366] uppercase tracking-tighter italic mb-4 leading-tight group-hover:text-[#a11a2d] transition-colors text-left">

@@ -11,6 +11,9 @@ import InfoBar from "@/components/layout/InfoBar";
 import SidebarNav from "@/components/layout/SidebarNav";
 import PremiumAdsSidebar from "@/components/ads/PremiumAdsSidebar";
 import SafeImage from "@/components/ui/SafeImage";
+import { useTranslation } from "@/utils/translations";
+import { getMenuPageCopy } from "@/utils/menu-page-copy";
+import { translateCategoryLabel } from "@/utils/category-landing-translations";
 
 const CATEGORIES = [
   "Alla",
@@ -42,6 +45,8 @@ interface Ad {
 }
 
 function AnnonserList() {
+  const { lang } = useTranslation()
+  const pageText = getMenuPageCopy(lang)
   const searchParams = useSearchParams()
   const locationFilter = searchParams.get('location')
   const categoryParam = searchParams.get('category')
@@ -85,7 +90,8 @@ function AnnonserList() {
     fetchData()
   }, [fetchData])
 
-  const today = new Date().toLocaleDateString('sv-SE', {
+  const dateLocale = { pl: 'pl-PL', sv: 'sv-SE', ua: 'uk-UA', en: 'en-US' }[lang]
+  const today = new Date().toLocaleDateString(dateLocale, {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
 
@@ -110,17 +116,17 @@ function AnnonserList() {
           <div className="col-span-1 md:col-span-9 lg:col-span-2 space-y-6">
             <div className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm">
               <div className="bg-[#003366] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider flex justify-between items-center">
-                <span>{categoryFilter === 'Alla' ? 'Bazar / Forum - Alla annonser' : `Bazar - ${categoryFilter}`}</span>
+                <span>{categoryFilter === 'Alla' ? pageText.listings.allAds : `${pageText.listings.listingPrefix} ${translateCategoryLabel(lang, categoryFilter)}`}</span>
               </div>
 
               <div className="p-4 md:p-6">
                 {locationFilter && (
                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 bg-red-50 border border-red-100 p-3 rounded-sm">
                       <span className="min-w-0 break-words text-[10px] font-black uppercase text-[#a11a2d] tracking-widest flex items-center gap-2">
-                        <MapPin size={14} className="shrink-0" /> Filtrerat på: {locationFilter}
+                        <MapPin size={14} className="shrink-0" /> {pageText.listings.filteredBy}: {locationFilter}
                       </span>
                       <Link href="/annonser" className="ml-auto shrink-0 self-end sm:self-auto text-[8px] font-black uppercase bg-[#a11a2d] text-white px-2 py-1 rounded-sm flex items-center gap-1 hover:bg-[#003366] transition-colors">
-                        Rensa <X size={10} />
+                        {pageText.listings.clear} <X size={10} />
                       </Link>
                    </div>
                 )}
@@ -131,7 +137,7 @@ function AnnonserList() {
                   </div>
                 ) : ads.length === 0 ? (
                   <div className="text-center py-20 italic text-zinc-400">
-                    Inga annonser hittades i {locationFilter ? locationFilter : 'denna kategori'}.
+                    {pageText.listings.noAds} {locationFilter ? `(${locationFilter})` : ''}
                   </div>
                 ) : (
                   <div className="space-y-12">
@@ -150,7 +156,7 @@ function AnnonserList() {
                           <div className="flex-1 flex flex-col justify-between py-0.5 min-w-0">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="text-[8px] md:text-[9px] font-black uppercase text-[#a11a2d]">{ad.category}</span>
+                                <span className="text-[8px] md:text-[9px] font-black uppercase text-[#a11a2d]">{translateCategoryLabel(lang, ad.category)}</span>
                                 <span className="text-[7px] md:text-[8px] text-zinc-300 font-bold border-l pl-2 hidden md:inline">{new Date(ad.created_at).toLocaleDateString()}</span>
                               </div>
                               <h3 className="line-clamp-2 md:line-clamp-1 text-sm md:text-lg font-bold italic group-hover:underline leading-tight mb-1 text-[#003366]">
@@ -160,9 +166,9 @@ function AnnonserList() {
                             </div>
                             <div className="flex justify-between items-end mt-1">
                               <span className={`text-[11px] md:text-sm font-black ${ad.is_premium ? 'text-[#D4AF37]' : 'text-zinc-900'}`}>
-                                {ad.price || 'Bud'}
+                                {ad.price || pageText.listings.bid}
                               </span>
-                              <span className="text-[8px] md:text-[9px] font-black text-[#003366] uppercase tracking-widest hidden md:inline">Visa info &raquo;</span>
+                              <span className="text-[8px] md:text-[9px] font-black text-[#003366] uppercase tracking-widest hidden md:inline">{pageText.listings.viewInfo} &raquo;</span>
                             </div>
                           </div>
                         </Link>
@@ -173,7 +179,7 @@ function AnnonserList() {
                     {ads.some(ad => ad.status === 'finished') && (
                       <div className="pt-8 border-t border-zinc-100">
                         <h4 className="text-[10px] font-black uppercase text-zinc-400 tracking-[0.2em] mb-6 flex items-center gap-4">
-                          Avslutade affärer <div className="h-px flex-1 bg-zinc-100"></div>
+                          {pageText.listings.completed} <div className="h-px flex-1 bg-zinc-100"></div>
                         </h4>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                           {ads.filter(ad => ad.status === 'finished').map((ad) => (
@@ -186,7 +192,7 @@ function AnnonserList() {
                                   fallbackSrc="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"
                                 />
                                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                                  <span className="text-[8px] font-black text-white uppercase tracking-tighter border border-white px-1">SÅLD</span>
+                                  <span className="text-[8px] font-black text-white uppercase tracking-tighter border border-white px-1">{lang === 'pl' ? 'SPRZEDANE' : lang === 'ua' ? 'ПРОДАНО' : lang === 'en' ? 'SOLD' : 'SÅLD'}</span>
                                 </div>
                               </div>
                               <h5 className="text-[10px] font-bold text-zinc-600 truncate">{ad.title}</h5>
@@ -211,7 +217,7 @@ function AnnonserList() {
 
 export default function AnnonserPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center italic text-zinc-400 font-sans">Laddar Bazar...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center italic text-zinc-400 font-sans">Loading...</div>}>
       <AnnonserList />
     </Suspense>
   )
