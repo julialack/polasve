@@ -7,28 +7,30 @@ import { Loader2, Tag as TagIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import UserAvatar from '../ui/UserAvatar'
 import { capitalizeFirst } from '@/utils/capitalize'
+import { useTranslation } from '@/utils/translations'
 
 interface PostBoxProps {
   defaultCategory?: string
   hideCategorySelector?: boolean
 }
 
-const FEED_CATEGORIES = [
-  { id: 'allmänt', label: 'Allmänt', color: 'bg-zinc-100 text-zinc-600' },
-  { id: 'fråga', label: 'Fråga', color: 'bg-blue-50 text-blue-700' },
-  { id: 'tips', label: 'Tips', color: 'bg-green-50 text-green-700' },
-  { id: 'varning', label: 'Varning', color: 'bg-red-50 text-red-700' },
-  { id: 'hjälp', label: 'Hjälp', color: 'bg-orange-50 text-orange-700' },
-  { id: 'mötesplats', label: '🤝 Mötesplats', color: 'bg-pink-50 text-pink-700' }
-]
-
 export default function PostBox({ defaultCategory = 'allmänt', hideCategorySelector = false }: PostBoxProps = {}) {
+  const { t } = useTranslation()
   const [content, setContent] = useState('')
   const [category, setCategory] = useState(defaultCategory.toLowerCase())
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState<any>(null)
   const supabase = createClient()
   const router = useRouter()
+
+  const feedCategories = [
+    { id: 'allmänt', label: t.feedGeneral, color: 'bg-zinc-100 text-zinc-600' },
+    { id: 'fråga', label: t.feedQuestion, color: 'bg-blue-50 text-blue-700' },
+    { id: 'tips', label: t.feedTips, color: 'bg-green-50 text-green-700' },
+    { id: 'varning', label: t.feedWarning, color: 'bg-red-50 text-red-700' },
+    { id: 'hjälp', label: t.feedHelp, color: 'bg-orange-50 text-orange-700' },
+    { id: 'mötesplats', label: t.feedMeetingPlace, color: 'bg-pink-50 text-pink-700' }
+  ]
 
   useEffect(() => {
     if (defaultCategory) {
@@ -93,7 +95,7 @@ export default function PostBox({ defaultCategory = 'allmänt', hideCategorySele
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder={category === 'mötesplats' ? 'Skriv ett inlägg för Mötesplats...' : 'Dela något med communityt...'}
+            placeholder={category === 'mötesplats' ? t.postMeetingPlaceholder : t.postPlaceholder}
             className="w-full bg-transparent border-none focus:ring-0 resize-none font-bold text-zinc-950 placeholder:text-zinc-300 py-1 text-sm md:text-base outline-none"
             rows={2}
             disabled={loading}
@@ -104,7 +106,7 @@ export default function PostBox({ defaultCategory = 'allmänt', hideCategorySele
               <div className="flex items-start gap-2">
                 <TagIcon size={12} className="text-zinc-500 shrink-0 mt-2" />
                 <div className="flex flex-wrap gap-1.5">
-                  {FEED_CATEGORIES.map((cat) => (
+                  {feedCategories.map((cat) => (
                     <button
                       key={cat.id}
                       onClick={() => setCategory(cat.id)}
@@ -128,7 +130,7 @@ export default function PostBox({ defaultCategory = 'allmänt', hideCategorySele
                 className="bg-sve-blue text-white px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-pola-red transition-all active:scale-95 disabled:bg-zinc-100 disabled:text-zinc-400 flex items-center gap-2 shadow-md w-full md:w-auto justify-center"
               >
                 {loading && <Loader2 size={12} className="animate-spin" />}
-                Publicera inlägg
+                {t.publishPostBtn}
               </button>
             </div>
           </div>

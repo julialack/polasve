@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { useTranslation } from "@/utils/translations";
 import {
   Box,
   Newspaper,
@@ -20,17 +21,14 @@ import {
   Lightbulb,
   Users,
   Info,
-  PlusCircle,
   ChevronRight,
-  ShieldCheck,
-  HelpCircle,
-  Mail,
   Zap,
   HelpCircle as QuestionIcon
 } from "lucide-react";
 import ContactModal from "@/components/modals/ContactModal";
 
 export default function SidebarNav() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const [featuredAd, setFeaturedAd] = useState<any>(null);
   const [isContactOpen, setIsContactOpen] = useState(false);
@@ -55,62 +53,56 @@ export default function SidebarNav() {
     {
       title: "Portal",
       items: [
-        { name: "Forum / Bazar", href: "/annonser", icon: <Box size={14} /> },
-        { name: "Senaste Nyheterna", href: "/nyheter", icon: <Newspaper size={14} /> },
-        { name: "Event", href: "/evenemang", icon: <Calendar size={14} /> },
+        { name: t.navForum, href: "/annonser", icon: <Box size={14} /> },
+        { name: t.navNews, href: "/nyheter", icon: <Newspaper size={14} /> },
+        { name: t.navEvents, href: "/evenemang", icon: <Calendar size={14} /> },
       ]
     },
     {
-      title: "Marketplace",
+      title: t.navMarketplace,
       href: "/marketplace",
       items: [
-        { name: "Köp / Acceptera", href: "/marketplace/kop", icon: <ShoppingCart size={14} /> },
-        { name: "Sälj / Bortskänkes", href: "/marketplace/salj", icon: <Tag size={14} /> },
-        { name: "Bytes", href: "/marketplace/bytes", icon: <Repeat size={14} /> },
+        { name: t.catBuy, href: "/marketplace/kop", icon: <ShoppingCart size={14} /> },
+        { name: t.catSell, href: "/marketplace/salj", icon: <Tag size={14} /> },
+        { name: t.exchange, href: "/marketplace/bytes", icon: <Repeat size={14} /> },
       ]
     },
     {
-      title: "Jobb & Bostad",
+      title: `${t.navJobs} & ${t.navHousing}`,
       href: "/bostad",
       items: [
-        { name: "Leta jobb", href: "/jobb", icon: <Briefcase size={14} /> },
-        { name: "Lägenhet sökes", href: "/bostad/sokes", icon: <Search size={14} /> },
-        { name: "Lägenheter Hyra ut", href: "/bostad/uthyres", icon: <Home size={14} /> },
-        { name: "Lokaler", href: "/bostad/lokaler", icon: <Building size={14} /> },
+        { name: t.navJobs, href: "/jobb", icon: <Briefcase size={14} /> },
+        { name: t.housingWanted, href: "/bostad/sokes", icon: <Search size={14} /> },
+        { name: t.housingRent, href: "/bostad/uthyres", icon: <Home size={14} /> },
+        { name: t.commercialLocales, href: "/bostad/lokaler", icon: <Building size={14} /> },
       ]
     },
     {
-      title: "Tjänster & Transport",
+      title: `${t.navServices} & ${t.navTransport}`,
       items: [
-        { name: "Tjänster", href: "/tjanster", icon: <Wrench size={14} /> },
-        { name: "Transport", href: "/transport", icon: <Truck size={14} /> },
+        { name: t.navServices, href: "/tjanster", icon: <Wrench size={14} /> },
+        { name: t.navTransport, href: "/transport", icon: <Truck size={14} /> },
       ]
     },
     {
-      title: "Community",
+      title: t.communityFeed,
       href: "/community",
       items: [
-        { name: "Tips & Trick", href: "/tips", icon: <Lightbulb size={14} /> },
-        { name: "Meeting Place", href: "/meeting-place", icon: <Users size={14} /> },
+        { name: t.tipsTricks, href: "/tips", icon: <Lightbulb size={14} /> },
+        { name: t.navMeetingPlace, href: "/meeting-place", icon: <Users size={14} /> },
       ]
     },
     {
-      title: "Information",
+      title: t.navInfo,
       items: [
-        { name: "Institutioner", href: "/institutioner", icon: <Info size={14} /> },
-        { name: "Om oss", href: "/om-oss", icon: <Users size={14} /> },
+        { name: t.institutions, href: "/institutioner", icon: <Info size={14} /> },
+        { name: t.navAbout, href: "/om-oss", icon: <Users size={14} /> },
       ]
     }
   ];
 
-  const footerLinks = [
-    { name: "Villkor", href: "/villkor", icon: <ShieldCheck size={12} /> },
-    { name: "Frågor & Svar", href: "/faq", icon: <HelpCircle size={12} /> },
-    { name: "Kontakt", href: "/om-oss", icon: <Mail size={12} /> },
-  ];
-
   return (
-    <aside className="space-y-2">
+    <aside className="space-y-2 text-left">
       {/* Premium Link at the top for paying users */}
       {featuredAd && (
         <section className="bg-[#a11a2d] shadow-lg overflow-hidden border border-red-900 rounded-sm animate-in fade-in slide-in-from-top-2">
@@ -120,7 +112,7 @@ export default function SidebarNav() {
                 <Zap size={14} fill="currentColor" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[7px] font-black uppercase text-red-200 tracking-widest mb-0.5">Aktuell Just Nu</p>
+                <p className="text-[7px] font-black uppercase text-red-200 tracking-widest mb-0.5">{t.currentNow}</p>
                 <h4 className="text-[10px] font-bold text-white italic truncate leading-tight group-hover:underline">
                   {featuredAd.title}
                 </h4>
@@ -133,38 +125,38 @@ export default function SidebarNav() {
 
       {/* Sidebar Header */}
       <section className="bg-white shadow-sm overflow-hidden border border-zinc-200 rounded-sm">
-        <div className="bg-sve-blue text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">Sido meny</div>
+        <div className="bg-sve-blue text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">{t.navigationHeader}</div>
       </section>
 
       {/* Navigation Sections */}
       {sections.map((section) => (
-        <section key={section.title} className="bg-white border border-zinc-200 shadow-sm relative overflow-hidden rounded-sm">
+        <section key={section.title} className="bg-white border border-zinc-200 shadow-sm relative overflow-hidden rounded-sm text-left">
           <div className="absolute top-0 left-0 w-1 h-full bg-sve-blue"></div>
           <div className="p-2">
             {section.href ? (
                 <Link href={section.href} className="block group/title">
-                    <h4 className="text-[8px] font-black uppercase text-zinc-500 mb-1 tracking-[0.2em] group-hover/title:text-pola-red transition-colors flex justify-between items-center">
+                    <h4 className="text-[8px] font-black uppercase text-zinc-500 mb-1 tracking-[0.2em] group-hover/title:text-pola-red transition-colors flex justify-between items-center text-left">
                         {section.title}
                         <ChevronRight size={8} className="opacity-0 group-hover/title:opacity-100" />
                     </h4>
                 </Link>
             ) : (
-                <h4 className="text-[8px] font-black uppercase text-zinc-500 mb-1 tracking-[0.2em]">{section.title}</h4>
+                <h4 className="text-[8px] font-black uppercase text-zinc-500 mb-1 tracking-[0.2em] text-left">{section.title}</h4>
             )}
-            <nav className="flex flex-col space-y-0">
+            <nav className="flex flex-col space-y-0 text-left">
               {section.items.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex items-center justify-between py-1 px-1 rounded-sm transition-all group ${
+                    className={`flex items-center justify-between py-1 px-1 rounded-sm transition-all group text-left ${
                       isActive
                         ? "bg-zinc-50 text-pola-red"
                         : "text-sve-blue hover:bg-zinc-50 hover:text-pola-red"
                     }`}
                   >
-                    <div className="flex items-center gap-3 text-[10px] font-bold">
+                    <div className="flex items-center gap-3 text-[10px] font-bold text-left">
                       <span className={isActive ? "text-pola-red" : "text-sve-blue opacity-70 group-hover:opacity-100"}>
                         {item.icon}
                       </span>
@@ -185,14 +177,14 @@ export default function SidebarNav() {
           onClick={() => setIsContactOpen(true)}
           className="flex items-center justify-center gap-2 w-full py-2.5 bg-white border-2 border-sve-blue text-sve-blue hover:bg-sve-blue hover:text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm active:scale-95"
         >
-          <QuestionIcon size={15} /> Frågor? Kontakta oss!
+          <QuestionIcon size={15} /> {t.contactBtn}
         </button>
 
         <Link
           href="/reklam"
           className="flex items-center justify-center gap-2 w-full py-2.5 bg-pola-red hover:bg-sve-blue text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl hover:shadow-2xl active:scale-95"
         >
-          <Building size={15} /> Lägg reklam
+          <Building size={15} /> {t.advertiseBtn}
         </Link>
       </section>
 

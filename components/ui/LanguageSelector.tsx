@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Check, ChevronDown, X } from 'lucide-react'
-
-export type LanguageCode = 'pl' | 'sv' | 'ua' | 'en'
+import { useTranslation, LanguageCode } from '@/utils/translations'
 
 export const LANGUAGES: { code: LanguageCode; flag: string; nativeName: string }[] = [
   { code: 'pl', flag: '🇵🇱', nativeName: 'Polski (Główny)' },
@@ -17,19 +16,11 @@ interface LanguageSelectorProps {
 }
 
 export default function LanguageSelector({ variant = 'hero' }: LanguageSelectorProps) {
-  const [currentLang, setCurrentLang] = useState<LanguageCode>('pl')
+  const { lang: currentLang, setLang } = useTranslation()
   const [open, setOpen] = useState(false)
 
-  useEffect(() => {
-    const saved = localStorage.getItem('polasve_lang') as LanguageCode
-    if (saved && LANGUAGES.some(l => l.code === saved)) {
-      setCurrentLang(saved)
-    }
-  }, [])
-
   const selectLanguage = (code: LanguageCode) => {
-    setCurrentLang(code)
-    localStorage.setItem('polasve_lang', code)
+    setLang(code)
     setOpen(false)
   }
 
@@ -44,11 +35,12 @@ export default function LanguageSelector({ variant = 'hero' }: LanguageSelectorP
       {/* Trigger Button */}
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black transition-all active:scale-95 shadow-xs ${buttonStyle}`}
+        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all active:scale-95 shadow-xs ${buttonStyle}`}
         aria-label="Wybierz język / Välj språk"
+        title={activeLang.nativeName}
       >
         <span className="text-base leading-none">{activeLang.flag}</span>
-        <span className="uppercase text-[10px] tracking-wider font-black">{activeLang.code}</span>
+        <span className="uppercase text-[10px] tracking-wider font-extrabold">{activeLang.code}</span>
         <ChevronDown size={11} className={`transition-transform duration-300 opacity-70 ${open ? 'rotate-180' : ''}`} />
       </button>
 
@@ -59,10 +51,10 @@ export default function LanguageSelector({ variant = 'hero' }: LanguageSelectorP
             className="fixed inset-0 z-[150] bg-black/40 backdrop-blur-xs"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute right-0 top-full mt-2 z-[160] w-52 bg-white rounded-xl shadow-2xl border border-zinc-200 p-2 animate-in zoom-in-95 duration-200 text-left text-zinc-900">
-            <div className="px-3 py-2 border-b border-zinc-100 flex items-center justify-between text-zinc-400">
-              <span className="text-[9px] font-black uppercase tracking-widest text-[#003366]">Wybierz język</span>
-              <button onClick={() => setOpen(false)} className="text-zinc-400 hover:text-black">
+          <div className="absolute right-0 top-full mt-2 z-[160] w-52 bg-white rounded-xl shadow-2xl border border-zinc-200 p-2 animate-in zoom-in-95 duration-200 text-left text-zinc-900 max-h-[70vh] overflow-y-auto">
+            <div className="px-3 py-2 border-b border-zinc-100 flex items-center justify-between text-zinc-400 sticky top-0 bg-white z-10">
+              <span className="text-[9px] font-black uppercase tracking-widest text-[#003366]">Wybierz język / Välj språk</span>
+              <button onClick={() => setOpen(false)} className="text-zinc-400 hover:text-black p-1">
                 <X size={14} />
               </button>
             </div>
@@ -71,7 +63,7 @@ export default function LanguageSelector({ variant = 'hero' }: LanguageSelectorP
                 <button
                   key={lang.code}
                   onClick={() => selectLanguage(lang.code)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-all text-left ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-bold transition-all text-left ${
                     currentLang === lang.code
                       ? 'bg-red-50 text-[#a11a2d] font-black'
                       : 'text-zinc-800 hover:bg-zinc-50'

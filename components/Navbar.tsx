@@ -6,8 +6,10 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
 import { User, MessageSquare, Menu, X, ChevronRight } from "lucide-react";
 import LanguageSelector from "@/components/ui/LanguageSelector";
+import { useTranslation } from "@/utils/translations";
 
 export default function Navbar() {
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -52,61 +54,61 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { name: "Hem", href: "/" },
-    { name: "Forum", href: "/annonser" },
-    { name: "Nyheter", href: "/nyheter" },
-    { name: "Event", href: "/evenemang" },
-    { name: "Om Oss", href: "/om-oss" },
+    { name: t.navHome, href: "/" },
+    { name: t.navForum, href: "/annonser" },
+    { name: t.navNews, href: "/nyheter" },
+    { name: t.navEvents, href: "/evenemang" },
+    { name: t.navAbout, href: "/om-oss" },
   ];
 
   const mobileMenuSections = [
     {
-      title: "Huvudmeny",
+      title: t.mainMenu,
       items: [
-        { name: "Hem", href: "/" },
-        { name: "Forum / Bazar", href: "/annonser" },
-        { name: "Nyheter", href: "/nyheter" },
-        { name: "Event", href: "/evenemang" },
+        { name: t.navHome, href: "/" },
+        { name: t.navForum, href: "/annonser" },
+        { name: t.navNews, href: "/nyheter" },
+        { name: t.navEvents, href: "/evenemang" },
       ]
     },
     {
-      title: "Marketplace",
+      title: t.navMarketplace,
       items: [
-        { name: "Köp / Acceptera", href: "/marketplace/kop" },
-        { name: "Sälj / Bortskänkes", href: "/marketplace/salj" },
-        { name: "Bytes", href: "/marketplace/bytes" },
+        { name: t.buyAccept, href: "/marketplace/kop" },
+        { name: t.sellGiveaway, href: "/marketplace/salj" },
+        { name: t.exchange, href: "/marketplace/bytes" },
       ]
     },
     {
-      title: "Jobb & Bostad",
+      title: t.jobAndHousing,
       items: [
-        { name: "Leta jobb", href: "/jobb" },
-        { name: "Lägenhet sökes", href: "/bostad/sokes" },
-        { name: "Lägenheter Hyra ut", href: "/bostad/uthyres" },
-        { name: "Lokaler", href: "/bostad/lokaler" },
+        { name: t.findJob, href: "/jobb" },
+        { name: t.housingWanted, href: "/bostad/sokes" },
+        { name: t.housingRent, href: "/bostad/uthyres" },
+        { name: t.commercialLocales, href: "/bostad/lokaler" },
       ]
     },
     {
-      title: "Tjänster & Transport",
+      title: t.servicesAndTransport,
       items: [
-        { name: "Tjänster", href: "/tjanster" },
-        { name: "Transport", href: "/transport" },
+        { name: t.navServices, href: "/tjanster" },
+        { name: t.navTransport, href: "/transport" },
       ]
     },
     {
-      title: "Community & Mötesplats",
+      title: t.communityAndMeeting,
       items: [
-        { name: "Mötesplats", href: "/meeting-place" },
-        { name: "Tips & Trick", href: "/tips" },
+        { name: t.navMeetingPlace, href: "/meeting-place" },
+        { name: t.tipsTricks, href: "/tips" },
       ]
     },
     {
-      title: "Information",
+      title: t.information,
       items: [
-        { name: "Institutioner", href: "/institutioner" },
-        { name: "Om oss", href: "/om-oss" },
-        { name: "Frågor & Svar", href: "/faq" },
-        { name: "Villkor", href: "/villkor" },
+        { name: t.institutions, href: "/institutioner" },
+        { name: t.navAbout, href: "/om-oss" },
+        { name: t.faq, href: "/faq" },
+        { name: t.terms, href: "/villkor" },
       ]
     }
   ];
@@ -207,14 +209,14 @@ export default function Navbar() {
                 <LanguageSelector variant="navbar" />
                 {!user ? (
                   <Link href="/logga-in" className="text-[11px] font-black text-[#003366] uppercase tracking-[0.2em] border-b-2 border-transparent hover:border-[#003366] transition-all py-1">
-                    Bli medlem / Logga in
+                    {t.loginRegisterBtn}
                   </Link>
                 ) : (
                   <>
-                    <Link href="/profil" className="text-zinc-500 hover:text-[#003366] transition-colors p-2" title="Min Profil">
+                    <Link href="/profil" className="text-zinc-500 hover:text-[#003366] transition-colors p-2" title={t.navProfile}>
                       <User size={22} />
                     </Link>
-                    <Link href="/meddelanden" className="relative text-zinc-500 hover:text-[#003366] transition-colors p-2" title="Meddelanden">
+                    <Link href="/meddelanden" className="relative text-zinc-500 hover:text-[#003366] transition-colors p-2" title={t.navMessages}>
                       <MessageSquare size={22} className="scale-x-[-1]" />
                       {unreadCount > 0 && (
                         <span className="absolute top-1.5 right-1.5 bg-[#a11a2d] text-white text-[8px] w-4 h-4 flex items-center justify-center rounded-full font-bold shadow-sm">
@@ -223,7 +225,7 @@ export default function Navbar() {
                       )}
                     </Link>
                     <button onClick={handleLogout} className="text-[11px] font-black text-[#a11a2d] uppercase tracking-widest hover:underline ml-2">
-                      Logga ut
+                      {t.navLogout}
                     </button>
                   </>
                 )}
@@ -237,7 +239,7 @@ export default function Navbar() {
           <button
             className="p-3 -ml-3 text-[#003366] hover:bg-zinc-50 rounded-md transition-colors"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Meny"
+            aria-label={t.menuTitle}
           >
             {menuOpen ? <X size={26} /> : <Menu size={26} />}
           </button>
@@ -257,6 +259,7 @@ export default function Navbar() {
           </Link>
 
           <div className="flex items-center gap-2">
+            <LanguageSelector variant="navbar" />
             {user ? (
               <Link href="/meddelanden" className="relative p-2 text-[#003366]">
                 <MessageSquare size={20} className="scale-x-[-1]" />
@@ -266,9 +269,7 @@ export default function Navbar() {
                   </span>
                 )}
               </Link>
-            ) : (
-              <div className="w-8"></div>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
@@ -281,7 +282,7 @@ export default function Navbar() {
         />
         <div className={`absolute top-0 left-0 bottom-0 w-[80%] max-w-sm bg-white shadow-2xl transition-transform duration-300 flex flex-col ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <div className="p-6 border-b flex justify-between items-center text-left">
-            <span className="font-black text-[#003366] uppercase tracking-widest text-sm text-left">Meny</span>
+            <span className="font-black text-[#003366] uppercase tracking-widest text-sm text-left">{t.menuTitle}</span>
             <button onClick={() => setMenuOpen(false)} className="p-2 text-zinc-400"><X size={24} /></button>
           </div>
           <nav className="flex-1 overflow-y-auto p-5 space-y-5 text-left">
@@ -312,19 +313,19 @@ export default function Navbar() {
               {user ? (
                 <div className="text-left space-y-3">
                   <Link href="/profil" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-sm font-black text-[#003366] text-left">
-                    <User size={18} /> Min Profil
+                    <User size={18} /> {t.navProfile}
                   </Link>
                   <Link href="/meddelanden" onClick={() => setMenuOpen(false)} className="flex items-center justify-between text-sm font-black text-[#003366] text-left">
-                    <span className="flex items-center gap-3 text-left"><MessageSquare size={18} /> Meddelanden</span>
+                    <span className="flex items-center gap-3 text-left"><MessageSquare size={18} /> {t.navMessages}</span>
                     {unreadCount > 0 && <span className="bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full font-black">{unreadCount}</span>}
                   </Link>
                   <button onClick={handleLogout} className="w-full text-left text-sm font-black text-[#a11a2d] pt-2 uppercase tracking-widest">
-                    Logga ut
+                    {t.navLogout}
                   </button>
                 </div>
               ) : (
                 <Link href="/logga-in" onClick={() => setMenuOpen(false)} className="block bg-[#003366] text-white text-center py-3 rounded-sm font-black uppercase tracking-widest shadow-md text-xs">
-                  Logga in / Bli medlem
+                  {t.loginRegisterBtn}
                 </Link>
               )}
             </div>

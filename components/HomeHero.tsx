@@ -6,8 +6,10 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { User, MessageSquare, ShieldCheck, Menu, X, PlusCircle, ChevronRight } from 'lucide-react'
 import LanguageSelector from '@/components/ui/LanguageSelector'
+import { useTranslation } from '@/utils/translations'
 
 export default function HomeHero() {
+  const { t } = useTranslation()
   const [user, setUser] = useState<any>(null)
   const [unreadCount, setUnreadCount] = useState(0)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
@@ -60,61 +62,61 @@ export default function HomeHero() {
   }
 
   const navLinks = [
-    { name: "Hem", href: "/" },
-    { name: "Forum", href: "/annonser" },
-    { name: "Nyheter", href: "/nyheter" },
-    { name: "Event", href: "/evenemang" },
-    { name: "Om Oss", href: "/om-oss" },
+    { name: t.navHome, href: "/" },
+    { name: t.navForum, href: "/annonser" },
+    { name: t.navNews, href: "/nyheter" },
+    { name: t.navEvents, href: "/evenemang" },
+    { name: t.navAbout, href: "/om-oss" },
   ]
 
   const mobileMenuSections = [
     {
-      title: "Huvudmeny",
+      title: t.mainMenu,
       items: [
-        { name: "Hem", href: "/" },
-        { name: "Forum / Bazar", href: "/annonser" },
-        { name: "Nyheter", href: "/nyheter" },
-        { name: "Event", href: "/evenemang" },
+        { name: t.navHome, href: "/" },
+        { name: t.navForum, href: "/annonser" },
+        { name: t.navNews, href: "/nyheter" },
+        { name: t.navEvents, href: "/evenemang" },
       ]
     },
     {
-      title: "Marketplace",
+      title: t.navMarketplace,
       items: [
-        { name: "Köp / Acceptera", href: "/marketplace/kop" },
-        { name: "Sälj / Bortskänkes", href: "/marketplace/salj" },
-        { name: "Bytes", href: "/marketplace/bytes" },
+        { name: t.buyAccept, href: "/marketplace/kop" },
+        { name: t.sellGiveaway, href: "/marketplace/salj" },
+        { name: t.exchange, href: "/marketplace/bytes" },
       ]
     },
     {
-      title: "Jobb & Bostad",
+      title: t.jobAndHousing,
       items: [
-        { name: "Leta jobb", href: "/jobb" },
-        { name: "Lägenhet sökes", href: "/bostad/sokes" },
-        { name: "Lägenheter Hyra ut", href: "/bostad/uthyres" },
-        { name: "Lokaler", href: "/bostad/lokaler" },
+        { name: t.findJob, href: "/jobb" },
+        { name: t.housingWanted, href: "/bostad/sokes" },
+        { name: t.housingRent, href: "/bostad/uthyres" },
+        { name: t.commercialLocales, href: "/bostad/lokaler" },
       ]
     },
     {
-      title: "Tjänster & Transport",
+      title: t.servicesAndTransport,
       items: [
-        { name: "Tjänster", href: "/tjanster" },
-        { name: "Transport", href: "/transport" },
+        { name: t.navServices, href: "/tjanster" },
+        { name: t.navTransport, href: "/transport" },
       ]
     },
     {
-      title: "Community & Mötesplats",
+      title: t.communityAndMeeting,
       items: [
-        { name: "Mötesplats", href: "/meeting-place" },
-        { name: "Tips & Trick", href: "/tips" },
+        { name: t.navMeetingPlace, href: "/meeting-place" },
+        { name: t.tipsTricks, href: "/tips" },
       ]
     },
     {
-      title: "Information",
+      title: t.information,
       items: [
-        { name: "Institutioner", href: "/institutioner" },
-        { name: "Om oss", href: "/om-oss" },
-        { name: "Frågor & Svar", href: "/faq" },
-        { name: "Villkor", href: "/villkor" },
+        { name: t.institutions, href: "/institutioner" },
+        { name: t.navAbout, href: "/om-oss" },
+        { name: t.faq, href: "/faq" },
+        { name: t.terms, href: "/villkor" },
       ]
     }
   ];
@@ -134,7 +136,7 @@ export default function HomeHero() {
 
       {/* Top Mobile Bar */}
       <div className="relative z-50 md:hidden flex justify-between items-center px-6 py-4 border-b border-white/10">
-        <button onClick={() => setMenuOpen(true)} className="p-2 -ml-2" aria-label="Meny">
+        <button onClick={() => setMenuOpen(true)} className="p-2 -ml-2" aria-label={t.menuTitle}>
           <Menu size={28} />
         </button>
         <Link href="/" className={`${isHome ? 'hidden' : 'block'} font-black italic tracking-tighter text-sm uppercase`}>Polasve</Link>
@@ -142,7 +144,7 @@ export default function HomeHero() {
           <LanguageSelector />
           {user ? (
             <>
-              <Link href="/meddelanden" className="relative p-2" aria-label="Meddelanden">
+              <Link href="/meddelanden" className="relative p-2" aria-label={t.navMessages}>
                 <MessageSquare size={24} className="scale-x-[-1]" />
                 {unreadCount > 0 && <span className="absolute top-1 right-1 bg-white text-red-600 text-[8px] w-5 h-5 flex items-center justify-center rounded-full font-black shadow-lg">{unreadCount}</span>}
               </Link>
@@ -151,7 +153,7 @@ export default function HomeHero() {
               </Link>
             </>
           ) : (
-            <Link href="/logga-in" className="text-[11px] font-black uppercase tracking-[0.2em] bg-white/20 backdrop-blur-sm px-4 py-2 rounded-sm active:scale-95 transition-all">Logga in</Link>
+            <Link href="/logga-in" className="text-[11px] font-black uppercase tracking-[0.2em] bg-white/20 backdrop-blur-sm px-4 py-2 rounded-sm active:scale-95 transition-all">{t.navLogin}</Link>
           )}
         </div>
       </div>
@@ -182,10 +184,10 @@ export default function HomeHero() {
           <div className="text-center px-4">
             <h1 className={`font-black uppercase tracking-tighter drop-shadow-2xl italic leading-tight transition-all ${
               isHome ? 'text-4xl md:text-7xl mb-2 md:mb-4' : 'text-lg md:text-4xl mb-0'
-            }`}>Polacker i Sverige</h1>
+            }`}>{t.heroTitle}</h1>
             <p className={`font-bold tracking-widest opacity-95 drop-shadow-lg uppercase transition-all ${
               isHome ? 'text-base md:text-2xl' : 'text-[8px] md:text-sm'
-            }`}>Din portal för jobb & annonser</p>
+            }`}>{t.heroSubtitle}</p>
           </div>
 
           {/* Swedish Flag */}
@@ -210,14 +212,14 @@ export default function HomeHero() {
             <Link key={link.name} href={link.href} className={`text-[11px] md:text-xs font-black uppercase tracking-[0.2em] hover:text-white/70 transition-all ${pathname === link.href ? 'border-b-2 border-white pb-1' : ''}`}>{link.name}</Link>
           ))}
           {user?.email === ADMIN_EMAIL && (
-            <Link href="/admin" className={`text-[11px] md:text-xs font-black uppercase tracking-[0.2em] text-yellow-300 hover:text-white flex items-center gap-2 transition-all ${pathname === '/admin' ? 'border-b-2 border-white pb-1' : ''}`}><ShieldCheck size={16} /> Admin</Link>
+            <Link href="/admin" className={`text-[11px] md:text-xs font-black uppercase tracking-[0.2em] text-yellow-300 hover:text-white flex items-center gap-2 transition-all ${pathname === '/admin' ? 'border-b-2 border-white pb-1' : ''}`}><ShieldCheck size={16} /> {t.navAdmin}</Link>
           )}
 
           <div className="flex items-center gap-4 ml-2">
             <LanguageSelector />
             {user ? (
               <>
-                <Link href="/profil" className="hover:opacity-70 transition-opacity">
+                <Link href="/profil" className="hover:opacity-70 transition-opacity" title={t.navProfile}>
                   {avatarUrl ? (
                     <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden shadow-md bg-white flex items-center justify-center">
                       <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
@@ -226,23 +228,23 @@ export default function HomeHero() {
                     <User size={22} />
                   )}
                 </Link>
-                <Link href="/meddelanden" className="relative hover:opacity-70 transition-opacity">
+                <Link href="/meddelanden" className="relative hover:opacity-70 transition-opacity" title={t.navMessages}>
                   <MessageSquare size={22} className="scale-x-[-1]" />
                   {unreadCount > 0 && <span className="absolute -top-1.5 -right-1.5 bg-white text-red-600 text-[8px] w-4.5 h-4.5 flex items-center justify-center rounded-full font-bold shadow-sm border border-red-600">{unreadCount}</span>}
                 </Link>
-                <button onClick={handleLogout} className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.15em] text-white hover:underline decoration-2 underline-offset-4 ml-1">Logga ut</button>
+                <button onClick={handleLogout} className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.15em] text-white hover:underline decoration-2 underline-offset-4 ml-1">{t.navLogout}</button>
               </>
             ) : (
-              <Link href="/logga-in" className="text-[10px] md:text-[11px] font-black uppercase tracking-widest bg-white text-[#d60000] px-5 py-2 rounded-sm hover:bg-zinc-100 transition-all shadow-lg">Logga in</Link>
+              <Link href="/logga-in" className="text-[10px] md:text-[11px] font-black uppercase tracking-widest bg-white text-[#d60000] px-5 py-2 rounded-sm hover:bg-zinc-100 transition-all shadow-lg">{t.navLogin}</Link>
             )}
-            <Link href="/skapa-annons" className="bg-[#ff3b3b] hover:bg-white hover:text-[#ff3b3b] text-white px-6 py-2.5 rounded-[4px] font-black text-[10px] md:text-xs uppercase tracking-widest transition-all shadow-xl ml-2 border-2 border-transparent hover:border-[#ff3b3b]">Lägg upp annons</Link>
+            <Link href="/skapa-annons" className="bg-[#ff3b3b] hover:bg-white hover:text-[#ff3b3b] text-white px-6 py-2.5 rounded-[4px] font-black text-[10px] md:text-xs uppercase tracking-widest transition-all shadow-xl ml-2 border-2 border-transparent hover:border-[#ff3b3b]">{t.createAdBtn}</Link>
           </div>
         </nav>
 
         {/* Mobile CTA Button */}
         <div className="md:hidden w-full px-4 mt-4">
            <Link href="/skapa-annons" className="flex items-center justify-center gap-2 bg-[#ff3b3b] text-white py-3 rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl active:scale-95 border-2 border-white/20">
-             <PlusCircle size={16} /> Lägg upp annons
+             <PlusCircle size={16} /> {t.createAdBtn}
            </Link>
         </div>
       </div>
@@ -252,7 +254,7 @@ export default function HomeHero() {
         <div className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${menuOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setMenuOpen(false)} />
         <div className={`absolute top-0 left-0 bottom-0 w-[80%] bg-white shadow-2xl transition-transform duration-300 flex flex-col ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <div className="p-6 border-b border-zinc-100 flex justify-between items-center bg-zinc-50">
-            <span className="font-black text-[#003366] uppercase tracking-[0.2em] text-xs">Meny</span>
+            <span className="font-black text-[#003366] uppercase tracking-[0.2em] text-xs">{t.menuTitle}</span>
             <button onClick={() => setMenuOpen(false)} className="p-2 text-zinc-400 hover:text-black"><X size={24} /></button>
           </div>
           <nav className="flex-1 overflow-y-auto p-5 space-y-5 text-left">
@@ -286,7 +288,7 @@ export default function HomeHero() {
                   onClick={() => setMenuOpen(false)}
                   className="text-xs font-black uppercase text-yellow-600 flex items-center gap-2 bg-yellow-50 p-2 rounded-sm text-left"
                 >
-                  <ShieldCheck size={16} /> Adminportal
+                  <ShieldCheck size={16} /> {t.navAdmin}
                 </Link>
               </div>
             )}
@@ -295,19 +297,19 @@ export default function HomeHero() {
               {user ? (
                 <>
                   <Link href="/profil" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 text-sm font-black text-[#003366] text-left">
-                    <User size={18} /> Min Profil
+                    <User size={18} /> {t.navProfile}
                   </Link>
                   <Link href="/meddelanden" onClick={() => setMenuOpen(false)} className="flex items-center justify-between text-sm font-black text-[#003366] text-left">
-                    <span className="flex items-center gap-3 text-left"><MessageSquare size={18} /> Meddelanden</span>
+                    <span className="flex items-center gap-3 text-left"><MessageSquare size={18} /> {t.navMessages}</span>
                     {unreadCount > 0 && <span className="bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full font-black">{unreadCount}</span>}
                   </Link>
                   <button onClick={handleLogout} className="w-full text-left text-sm font-black text-[#a11a2d] pt-2 uppercase tracking-widest">
-                    Logga ut
+                    {t.navLogout}
                   </button>
                 </>
               ) : (
                 <Link href="/logga-in" onClick={() => setMenuOpen(false)} className="block bg-[#003366] text-white text-center py-3 rounded-sm font-black uppercase tracking-widest shadow-md text-xs">
-                  Logga in / Bli medlem
+                  {t.loginRegisterBtn}
                 </Link>
               )}
             </div>

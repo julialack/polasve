@@ -11,6 +11,7 @@ import ReportModal from '../ui/ReportModal'
 import SmartText from '../ui/SmartText'
 import Link from 'next/link'
 import { capitalizeFirst } from '@/utils/capitalize'
+import { useTranslation } from '@/utils/translations'
 
 interface PostCardProps {
   post: Post & { category?: string }
@@ -28,6 +29,7 @@ const CATEGORY_STYLES: Record<string, string> = {
 }
 
 export default function PostCard({ post, currentUser, onDelete, onUpdate }: PostCardProps) {
+  const { t } = useTranslation()
   const [loadingLikes, setLoadingLikes] = useState(false)
   const [activeCommentPost, setActiveCommentPost] = useState(false)
   const [commentContent, setCommentContent] = useState('')
@@ -48,8 +50,6 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
   const supabase = createClient()
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/annonser/${post.id}` // Assuming posts have their own URLs or we use the feed URL
-    // For now, let's just copy the current URL or a specific post link if we had one
     try {
       if (navigator.share) {
         await navigator.share({
@@ -59,7 +59,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
         })
       } else {
         await navigator.clipboard.writeText(window.location.href)
-        toast.success('Länk kopierad till urklipp!')
+        toast.success(t.linkCopied)
       }
     } catch (err) {
       console.error('Share failed:', err)
@@ -191,14 +191,14 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
             </div>
             <div className="flex items-center gap-2 mt-0.5">
               <span className="text-[8px] md:text-[9px] text-zinc-400 font-bold">{new Date(post.created_at).toLocaleDateString()}</span>
-              {post.edited && <span className="text-[7px] md:text-[8px] text-zinc-300 italic">(redigerad)</span>}
+              {post.edited && <span className="text-[7px] md:text-[8px] text-zinc-300 italic">{t.edited}</span>}
             </div>
           </div>
         </div>
         {currentUser?.id === post.user_id && !editingPost && (
           <div className="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-            <button onClick={() => { setEditingPost(true); setEditPostContent(post.content) }} className="text-zinc-400 hover:text-blue-600 transition-colors p-1"><Edit2 size={13} /></button>
-            <button onClick={() => onDelete(post.id)} className="text-zinc-400 hover:text-red-800 transition-colors p-1"><Trash2 size={13} /></button>
+            <button onClick={() => { setEditingPost(true); setEditPostContent(post.content) }} className="text-zinc-400 hover:text-blue-600 transition-colors p-1" title={t.edit}><Edit2 size={13} /></button>
+            <button onClick={() => onDelete(post.id)} className="text-zinc-400 hover:text-red-800 transition-colors p-1" title={t.delete}><Trash2 size={13} /></button>
           </div>
         )}
       </div>
@@ -207,8 +207,8 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
         <div className="space-y-2 mt-2">
           <textarea value={editPostContent} onChange={(e) => setEditPostContent(e.target.value)} className="w-full border border-[#003366]/30 p-3 text-sm text-zinc-900 rounded-sm font-bold outline-none" rows={3} autoFocus />
           <div className="flex gap-2 justify-end">
-            <button onClick={() => setEditingPost(false)} className="text-[10px] font-black text-zinc-400 px-3 py-1 uppercase tracking-widest">Avbryt</button>
-            <button onClick={handleUpdatePost} className="text-[10px] font-black bg-[#003366] text-white px-4 py-1.5 rounded-sm uppercase tracking-widest shadow-md">Spara</button>
+            <button onClick={() => setEditingPost(false)} className="text-[10px] font-black text-zinc-400 px-3 py-1 uppercase tracking-widest">{t.cancel}</button>
+            <button onClick={handleUpdatePost} className="text-[10px] font-black bg-[#003366] text-white px-4 py-1.5 rounded-sm uppercase tracking-widest shadow-md">{t.save}</button>
           </div>
         </div>
       ) : (
@@ -226,11 +226,11 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
         </button>
         <button onClick={handleShare} className="flex items-center gap-1.5 text-zinc-400 hover:text-[#003366] transition-colors">
           <Share2 size={15} />
-          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Dela</span>
+          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{t.share}</span>
         </button>
         <button onClick={() => openReport(post.id, 'post')} className="flex items-center gap-1.5 text-zinc-300 hover:text-[#a11a2d] transition-colors ml-auto">
           <Flag size={14} />
-          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Anmäl</span>
+          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{t.report}</span>
         </button>
       </div>
 
@@ -259,7 +259,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start text-xs">
                         <Link href={`/profil/${comment.user_id}`} className="hover:underline">
-                          <span className="font-pacifico text-[#003366] tracking-normal">{formatDisplayName(comment.user_name)} {comment.edited && <span className="font-sans font-normal text-[8px] text-zinc-300 italic lowercase ml-1">(redigerad)</span>}</span>
+                          <span className="font-pacifico text-[#003366] tracking-normal">{formatDisplayName(comment.user_name)} {comment.edited && <span className="font-sans font-normal text-[8px] text-zinc-300 italic lowercase ml-1">{t.edited}</span>}</span>
                         </Link>
                         <div className="flex gap-2">
                           {currentUser?.id === comment.user_id && !editingComment && (
@@ -296,8 +296,8 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
               userName={currentUser?.user_metadata?.full_name}
               size="xs"
             />
-            <input value={commentContent} onChange={(e) => setCommentContent(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handlePostComment()} placeholder="Skriv ett svar..." className="flex-1 min-w-0 bg-zinc-100 border border-zinc-200 py-3 px-4 sm:px-5 rounded-full text-sm text-black font-bold outline-none focus:border-[#003366] placeholder:text-zinc-400 placeholder:font-normal h-11 w-full" />
-            <button onClick={handlePostComment} className="shrink-0 text-[#003366] hover:text-[#a11a2d] transition-all p-2 active:scale-90" aria-label="Skicka"><Send size={20} /></button>
+            <input value={commentContent} onChange={(e) => setCommentContent(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handlePostComment()} placeholder={t.writeReply} className="flex-1 min-w-0 bg-zinc-100 border border-zinc-200 py-3 px-4 sm:px-5 rounded-full text-sm text-black font-bold outline-none focus:border-[#003366] placeholder:text-zinc-400 placeholder:font-normal h-11 w-full" />
+            <button onClick={handlePostComment} className="shrink-0 text-[#003366] hover:text-[#a11a2d] transition-all p-2 active:scale-90" aria-label={t.sendComment}><Send size={20} /></button>
           </div>
         </div>
       )}

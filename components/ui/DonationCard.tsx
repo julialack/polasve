@@ -1,14 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { Heart, CreditCard, Loader2, CheckCircle2 } from 'lucide-react'
+import { Heart, CreditCard, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslation } from '@/utils/translations'
 
 interface DonationCardProps {
   compact?: boolean
 }
 
 export default function DonationCard({ compact = false }: DonationCardProps) {
+  const { t } = useTranslation()
   const [selectedAmount, setSelectedAmount] = useState<number>(25)
   const [customAmount, setCustomAmount] = useState<string>('')
   const [loading, setLoading] = useState(false)
@@ -51,17 +53,17 @@ export default function DonationCard({ compact = false }: DonationCardProps) {
           <Heart size={16} className="fill-white" />
         </div>
         <h3 className="font-black text-[#003366] uppercase text-xs md:text-sm tracking-wider">
-          Stöd vårt community!
+          {t.supportUsTitle}
         </h3>
       </div>
 
       <p className="text-[11px] md:text-xs text-zinc-600 font-medium leading-relaxed mb-4 italic">
-        Vi bygger en plattform för polacker i Sverige. Om du vill hjälpa oss utveckla tjänsten vidare kan du ge ett frivilligt bidrag – allt från 5 kr uppskattas ❤️
+        {t.supportUsSubtitle} ❤️
       </p>
 
       {/* Preset Amount Selector */}
       <div className="space-y-3 mb-4">
-        <p className="text-[9px] font-black uppercase text-amber-800 tracking-widest">Välj belopp (kr):</p>
+        <p className="text-[9px] font-black uppercase text-amber-800 tracking-widest">{t.selectAmount}</p>
         <div className="grid grid-cols-4 gap-2">
           {PRESET_AMOUNTS.map((amt) => (
             <button
@@ -85,7 +87,7 @@ export default function DonationCard({ compact = false }: DonationCardProps) {
             type="number"
             value={customAmount}
             onChange={(e) => setCustomAmount(e.target.value)}
-            placeholder="Eller skriv valfritt belopp (min 5 kr)..."
+            placeholder={t.customAmountPlaceholder}
             min={5}
             className="w-full p-2.5 bg-white border border-zinc-200 rounded-sm text-xs font-bold text-zinc-900 outline-none focus:border-[#003366] placeholder:text-zinc-400 placeholder:font-normal"
           />
@@ -102,13 +104,13 @@ export default function DonationCard({ compact = false }: DonationCardProps) {
           <Loader2 size={14} className="animate-spin" />
         ) : (
           <>
-            <CreditCard size={14} /> Donera {effectiveAmount > 0 ? `${effectiveAmount} kr` : ''} via Stripe
+            <CreditCard size={14} /> {t.donateViaStripe} {effectiveAmount > 0 ? `(${effectiveAmount} kr)` : ''}
           </>
         )}
       </button>
 
       <p className="text-[8px] text-zinc-400 font-bold uppercase tracking-wider text-center mt-2.5">
-        🔒 Säker kortbetalning via Stripe
+        {t.securePayment}
       </p>
     </div>
   )

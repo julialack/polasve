@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Pacifico } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "sonner";
+import { LanguageProvider } from "@/utils/translations";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -95,11 +96,13 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${pacifico.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-zinc-900">
-        <Navbar />
-        <main className="flex-1 w-full text-base md:text-lg">
-          {children}
-        </main>
-        <Toaster position="top-center" richColors />
+        <LanguageProvider>
+          <Navbar />
+          <main className="flex-1 w-full text-base md:text-lg">
+            {children}
+          </main>
+          <Toaster position="top-center" richColors />
+        </LanguageProvider>
       </body>
     </html>
   );

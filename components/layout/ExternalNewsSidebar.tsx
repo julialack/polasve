@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Newspaper, ExternalLink, ArrowRight } from 'lucide-react'
+import { Newspaper } from 'lucide-react'
+import { useTranslation } from '@/utils/translations'
 
 export default function ExternalNewsSidebar() {
+  const { t } = useTranslation()
   const [news, setNews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -48,7 +50,7 @@ export default function ExternalNewsSidebar() {
     <section className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm">
       <div className="bg-zinc-800 text-white px-4 py-2 text-[8px] font-black uppercase tracking-[0.2em] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Newspaper size={10} /> Live från Polen
+          <Newspaper size={10} /> {t.livePolandNews}
         </div>
         <span className="flex h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></span>
       </div>
@@ -89,7 +91,7 @@ export default function ExternalNewsSidebar() {
         href="/nyheter"
         className="block text-center py-2 bg-zinc-50 text-[8px] font-black text-zinc-400 hover:text-pola-red uppercase tracking-widest border-t transition-colors"
       >
-        Visa fler nyheter &raquo;
+        {t.seeMoreNews}
       </a>
     </section>
   )
