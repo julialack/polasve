@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Check, ChevronDown, X } from 'lucide-react'
 import { useTranslation, LanguageCode } from '@/utils/translations'
+import { getMenuPageCopy } from '@/utils/menu-page-copy'
 
 export const LANGUAGES: { code: LanguageCode; flag: string; nativeName: string }[] = [
   { code: 'pl', flag: '🇵🇱', nativeName: 'Polski (Główny)' },
@@ -17,6 +18,7 @@ interface LanguageSelectorProps {
 
 export default function LanguageSelector({ variant = 'hero' }: LanguageSelectorProps) {
   const { lang: currentLang, setLang } = useTranslation()
+  const languageLabel = getMenuPageCopy(currentLang).common.chooseLanguage
   const [open, setOpen] = useState(false)
 
   const selectLanguage = (code: LanguageCode) => {
@@ -36,7 +38,7 @@ export default function LanguageSelector({ variant = 'hero' }: LanguageSelectorP
       <button
         onClick={() => setOpen(!open)}
         className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all active:scale-95 shadow-xs ${buttonStyle}`}
-        aria-label="Wybierz język / Välj språk"
+        aria-label={languageLabel}
         title={activeLang.nativeName}
       >
         <span className="text-base leading-none">{activeLang.flag}</span>
@@ -53,7 +55,7 @@ export default function LanguageSelector({ variant = 'hero' }: LanguageSelectorP
           />
           <div className="absolute right-0 top-full mt-2 z-[160] w-52 bg-white rounded-xl shadow-2xl border border-zinc-200 p-2 animate-in zoom-in-95 duration-200 text-left text-zinc-900 max-h-[70vh] overflow-y-auto">
             <div className="px-3 py-2 border-b border-zinc-100 flex items-center justify-between text-zinc-400 sticky top-0 bg-white z-10">
-              <span className="text-[9px] font-black uppercase tracking-widest text-[#003366]">Wybierz język / Välj språk</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-[#003366]">{languageLabel}</span>
               <button onClick={() => setOpen(false)} className="text-zinc-400 hover:text-black p-1">
                 <X size={14} />
               </button>

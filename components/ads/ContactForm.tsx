@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useTranslation } from '@/utils/translations'
+import { getMenuPageCopy } from '@/utils/menu-page-copy'
 
 interface ContactFormProps {
   receiverId: string
@@ -15,6 +17,8 @@ export default function ContactForm({ receiverId, adId, adTitle }: ContactFormPr
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
+  const { lang } = useTranslation()
+  const copy = getMenuPageCopy(lang).common
   const supabase = createClient()
   const router = useRouter()
 
@@ -25,13 +29,14 @@ export default function ContactForm({ receiverId, adId, adTitle }: ContactFormPr
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      toast.error('Du måste vara inloggad för att skicka meddelanden.')
+      toast.error(copy.loginToMessage)
       router.push('/logga-in')
+      setLoading(false)
       return
     }
 
     if (user.id === receiverId) {
-      toast.error('Du kan inte skicka meddelanden till din egen annons.')
+      toast.error(copy.cannotMessageSelf)
       setLoading(false)
       return
     }
@@ -48,10 +53,10 @@ export default function ContactForm({ receiverId, adId, adTitle }: ContactFormPr
       ])
 
     if (error) {
-      toast.error('Kunde inte skicka meddelande: ' + error.message)
+      toast.error(`${copy.messageFailed} ${error.message}`)
     } else {
       setSent(true)
-      toast.success('Meddelandet har skickats!')
+      toast.success(copy.messageSent)
       setMessage('')
     }
     setLoading(false)
@@ -61,9 +66,9 @@ export default function ContactForm({ receiverId, adId, adTitle }: ContactFormPr
     return (
       <div className="bg-zinc-900 p-8 rounded-sm text-center border border-[#a11a2d]/30 shadow-2xl">
         <div className="text-[#a11a2d] text-3xl mb-4 font-serif italic">✓</div>
-        <h3 className="text-xl font-light italic font-serif mb-2 text-white">Meddelande skickat</h3>
+        <h3 className="text-xl font-light italic font-serif mb-2 text-white">{copy.messageSent}</h3>
         <p className="text-zinc-500 text-[10px] font-bold tracking-[0.2em] uppercase">
-          Annonsören har fått ditt meddelande.
+          {copy.advertiserReceived}
         </p>
       </div>
     )
@@ -72,12 +77,12 @@ export default function ContactForm({ receiverId, adId, adTitle }: ContactFormPr
   return (
     <div className="bg-zinc-950 p-10 text-white shadow-2xl rounded-sm relative overflow-hidden border border-zinc-900">
       <div className="relative z-10">
-        <h3 className="text-xl font-bold italic text-white/90 mb-6 uppercase tracking-tight">Intresserad?</h3>
+        <h3 className="text-xl font-bold italic text-white/90 mb-6 uppercase tracking-tight">{copy.interest}</h3>
         <form onSubmit={handleSendMessage} className="space-y-6">
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder={`Skriv ditt meddelande här...`}
+            placeholder={copy.messagePlaceholder}
             required
             className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-sm text-sm font-bold text-white focus:border-[#a11a2d] outline-none transition-colors min-h-[140px] resize-none placeholder:text-zinc-600 placeholder:font-normal"
           />
@@ -86,11 +91,11 @@ export default function ContactForm({ receiverId, adId, adTitle }: ContactFormPr
             disabled={loading || !message.trim()}
             className="w-full bg-[#a11a2d] text-white py-5 rounded-sm font-black uppercase tracking-[0.2em] hover:bg-[#8d1627] transition-all text-[11px] shadow-xl shadow-red-900/10 disabled:bg-zinc-800 disabled:shadow-none active:scale-95"
           >
-            {loading ? 'Skickar...' : 'Skicka Meddelande'}
+            {loading ? copy.sending : copy.sendMessage}
           </button>
         </form>
         <div className="mt-6 text-center">
-          <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest italic font-serif">Svarar vanligtvis inom 24 timmar</p>
+          <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest italic font-serif">{copy.responseTime}</p>
         </div>
       </div>
       <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-64 h-64 bg-red-800/10 rounded-full blur-3xl"></div>

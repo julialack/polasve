@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import SwedenMap from "@/components/map/SwedenMap";
+import { useTranslation } from "@/utils/translations";
+import { getMenuPageCopy } from "@/utils/menu-page-copy";
 
 interface Ad {
   id: string
@@ -16,6 +18,8 @@ interface Ad {
 export default function PremiumAdsSidebar() {
   const [ads, setAds] = useState<Ad[]>([])
   const [loading, setLoading] = useState(true)
+  const { lang } = useTranslation()
+  const copy = getMenuPageCopy(lang).common
   const supabase = createClient()
 
   useEffect(() => {
@@ -40,7 +44,7 @@ export default function PremiumAdsSidebar() {
   return (
     <aside className="hidden lg:block lg:col-span-1 space-y-6">
       <section className="bg-white shadow-sm overflow-hidden border border-zinc-200">
-        <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">Bazar - Premium</div>
+        <div className="bg-[#a11a2d] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">{copy.premiumAds}</div>
         <div className="p-4 space-y-5">
           {loading ? (
             <div className="space-y-4">
@@ -67,7 +71,7 @@ export default function PremiumAdsSidebar() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="text-[12px] font-black text-[#003366] italic leading-tight truncate group-hover:text-[#a11a2d] transition-colors">{ad.title}</h4>
-                    <p className="text-[11px] text-[#D4AF37] font-black mt-2">{ad.price || 'Bud'}</p>
+                    <p className="text-[11px] text-[#D4AF37] font-black mt-2">{ad.price || copy.bid}</p>
                     <p className="text-[9px] text-zinc-400 font-bold uppercase mt-1 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#a11a2d] opacity-50"></span> {ad.location}
                     </p>
@@ -76,13 +80,13 @@ export default function PremiumAdsSidebar() {
               </Link>
             ))
           ) : (
-            <p className="text-[10px] text-zinc-400 italic text-center py-4">Inga premiumannonser just nu.</p>
+            <p className="text-[10px] text-zinc-400 italic text-center py-4">{copy.noPremiumAds}</p>
           )}
         </div>
-        <Link href="/annonser" className="block text-center py-3 bg-zinc-50 text-[10px] font-black text-zinc-500 hover:text-red-800 uppercase tracking-widest border-t transition-colors italic text-center">Visa Bazar &gt;&gt;</Link>
+        <Link href="/annonser" className="block text-center py-3 bg-zinc-50 text-[10px] font-black text-zinc-500 hover:text-red-800 uppercase tracking-widest border-t transition-colors italic text-center">{copy.viewMarketplace}</Link>
       </section>
       <section className="bg-white border border-zinc-200 overflow-hidden shadow-sm">
-        <div className="bg-[#003366] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider">Sverigekartan</div>
+        <div className="bg-[#003366] text-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider">{copy.swedenMap}</div>
         <SwedenMap />
       </section>
     </aside>

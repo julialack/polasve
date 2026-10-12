@@ -2,9 +2,11 @@
 
 import { Users } from "lucide-react";
 import { useTranslation } from "@/utils/translations";
+import { getMenuPageCopy } from "@/utils/menu-page-copy";
 
 export default function InfoBar() {
   const { t, lang } = useTranslation();
+  const copy = getMenuPageCopy(lang).common;
 
   const localeMap: Record<string, string> = {
     pl: 'pl-PL',
@@ -25,7 +27,7 @@ export default function InfoBar() {
       <div className="max-w-7xl mx-auto flex justify-between items-center text-[10px] md:text-xs text-zinc-500 font-medium">
         <div className="capitalize font-bold text-[#003366] text-left">{today}</div>
         <div className="flex gap-4">
-          <span className="flex items-center gap-1"><Users size={12} /> 142 online</span>
+          <span className="flex items-center gap-1"><Users size={12} /> 142 {copy.online}</span>
           <span className="hidden sm:inline border-l pl-4 font-bold text-[#a11a2d]">{t.welcomeMsg}</span>
         </div>
       </div>

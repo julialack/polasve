@@ -5,6 +5,8 @@ import { createClient } from '@/utils/supabase/client'
 import PostCard from './PostCard'
 import Skeleton from '../ui/Skeleton'
 import { Post } from '@/types/database'
+import { useTranslation } from '@/utils/translations'
+import { getMenuPageCopy } from '@/utils/menu-page-copy'
 
 interface FeedListProps {
   categoryFilter?: string
@@ -19,6 +21,8 @@ export default function FeedList({ categoryFilter }: FeedListProps = {}) {
   const [posts, setPosts] = useState<Post[]>([])
   const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null)
   const [loading, setLoading] = useState(true)
+  const { lang } = useTranslation()
+  const copy = getMenuPageCopy(lang).common
   const supabase = createClient()
 
   const fetchPosts = useCallback(async () => {
@@ -133,7 +137,7 @@ export default function FeedList({ categoryFilter }: FeedListProps = {}) {
   return (
     <div className="w-full max-w-full space-y-4 text-left overflow-x-hidden">
       {posts.length === 0 ? (
-        <p className="text-center py-10 text-zinc-400 italic text-sm">Inga inlägg här ännu...</p>
+        <p className="text-center py-10 text-zinc-400 italic text-sm">{copy.emptyPosts}</p>
       ) : (
         posts.map((post) => (
           <PostCard

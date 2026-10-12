@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react'
 import { Newspaper } from 'lucide-react'
 import { useTranslation } from '@/utils/translations'
+import { getMenuPageCopy } from '@/utils/menu-page-copy'
 
 export default function ExternalNewsSidebar() {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
+  const copy = getMenuPageCopy(lang).common
   const [news, setNews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -56,7 +58,9 @@ export default function ExternalNewsSidebar() {
       </div>
 
       <div className="p-3 space-y-3">
-        {news.map((item, idx) => (
+        {news.length === 0 ? (
+          <p className="text-center py-4 text-[10px] text-zinc-400 italic">{copy.noNews}</p>
+        ) : news.map((item, idx) => (
           <a
             key={idx}
             href={item.link}

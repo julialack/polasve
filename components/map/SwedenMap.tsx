@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import { useTranslation } from '@/utils/translations'
+import { getMenuPageCopy } from '@/utils/menu-page-copy'
 
 const CITIES = [
   { name: 'Stockholm', top: '72%', left: '68%', pulse: true },
@@ -24,6 +26,8 @@ const CITIES = [
 
 export default function SwedenMap() {
   const router = useRouter()
+  const { lang } = useTranslation()
+  const copy = getMenuPageCopy(lang).common
   const [cityCounts, setCityCounts] = useState<Record<string, number>>({})
   const supabase = createClient()
 
@@ -96,7 +100,7 @@ export default function SwedenMap() {
             onClick={() => handleCityClick(city.name)}
             className="absolute -translate-x-1/2 -translate-y-1/2 group/pin z-10 transition-all hover:scale-125"
             style={{ top: city.top, left: city.left }}
-            title={`Sök i ${city.name} (${count} annonser)`}
+            title={`${copy.searchInCity} ${city.name} (${count} ${copy.listingsCount})`}
           >
             <div className="relative flex items-center justify-center">
               {city.pulse && (
@@ -124,15 +128,15 @@ export default function SwedenMap() {
       {/* Map Header Overlay */}
       <div className="absolute top-4 left-0 right-0 px-4 flex justify-between items-center pointer-events-none">
         <div className="h-px flex-1 bg-gradient-to-r from-transparent to-zinc-100"></div>
-        <span className="px-3 text-[8px] font-black uppercase text-zinc-300 tracking-[0.2em]">Interaktiv Marknad</span>
+        <span className="px-3 text-[8px] font-black uppercase text-zinc-300 tracking-[0.2em]">{copy.interactiveMarket}</span>
         <div className="h-px flex-1 bg-gradient-to-l from-transparent to-zinc-100"></div>
       </div>
 
       {/* Map Footer Overlay */}
       <div className="absolute bottom-4 left-4 right-4 pointer-events-none">
         <div className="bg-white/90 backdrop-blur-md p-3 border border-zinc-100 shadow-lg rounded-sm text-center transform transition-transform group-hover:-translate-y-1">
-          <p className="text-[9px] font-black text-[#003366] uppercase tracking-[0.1em]">Utforska Regioner</p>
-          <p className="text-[7px] text-zinc-400 font-bold uppercase mt-1 tracking-tighter">Klicka på en stad för att se lokala annonser</p>
+          <p className="text-[9px] font-black text-[#003366] uppercase tracking-[0.1em]">{copy.exploreRegions}</p>
+          <p className="text-[7px] text-zinc-400 font-bold uppercase mt-1 tracking-tighter">{copy.cityListings}</p>
         </div>
       </div>
 

@@ -4,6 +4,61 @@ type MenuPageCopy = {
   common: {
     online: string;
     welcome: string;
+    loading: string;
+    chooseLanguage: string;
+    search: string;
+    clearSearch: string;
+    share: string;
+    shareIntro: string;
+    linkCopied: string;
+    report: string;
+    reportContent: string;
+    cancel: string;
+    submitReport: string;
+    reportPrompt: string;
+    reportPlaceholder: string;
+    signInToReport: string;
+    reasonRequired: string;
+    reportSent: string;
+    reportFailed: string;
+    emptyPosts: string;
+    premiumAds: string;
+    noPremiumAds: string;
+    viewMarketplace: string;
+    bid: string;
+    swedenMap: string;
+    interactiveMarket: string;
+    exploreRegions: string;
+    cityListings: string;
+    searchInCity: string;
+    listingsCount: string;
+    noNews: string;
+    readNews: string;
+    interest: string;
+    messageSent: string;
+    advertiserReceived: string;
+    messagePlaceholder: string;
+    sending: string;
+    sendMessage: string;
+    responseTime: string;
+    contactUs: string;
+    contactHelp: string;
+    email: string;
+    subject: string;
+    chooseReason: string;
+    listingQuestion: string;
+    technicalIssue: string;
+    reportPostOrUser: string;
+    collaboration: string;
+    other: string;
+    message: string;
+    writeQuestion: string;
+    fillAllFields: string;
+    contactSent: string;
+    contactFailed: string;
+    loginToMessage: string;
+    cannotMessageSelf: string;
+    messageFailed: string;
   };
   news: {
     polandLive: string;
@@ -64,11 +119,95 @@ type MenuPageCopy = {
     welcome: string;
     listingPrefix: string;
   };
+  donation: {
+    backHome: string;
+    thanks: string;
+    thankYou: string;
+    voluntaryAmount: string;
+    title: string;
+    heading: string;
+    intro: string;
+    whatFunds: string;
+    funds: string[];
+    topNews: string;
+    noNews: string;
+    readNews: string;
+    minAmountError: string;
+    paymentError: string;
+    startError: string;
+  };
+  account: {
+    loginTitle: string;
+    email: string;
+    password: string;
+    forgotShort: string;
+    loggingIn: string;
+    login: string;
+    orSignInWith: string;
+    notMember: string;
+    createAccount: string;
+    welcomeBack: string;
+    signupName: string;
+    fullName: string;
+    invalidName: string;
+    invalidEmail: string;
+    passwordMin: string;
+    signingUp: string;
+    signUpSuccess: string;
+    alreadyMember: string;
+    forgotTitle: string;
+    forgotIntro: string;
+    sendLink: string;
+    checkEmail: string;
+    instructionsSent: string;
+    sendAgain: string;
+    newPasswordTitle: string;
+    chooseSecurePassword: string;
+    expiredSession: string;
+    requestLink: string;
+    updatePassword: string;
+    passwordUpdated: string;
+    updatingPassword: string;
+  };
 };
 
 export const MENU_PAGE_COPY: Record<LanguageCode, MenuPageCopy> = {
   pl: {
-    common: { online: "online", welcome: "Witamy!" },
+    common: {
+      online: "online", welcome: "Witamy!", loading: "Ładowanie strony...",
+      chooseLanguage: "Wybierz język", search: "Szukaj", clearSearch: "Wyczyść wyszukiwanie",
+      share: "Udostępnij", shareIntro: "Zobacz na Polasve:", linkCopied: "Link skopiowany!",
+      report: "Zgłoś", reportContent: "Zgłoś treść", cancel: "Anuluj", submitReport: "Wyślij zgłoszenie",
+      reportPrompt: "Dlaczego chcesz to zgłosić? Zgłoszenie zostanie sprawdzone przez moderatorów.",
+      reportPlaceholder: "Opisz problem...",
+      signInToReport: "Zaloguj się, aby zgłosić treść", reasonRequired: "Podaj powód zgłoszenia",
+      reportSent: "Zgłoszenie wysłane. Dziękujemy za pomoc w dbaniu o bezpieczeństwo społeczności!",
+      reportFailed: "Nie udało się wysłać zgłoszenia. Spróbuj ponownie później.",
+      emptyPosts: "Nie ma tu jeszcze żadnych wpisów...",
+      premiumAds: "Ogłoszenia Premium", noPremiumAds: "Brak aktualnych ogłoszeń Premium.",
+      viewMarketplace: "Zobacz bazar »", swedenMap: "Mapa Szwecji",
+      bid: "Cena do uzgodnienia",
+      interactiveMarket: "Interaktywna mapa", exploreRegions: "Odkryj regiony",
+      cityListings: "Kliknij miasto, aby zobaczyć lokalne ogłoszenia",
+      searchInCity: "Szukaj w", listingsCount: "ogłoszeń",
+      noNews: "Brak wiadomości...", readNews: "Czytaj wszystkie wiadomości »",
+      interest: "Zainteresowany/a?", messageSent: "Wiadomość wysłana",
+      advertiserReceived: "Ogłoszeniodawca otrzymał Twoją wiadomość.",
+      messagePlaceholder: "Napisz wiadomość...",
+      sending: "Wysyłanie...", sendMessage: "Wyślij wiadomość",
+      responseTime: "Zwykle odpowiadamy w ciągu 24 godzin",
+      contactUs: "Skontaktuj się z nami", contactHelp: "Masz pytania? Chętnie pomożemy!",
+      email: "Twój e-mail", subject: "Temat / Powód", chooseReason: "Wybierz powód...",
+      listingQuestion: "Pytanie o ogłoszenie", technicalIssue: "Problem techniczny",
+      reportPostOrUser: "Zgłoś post/użytkownika", collaboration: "Współpraca", other: "Inne",
+      message: "Wiadomość", writeQuestion: "Napisz swoje pytanie...",
+      fillAllFields: "Wypełnij wszystkie pola",
+      contactSent: "Wiadomość została wysłana! Odezwiemy się najszybciej, jak to możliwe.",
+      contactFailed: "Nie udało się wysłać wiadomości:",
+      loginToMessage: "Zaloguj się, aby wysyłać wiadomości.",
+      cannotMessageSelf: "Nie możesz wysłać wiadomości do własnego ogłoszenia.",
+      messageFailed: "Nie udało się wysłać wiadomości:",
+    },
     news: {
       polandLive: "Najnowsze wiadomości z Polski (na żywo)",
       officialUpdates: "Oficjalne aktualności",
@@ -139,9 +278,84 @@ export const MENU_PAGE_COPY: Record<LanguageCode, MenuPageCopy> = {
       welcome: "Witamy!",
       listingPrefix: "Bazar -",
     },
+    donation: {
+      backHome: "Wróć na stronę główną",
+      thanks: "Dziękujemy za wsparcie! 🎉",
+      thankYou: "Twoje wsparcie w wysokości {amount} wiele dla nas znaczy i pomaga rozwijać społeczność Polasve! ❤️",
+      voluntaryAmount: "dobrowolna kwota",
+      title: "Wesprzyj społeczność Polasve",
+      heading: "Pomóż nam stworzyć najlepszy portal dla Polaków w Szwecji",
+      intro: "Polasve powstało, aby ułatwić Polakom w Szwecji znalezienie pracy i mieszkania, kupowanie i sprzedawanie, śledzenie wiadomości oraz poznawanie się nawzajem.",
+      whatFunds: "Na co przeznaczamy wpłaty?",
+      funds: [
+        "Utrzymanie serwerów i szybkie działanie dla wszystkich odwiedzających.",
+        "Rozwój nowych funkcji, takich jak lepsze filtry wyszukiwania, czat i wydarzenia.",
+        "Narzędzia moderacji i bezpieczeństwo, aby każdy czuł się pewnie.",
+      ],
+      topNews: "Najważniejsze wiadomości",
+      noNews: "Brak wiadomości...",
+      readNews: "Czytaj wszystkie wiadomości »",
+      minAmountError: "Minimalna kwota wpłaty to 5 kr",
+      paymentError: "Nie udało się rozpocząć płatności",
+      startError: "Nie udało się rozpocząć wpłaty",
+    },
+    account: {
+      loginTitle: "Logowanie członkowskie", email: "Adres e-mail", password: "Hasło",
+      forgotShort: "Nie pamiętasz?", loggingIn: "Logowanie...", login: "Zaloguj się",
+      orSignInWith: "Lub zaloguj się przez", notMember: "Nie masz jeszcze konta?",
+      createAccount: "Utwórz konto", welcomeBack: "Witamy ponownie!",
+      signupName: "Imię i nazwisko", fullName: "Twoje imię i nazwisko",
+      invalidName: "Wpisz imię i nazwisko.", invalidEmail: "Podaj prawidłowy adres e-mail.",
+      passwordMin: "Hasło musi mieć co najmniej 8 znaków.", signingUp: "Tworzenie konta...",
+      signUpSuccess: "Witamy! Sprawdź pocztę, aby zweryfikować konto przed zalogowaniem.",
+      alreadyMember: "Masz już konto?", forgotTitle: "Zresetuj hasło",
+      forgotIntro: "Wpisz poniżej swój adres e-mail, a wyślemy link do ustawienia nowego hasła.",
+      sendLink: "Wyślij link", checkEmail: "Sprawdź swoją pocztę!",
+      instructionsSent: "Wysłaliśmy instrukcje resetowania hasła na adres",
+      sendAgain: "Wyślij ponownie?", newPasswordTitle: "Nowe hasło",
+      chooseSecurePassword: "Wybierz bezpieczne hasło",
+      expiredSession: "Twoja sesja wygasła. Poproś o nowy link do resetowania hasła.",
+      requestLink: "Poproś o nowy link", updatePassword: "Zaktualizuj hasło",
+      passwordUpdated: "Hasło zostało zaktualizowane! Możesz się teraz zalogować.",
+      updatingPassword: "Aktualizowanie hasła...",
+    },
   },
   sv: {
-    common: { online: "online", welcome: "Välkommen!" },
+    common: {
+      online: "online", welcome: "Välkommen!", loading: "Laddar sida...",
+      chooseLanguage: "Välj språk", search: "Sök", clearSearch: "Rensa sökning",
+      share: "Dela", shareIntro: "Kolla in detta på Polasve:", linkCopied: "Länk kopierad till urklipp!",
+      report: "Anmäl", reportContent: "Anmäl innehåll", cancel: "Avbryt", submitReport: "Skicka anmälan",
+      reportPrompt: "Varför vill du anmäla detta? Din anmälan granskas av moderatorer.",
+      reportPlaceholder: "Beskriv problemet här...",
+      signInToReport: "Du måste vara inloggad för att anmäla", reasonRequired: "Vänligen ange en anledning",
+      reportSent: "Anmälan har skickats. Tack för att du hjälper till att hålla communityt säkert!",
+      reportFailed: "Kunde inte skicka anmälan. Försök igen senare.",
+      emptyPosts: "Inga inlägg här ännu...",
+      premiumAds: "Bazar - Premium", noPremiumAds: "Inga premiumannonser just nu.",
+      viewMarketplace: "Visa Bazar »", swedenMap: "Sverigekartan",
+      bid: "Bud",
+      interactiveMarket: "Interaktiv marknad", exploreRegions: "Utforska regioner",
+      cityListings: "Klicka på en stad för att se lokala annonser",
+      searchInCity: "Sök i", listingsCount: "annonser",
+      noNews: "Inga nyheter...", readNews: "Läs alla nyheter »",
+      interest: "Intresserad?", messageSent: "Meddelande skickat",
+      advertiserReceived: "Annonsören har fått ditt meddelande.",
+      messagePlaceholder: "Skriv ditt meddelande här...",
+      sending: "Skickar...", sendMessage: "Skicka meddelande",
+      responseTime: "Svarar vanligtvis inom 24 timmar",
+      contactUs: "Kontakta oss", contactHelp: "Har du frågor? Vi hjälper dig!",
+      email: "Din e-post", subject: "Ärende / Anledning", chooseReason: "Välj anledning...",
+      listingQuestion: "Fråga om annons", technicalIssue: "Tekniskt problem",
+      reportPostOrUser: "Anmäl inlägg/användare", collaboration: "Samarbeten", other: "Övrigt",
+      message: "Meddelande", writeQuestion: "Skriv din fråga här...",
+      fillAllFields: "Vänligen fyll i alla fält",
+      contactSent: "Ditt meddelande har skickats! Vi återkommer så snart vi kan.",
+      contactFailed: "Kunde inte skicka meddelandet:",
+      loginToMessage: "Du måste vara inloggad för att skicka meddelanden.",
+      cannotMessageSelf: "Du kan inte skicka meddelanden till din egen annons.",
+      messageFailed: "Kunde inte skicka meddelande:",
+    },
     news: {
       polandLive: "Senaste nytt från Polen (realtid)",
       officialUpdates: "Officiella uppdateringar",
@@ -212,9 +426,84 @@ export const MENU_PAGE_COPY: Record<LanguageCode, MenuPageCopy> = {
       welcome: "Välkommen!",
       listingPrefix: "Bazar -",
     },
+    donation: {
+      backHome: "Tillbaka till startsidan",
+      thanks: "Tack för ditt bidrag! 🎉",
+      thankYou: "Ditt stöd på {amount} betyder oerhört mycket för oss och hjälper till att driva och utveckla Polasve community vidare! ❤️",
+      voluntaryAmount: "frivilligt belopp",
+      title: "Stöd Polasve Community",
+      heading: "Hjälp oss bygga den bästa portalen för polacker i Sverige",
+      intro: "Polasve skapades för att göra det lättare för polacker i Sverige att hitta jobb, bostäder, köpa & sälja prylar, hålla sig uppdaterade med nyheter och lära känna varandra.",
+      whatFunds: "Vad går bidragen till?",
+      funds: [
+        "Drift, servrar och snabb prestanda för alla besökare.",
+        "Utveckling av nya funktioner, till exempel bättre sökfilter, direktchatt och evenemang.",
+        "Modereringsverktyg och säkerhet så att alla kan känna sig trygga.",
+      ],
+      topNews: "Toppnyheter",
+      noNews: "Inga nyheter...",
+      readNews: "Läs alla nyheter »",
+      minAmountError: "Minsta donationsbelopp är 5 kr",
+      paymentError: "Kunde inte starta betalningen",
+      startError: "Donationen kunde inte startas",
+    },
+    account: {
+      loginTitle: "Medlemsinloggning", email: "E-postadress", password: "Lösenord",
+      forgotShort: "Glömt?", loggingIn: "Loggar in...", login: "Logga in",
+      orSignInWith: "Eller logga in med", notMember: "Inte medlem än?",
+      createAccount: "Skapa konto", welcomeBack: "Välkommen tillbaka!",
+      signupName: "Namn", fullName: "Ditt för- och efternamn",
+      invalidName: "Skriv in ditt för- och efternamn.", invalidEmail: "Ange en giltig e-postadress.",
+      passwordMin: "Lösenordet måste vara minst 8 tecken långt.", signingUp: "Skapar konto...",
+      signUpSuccess: "Välkommen! Kontrollera din e-post för att verifiera kontot innan du loggar in.",
+      alreadyMember: "Har du redan ett konto?", forgotTitle: "Återställ lösenord",
+      forgotIntro: "Ange din e-postadress nedan så skickar vi en länk för att välja ett nytt lösenord.",
+      sendLink: "Skicka länk", checkEmail: "Kolla din mail!",
+      instructionsSent: "Vi har skickat instruktioner för att återställa ditt lösenord till",
+      sendAgain: "Skicka igen?", newPasswordTitle: "Nytt lösenord",
+      chooseSecurePassword: "Välj ett säkert lösenord",
+      expiredSession: "Din session har utgått. Vänligen begär en ny återställningslänk.",
+      requestLink: "Begär ny länk", updatePassword: "Uppdatera lösenord",
+      passwordUpdated: "Ditt lösenord har uppdaterats! Du kan nu logga in.",
+      updatingPassword: "Uppdaterar lösenord...",
+    },
   },
   ua: {
-    common: { online: "онлайн", welcome: "Ласкаво просимо!" },
+    common: {
+      online: "онлайн", welcome: "Ласкаво просимо!", loading: "Завантаження сторінки...",
+      chooseLanguage: "Виберіть мову", search: "Пошук", clearSearch: "Очистити пошук",
+      share: "Поділитися", shareIntro: "Перегляньте на Polasve:", linkCopied: "Посилання скопійовано!",
+      report: "Поскаржитися", reportContent: "Поскаржитися на вміст", cancel: "Скасувати", submitReport: "Надіслати скаргу",
+      reportPrompt: "Чому ви хочете поскаржитися? Модератори перевірять ваше звернення.",
+      reportPlaceholder: "Опишіть проблему...",
+      signInToReport: "Увійдіть, щоб поскаржитися", reasonRequired: "Вкажіть причину скарги",
+      reportSent: "Скаргу надіслано. Дякуємо, що допомагаєте підтримувати безпеку спільноти!",
+      reportFailed: "Не вдалося надіслати скаргу. Спробуйте ще раз пізніше.",
+      emptyPosts: "Тут ще немає дописів...",
+      premiumAds: "Преміум-оголошення", noPremiumAds: "Наразі немає преміум-оголошень.",
+      viewMarketplace: "Переглянути базар »", swedenMap: "Мапа Швеції",
+      bid: "Ціна договірна",
+      interactiveMarket: "Інтерактивний ринок", exploreRegions: "Досліджуйте регіони",
+      cityListings: "Натисніть на місто, щоб побачити місцеві оголошення",
+      searchInCity: "Шукати в", listingsCount: "оголошень",
+      noNews: "Немає новин...", readNews: "Читати всі новини »",
+      interest: "Зацікавлені?", messageSent: "Повідомлення надіслано",
+      advertiserReceived: "Автор оголошення отримав ваше повідомлення.",
+      messagePlaceholder: "Напишіть повідомлення...",
+      sending: "Надсилання...", sendMessage: "Надіслати повідомлення",
+      responseTime: "Зазвичай відповідаємо протягом 24 годин",
+      contactUs: "Зв'яжіться з нами", contactHelp: "Є запитання? Ми допоможемо!",
+      email: "Ваша електронна пошта", subject: "Тема / Причина", chooseReason: "Виберіть причину...",
+      listingQuestion: "Запитання про оголошення", technicalIssue: "Технічна проблема",
+      reportPostOrUser: "Поскаржитися на допис/користувача", collaboration: "Співпраця", other: "Інше",
+      message: "Повідомлення", writeQuestion: "Напишіть своє запитання...",
+      fillAllFields: "Будь ласка, заповніть усі поля",
+      contactSent: "Повідомлення надіслано! Ми відповімо якомога швидше.",
+      contactFailed: "Не вдалося надіслати повідомлення:",
+      loginToMessage: "Увійдіть, щоб надсилати повідомлення.",
+      cannotMessageSelf: "Ви не можете надіслати повідомлення щодо власного оголошення.",
+      messageFailed: "Не вдалося надіслати повідомлення:",
+    },
     news: {
       polandLive: "Останні новини з Польщі (наживо)",
       officialUpdates: "Офіційні оновлення",
@@ -285,9 +574,84 @@ export const MENU_PAGE_COPY: Record<LanguageCode, MenuPageCopy> = {
       welcome: "Ласкаво просимо!",
       listingPrefix: "Базар —",
     },
+    donation: {
+      backHome: "Повернутися на головну",
+      thanks: "Дякуємо за вашу підтримку! 🎉",
+      thankYou: "Ваша підтримка у розмірі {amount} дуже важлива для нас і допомагає розвивати спільноту Polasve! ❤️",
+      voluntaryAmount: "довільна сума",
+      title: "Підтримайте спільноту Polasve",
+      heading: "Допоможіть нам створити найкращий портал для поляків у Швеції",
+      intro: "Polasve створено, щоб полякам у Швеції було легше знаходити роботу та житло, купувати й продавати речі, стежити за новинами та знайомитися.",
+      whatFunds: "На що йдуть внески?",
+      funds: [
+        "Робота серверів і швидке завантаження для всіх відвідувачів.",
+        "Розробка нових функцій, наприклад покращених фільтрів пошуку, чату та подій.",
+        "Інструменти модерації та безпека, щоб кожен почувався впевнено.",
+      ],
+      topNews: "Головні новини",
+      noNews: "Немає новин...",
+      readNews: "Читати всі новини »",
+      minAmountError: "Мінімальна сума внеску — 5 kr",
+      paymentError: "Не вдалося розпочати оплату",
+      startError: "Не вдалося розпочати внесок",
+    },
+    account: {
+      loginTitle: "Вхід для учасників", email: "Електронна пошта", password: "Пароль",
+      forgotShort: "Забули?", loggingIn: "Вхід...", login: "Увійти",
+      orSignInWith: "Або увійдіть через", notMember: "Ще не маєте облікового запису?",
+      createAccount: "Створити обліковий запис", welcomeBack: "З поверненням!",
+      signupName: "Ім'я та прізвище", fullName: "Ваше ім'я та прізвище",
+      invalidName: "Введіть ім'я та прізвище.", invalidEmail: "Введіть дійсну адресу електронної пошти.",
+      passwordMin: "Пароль має містити щонайменше 8 символів.", signingUp: "Створення облікового запису...",
+      signUpSuccess: "Вітаємо! Перевірте пошту та підтвердьте обліковий запис перед входом.",
+      alreadyMember: "Вже маєте обліковий запис?", forgotTitle: "Скинути пароль",
+      forgotIntro: "Введіть свою електронну пошту, і ми надішлемо посилання для створення нового пароля.",
+      sendLink: "Надіслати посилання", checkEmail: "Перевірте свою пошту!",
+      instructionsSent: "Ми надіслали інструкції зі скидання пароля на адресу",
+      sendAgain: "Надіслати ще раз?", newPasswordTitle: "Новий пароль",
+      chooseSecurePassword: "Виберіть надійний пароль",
+      expiredSession: "Термін дії сеансу минув. Запросіть нове посилання для скидання пароля.",
+      requestLink: "Запросити нове посилання", updatePassword: "Оновити пароль",
+      passwordUpdated: "Пароль оновлено! Тепер ви можете увійти.",
+      updatingPassword: "Оновлення пароля...",
+    },
   },
   en: {
-    common: { online: "online", welcome: "Welcome!" },
+    common: {
+      online: "online", welcome: "Welcome!", loading: "Loading page...",
+      chooseLanguage: "Choose language", search: "Search", clearSearch: "Clear search",
+      share: "Share", shareIntro: "Check this out on Polasve:", linkCopied: "Link copied to clipboard!",
+      report: "Report", reportContent: "Report content", cancel: "Cancel", submitReport: "Submit report",
+      reportPrompt: "Why are you reporting this? A moderator will review your report.",
+      reportPlaceholder: "Describe the issue...",
+      signInToReport: "You must be signed in to report content", reasonRequired: "Please provide a reason",
+      reportSent: "Report submitted. Thank you for helping keep the community safe!",
+      reportFailed: "Could not submit the report. Please try again later.",
+      emptyPosts: "No posts here yet...",
+      premiumAds: "Premium listings", noPremiumAds: "No premium listings right now.",
+      viewMarketplace: "View marketplace »", swedenMap: "Map of Sweden",
+      bid: "Make an offer",
+      interactiveMarket: "Interactive map", exploreRegions: "Explore regions",
+      cityListings: "Select a city to see local listings",
+      searchInCity: "Search in", listingsCount: "listings",
+      noNews: "No news...", readNews: "Read all news »",
+      interest: "Interested?", messageSent: "Message sent",
+      advertiserReceived: "The advertiser has received your message.",
+      messagePlaceholder: "Write your message...",
+      sending: "Sending...", sendMessage: "Send message",
+      responseTime: "We usually reply within 24 hours",
+      contactUs: "Contact us", contactHelp: "Have questions? We're here to help!",
+      email: "Your email", subject: "Subject / Reason", chooseReason: "Choose a reason...",
+      listingQuestion: "Question about a listing", technicalIssue: "Technical issue",
+      reportPostOrUser: "Report a post/user", collaboration: "Collaboration", other: "Other",
+      message: "Message", writeQuestion: "Write your question here...",
+      fillAllFields: "Please fill in all fields",
+      contactSent: "Your message has been sent! We'll get back to you as soon as possible.",
+      contactFailed: "Could not send the message:",
+      loginToMessage: "You must be signed in to send messages.",
+      cannotMessageSelf: "You can't message your own listing.",
+      messageFailed: "Could not send the message:",
+    },
     news: {
       polandLive: "Latest news from Poland (live)",
       officialUpdates: "Official updates",
@@ -357,6 +721,47 @@ export const MENU_PAGE_COPY: Record<LanguageCode, MenuPageCopy> = {
       bid: "Offer",
       welcome: "Welcome!",
       listingPrefix: "Marketplace -",
+    },
+    donation: {
+      backHome: "Back to homepage",
+      thanks: "Thank you for your contribution! 🎉",
+      thankYou: "Your support of {amount} means a lot to us and helps grow the Polasve community! ❤️",
+      voluntaryAmount: "a voluntary amount",
+      title: "Support the Polasve community",
+      heading: "Help us build the best portal for Poles in Sweden",
+      intro: "Polasve was created to help Poles in Sweden find jobs and housing, buy and sell items, keep up with the news, and meet one another.",
+      whatFunds: "What do donations fund?",
+      funds: [
+        "Operations, servers, and fast performance for all visitors.",
+        "New features, such as better search filters, direct messaging, and events.",
+        "Moderation tools and safety so everyone can feel secure.",
+      ],
+      topNews: "Top news",
+      noNews: "No news...",
+      readNews: "Read all news »",
+      minAmountError: "The minimum donation is 5 kr",
+      paymentError: "Could not start the payment",
+      startError: "The donation could not be started",
+    },
+    account: {
+      loginTitle: "Member login", email: "Email address", password: "Password",
+      forgotShort: "Forgot?", loggingIn: "Signing in...", login: "Sign in",
+      orSignInWith: "Or sign in with", notMember: "Not a member yet?",
+      createAccount: "Create account", welcomeBack: "Welcome back!",
+      signupName: "Name", fullName: "Your first and last name",
+      invalidName: "Enter your first and last name.", invalidEmail: "Enter a valid email address.",
+      passwordMin: "Password must be at least 8 characters long.", signingUp: "Creating account...",
+      signUpSuccess: "Welcome! Check your email to verify your account before signing in.",
+      alreadyMember: "Already have an account?", forgotTitle: "Reset password",
+      forgotIntro: "Enter your email address below and we'll send a link to choose a new password.",
+      sendLink: "Send link", checkEmail: "Check your email!",
+      instructionsSent: "We sent password reset instructions to",
+      sendAgain: "Send again?", newPasswordTitle: "New password",
+      chooseSecurePassword: "Choose a secure password",
+      expiredSession: "Your session has expired. Please request a new password reset link.",
+      requestLink: "Request a new link", updatePassword: "Update password",
+      passwordUpdated: "Your password has been updated! You can now sign in.",
+      updatingPassword: "Updating password...",
     },
   },
 };

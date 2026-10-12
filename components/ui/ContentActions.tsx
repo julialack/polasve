@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Share2, Flag } from 'lucide-react'
 import { toast } from 'sonner'
 import ReportModal from './ReportModal'
+import { useTranslation } from '@/utils/translations'
+import { getMenuPageCopy } from '@/utils/menu-page-copy'
 
 interface ContentActionsProps {
   contentId: string
@@ -16,6 +18,8 @@ interface ContentActionsProps {
 
 export default function ContentActions({ contentId, contentTitle, contentType, currentUserId, shareUrl, className = '' }: ContentActionsProps) {
   const [reportModalOpen, setReportModalOpen] = useState(false)
+  const { lang } = useTranslation()
+  const copy = getMenuPageCopy(lang).common
 
   const handleShare = async () => {
     const url = shareUrl || window.location.href
@@ -23,12 +27,12 @@ export default function ContentActions({ contentId, contentTitle, contentType, c
       if (navigator.share) {
         await navigator.share({
           title: contentTitle,
-          text: `Kolla in detta på Polasve: ${contentTitle}`,
+          text: `${copy.shareIntro} ${contentTitle}`,
           url: url,
         })
       } else {
         await navigator.clipboard.writeText(url)
-        toast.success('Länk kopierad till urklipp!')
+        toast.success(copy.linkCopied)
       }
     } catch (err) {
       console.error('Share failed:', err)
@@ -36,7 +40,7 @@ export default function ContentActions({ contentId, contentTitle, contentType, c
   }
 
   const handleReport = () => {
-    if (!currentUserId) return toast.error('Du måste vara inloggad för att anmäla')
+    if (!currentUserId) return toast.error(copy.signInToReport)
     setReportModalOpen(true)
   }
 
@@ -46,18 +50,18 @@ export default function ContentActions({ contentId, contentTitle, contentType, c
         <button
           onClick={handleShare}
           className="flex items-center gap-1.5 text-zinc-400 hover:text-sve-blue transition-colors"
-          title="Dela"
+          title={copy.share}
         >
           <Share2 size={14} />
-          <span className="text-[9px] font-black uppercase tracking-widest hidden sm:inline">Dela</span>
+          <span className="text-[9px] font-black uppercase tracking-widest hidden sm:inline">{copy.share}</span>
         </button>
         <button
           onClick={handleReport}
           className="flex items-center gap-1.5 text-zinc-300 hover:text-pola-red transition-colors"
-          title="Anmäl"
+          title={copy.report}
         >
           <Flag size={13} />
-          <span className="text-[9px] font-black uppercase tracking-widest hidden sm:inline">Anmäl</span>
+          <span className="text-[9px] font-black uppercase tracking-widest hidden sm:inline">{copy.report}</span>
         </button>
       </div>
 

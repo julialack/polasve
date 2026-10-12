@@ -6,6 +6,8 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "@/utils/translations";
+import { getMenuPageCopy } from "@/utils/menu-page-copy";
 
 export default function RegistreraPage() {
   const [email, setEmail] = useState("");
@@ -15,6 +17,8 @@ export default function RegistreraPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+  const { lang } = useTranslation();
+  const copy = getMenuPageCopy(lang).account;
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,17 +27,17 @@ export default function RegistreraPage() {
     const trimmedEmail = email.trim();
 
     if (trimmedName.length < 2) {
-      toast.error("Skriv in ditt för- och efternamn.");
+      toast.error(copy.invalidName);
       return;
     }
 
     if (!trimmedEmail || !trimmedEmail.includes("@")) {
-      toast.error("Ange en giltig e-postadress.");
+      toast.error(copy.invalidEmail);
       return;
     }
 
     if (password.length < 8) {
-      toast.error("Lösenordet måste vara minst 8 tecken långt.");
+      toast.error(copy.passwordMin);
       return;
     }
 
@@ -52,7 +56,7 @@ export default function RegistreraPage() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Välkommen! Kolla din e-post för att verifiera ditt konto innan du loggar in.");
+      toast.success(copy.signUpSuccess);
       router.push("/logga-in");
     }
     setLoading(false);
@@ -65,43 +69,43 @@ export default function RegistreraPage() {
           <Link href="/" className="inline-flex items-center gap-3 text-3xl font-light tracking-widest text-zinc-900 mb-6">
             POLA<span className="font-bold text-red-800">SVE</span>
           </Link>
-          <h1 className="text-xl font-black uppercase tracking-[0.3em] text-zinc-900">Skapa konto</h1>
+          <h1 className="text-xl font-black uppercase tracking-[0.3em] text-zinc-900">{copy.createAccount}</h1>
         </div>
 
         <div className="bg-white p-8 md:p-10 rounded-sm border border-zinc-100 shadow-2xl shadow-zinc-100">
           <form onSubmit={handleSignUp} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">Namn</label>
+              <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">{copy.signupName}</label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Ditt för- och efternamn"
+                placeholder={copy.fullName}
                 required
                 className="w-full py-3 bg-transparent border-b border-zinc-200 focus:border-red-800 outline-none transition-colors font-light text-zinc-900 placeholder:text-zinc-200"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">E-post</label>
+              <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">{copy.email}</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="namn@exempel.se"
+                placeholder="name@example.com"
                 required
                 className="w-full py-3 bg-transparent border-b border-zinc-200 focus:border-red-800 outline-none transition-colors font-light text-zinc-900 placeholder:text-zinc-200"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">Lösenord</label>
+              <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">{copy.password}</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Minst 8 tecken"
+                  placeholder={copy.passwordMin}
                   required
                   className="w-full py-3 bg-transparent border-b border-zinc-200 focus:border-red-800 outline-none transition-colors font-light text-zinc-900 placeholder:text-zinc-200"
                 />
@@ -120,14 +124,14 @@ export default function RegistreraPage() {
               disabled={loading}
               className="w-full bg-zinc-900 text-white py-4 rounded-full font-bold uppercase tracking-[0.2em] hover:bg-red-800 transition-all active:scale-[0.98] disabled:bg-zinc-300 text-[10px]"
             >
-              {loading ? "Skapar konto..." : "Skapa konto"}
+              {loading ? copy.signingUp : copy.createAccount}
             </button>
           </form>
         </div>
 
         <p className="text-center mt-8 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">
-          Har du redan ett konto?{" "}
-          <Link href="/logga-in" className="text-red-800 hover:underline ml-2">Logga in</Link>
+          {copy.alreadyMember}{" "}
+          <Link href="/logga-in" className="text-red-800 hover:underline ml-2">{copy.login}</Link>
         </p>
       </div>
     </div>

@@ -11,8 +11,12 @@ import SafeImage from "@/components/ui/SafeImage";
 import { createClient } from '@/utils/supabase/client';
 import { Heart, ShieldCheck, CheckCircle2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "@/utils/translations";
+import { getMenuPageCopy } from "@/utils/menu-page-copy";
 
 function StodOssContent() {
+  const { lang } = useTranslation()
+  const { donation: copy } = getMenuPageCopy(lang)
   const searchParams = useSearchParams()
   const isSuccess = searchParams.get('donation') === 'success'
   const amount = searchParams.get('amount')
@@ -39,7 +43,7 @@ function StodOssContent() {
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-6 md:py-10">
         <Link href="/" className="inline-flex items-center gap-2 text-zinc-500 hover:text-[#003366] transition-colors mb-6 text-[10px] font-black uppercase tracking-widest">
-          <ArrowLeft size={14} /> Tillbaka till startsidan
+          <ArrowLeft size={14} /> {copy.backHome}
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-12 lg:grid-cols-4 gap-6">
@@ -59,26 +63,26 @@ function StodOssContent() {
                   <Heart size={32} className="fill-white" />
                 </div>
                 <h2 className="text-xl md:text-3xl font-black text-emerald-950 uppercase italic mb-2">
-                  Tack för ditt bidrag! 🎉
+                  {copy.thanks}
                 </h2>
                 <p className="text-emerald-900 font-bold text-xs md:text-base max-w-lg mx-auto leading-relaxed">
-                  Ditt stöd på <span className="underline font-black">{amount ? `${amount} kr` : 'frivilligt belopp'}</span> betyder oerhört mycket för oss och hjälper till att driva och utveckla Polasve community vidare! ❤️
+                  {copy.thankYou.replace('{amount}', amount ? `${amount} kr` : copy.voluntaryAmount)}
                 </p>
               </div>
             )}
 
             <div className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm">
               <div className="bg-[#a11a2d] text-white px-4 md:px-6 py-3.5 text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                <Heart size={16} className="fill-white" /> Stöd Polasve Community
+                <Heart size={16} className="fill-white" /> {copy.title}
               </div>
 
               <div className="p-4 md:p-10 text-left">
                 <h1 className="text-xl md:text-3xl lg:text-4xl font-black text-[#003366] uppercase tracking-tighter italic mb-4 leading-tight">
-                  Hjälp oss bygga den bästa <span className="text-[#a11a2d]">portalen för polacker i Sverige</span>
+                  {copy.heading}
                 </h1>
 
                 <p className="text-xs md:text-base text-zinc-600 font-medium leading-relaxed mb-6 md:mb-8">
-                  Polasve skapades för att göra det lättare för polacker i Sverige att hitta jobb, bostäder, köpa & sälja prylar, hålla sig uppdaterade med nyheter och lära känna varandra.
+                  {copy.intro}
                 </p>
 
                 {/* Donation Card */}
@@ -89,21 +93,15 @@ function StodOssContent() {
                 {/* What donations fund */}
                 <div className="bg-zinc-50 border border-zinc-100 p-4 md:p-6 rounded-sm space-y-3 md:space-y-4">
                   <h3 className="text-[11px] md:text-xs font-black uppercase tracking-widest text-[#003366] flex items-center gap-2">
-                    <ShieldCheck size={16} className="text-[#a11a2d]" /> Vad går bidragen till?
+                    <ShieldCheck size={16} className="text-[#a11a2d]" /> {copy.whatFunds}
                   </h3>
                   <ul className="space-y-2.5 text-xs text-zinc-600 font-medium">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
-                      <span>Drift, servrar och snabb prestanda för alla besökare.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
-                      <span>Utveckling av nya funktioner (t.ex. bättre sökfilter, direktchatt och evenemang).</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
-                      <span>Modereringsverktyg och säkerhet så att alla kan känna sig trygga.</span>
-                    </li>
+                    {copy.funds.map((fund) => (
+                      <li key={fund} className="flex items-start gap-2">
+                        <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
+                        <span>{fund}</span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -117,7 +115,7 @@ function StodOssContent() {
 
             {/* Toppnyheter */}
             <section className="bg-white border border-zinc-200 shadow-sm overflow-hidden text-left">
-              <div className="bg-[#a11a2d] text-white px-4 py-2 text-[10px] font-black uppercase tracking-wider">Toppnyheter</div>
+              <div className="bg-[#a11a2d] text-white px-4 py-2 text-[10px] font-black uppercase tracking-wider">{copy.topNews}</div>
               <div className="p-4 space-y-4 text-left">
                 {news.length > 0 ? (
                   news.map((item) => (
@@ -132,9 +130,9 @@ function StodOssContent() {
                       <h4 className="text-[10px] font-bold text-zinc-800 leading-tight group-hover:text-blue-800 transition-colors italic line-clamp-2 text-left">{item.title}</h4>
                     </Link>
                   ))
-                ) : <p className="text-center py-4 text-zinc-400 italic text-[10px]">Inga nyheter...</p>}
+                ) : <p className="text-center py-4 text-zinc-400 italic text-[10px]">{copy.noNews}</p>}
               </div>
-              <Link href="/nyheter" className="block text-center py-3 bg-zinc-50 text-[10px] font-black text-zinc-500 hover:text-[#003366] uppercase tracking-widest border-t transition-colors italic">Läs alla nyheter &raquo;</Link>
+              <Link href="/nyheter" className="block text-center py-3 bg-zinc-50 text-[10px] font-black text-zinc-500 hover:text-[#003366] uppercase tracking-widest border-t transition-colors italic">{copy.readNews}</Link>
             </section>
           </aside>
 
@@ -146,7 +144,7 @@ function StodOssContent() {
 
 export default function StodOssPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center italic text-zinc-400 text-sm">Laddar sida...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center italic text-zinc-400 text-sm">…</div>}>
       <StodOssContent />
     </Suspense>
   )

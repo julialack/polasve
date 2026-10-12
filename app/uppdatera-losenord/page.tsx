@@ -5,6 +5,8 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "@/utils/translations";
+import { getMenuPageCopy } from "@/utils/menu-page-copy";
 
 export default function UppdateraLosenordPage() {
   const [password, setPassword] = useState("");
@@ -13,6 +15,8 @@ export default function UppdateraLosenordPage() {
   const [sessionError, setSessionError] = useState("");
   const router = useRouter();
   const supabase = createClient();
+  const { lang } = useTranslation();
+  const copy = getMenuPageCopy(lang).account;
 
   useEffect(() => {
     const verifySession = async () => {
@@ -21,7 +25,7 @@ export default function UppdateraLosenordPage() {
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        setSessionError("Din session har utgått. Vänligen begär en ny återställningslänk.");
+        setSessionError(copy.expiredSession);
       }
     };
     verifySession();
@@ -31,7 +35,7 @@ export default function UppdateraLosenordPage() {
     e.preventDefault();
 
     if (password.length < 8) {
-      toast.error("Lösenordet måste vara minst 8 tecken långt");
+      toast.error(copy.passwordMin);
       return;
     }
 
@@ -44,7 +48,7 @@ export default function UppdateraLosenordPage() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Ditt lösenord har uppdaterats! Du kan nu logga in.");
+      toast.success(copy.passwordUpdated);
       router.push("/logga-in");
     }
     setLoading(false);
@@ -54,8 +58,8 @@ export default function UppdateraLosenordPage() {
     <div className="min-h-[100dvh] bg-white flex flex-col justify-center py-12 px-6">
       <div className="max-w-md w-full mx-auto">
         <div className="text-center mb-10">
-          <h1 className="text-xl font-black uppercase tracking-[0.3em] text-sve-blue">Nytt lösenord</h1>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mt-2">Välj ett säkert lösenord</p>
+          <h1 className="text-xl font-black uppercase tracking-[0.3em] text-sve-blue">{copy.newPasswordTitle}</h1>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mt-2">{copy.chooseSecurePassword}</p>
           <div className="w-8 h-px bg-pola-red mx-auto mt-4"></div>
         </div>
 
@@ -70,19 +74,19 @@ export default function UppdateraLosenordPage() {
                 onClick={() => router.push("/glomt-losenord")}
                 className="w-full bg-sve-blue text-white py-5 rounded-full font-black uppercase tracking-[0.2em] hover:bg-pola-red transition-all shadow-xl text-[10px]"
               >
-                Begär ny länk
+                {copy.requestLink}
               </button>
             </div>
           ) : (
             <form onSubmit={handleUpdate} className="space-y-8">
               <div className="space-y-4">
-                <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">Nytt lösenord</label>
+                <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">{copy.newPasswordTitle}</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Minst 8 tecken"
+                    placeholder={copy.passwordMin}
                     required
                     className="w-full py-4 bg-transparent border-b border-zinc-200 focus:border-pola-red outline-none transition-colors font-bold text-zinc-950 text-lg placeholder:text-zinc-200 pr-10"
                   />
@@ -101,7 +105,7 @@ export default function UppdateraLosenordPage() {
                 disabled={loading || !password}
                 className="w-full bg-sve-blue text-white py-5 rounded-full font-black uppercase tracking-[0.2em] hover:bg-pola-red transition-all shadow-xl active:scale-[0.98] disabled:bg-zinc-100 disabled:text-zinc-400 flex items-center justify-center gap-2"
               >
-                {loading ? <Loader2 className="animate-spin" size={18} /> : "Uppdatera lösenord"}
+                {loading ? <Loader2 className="animate-spin" size={18} /> : copy.updatePassword}
               </button>
             </form>
           )}

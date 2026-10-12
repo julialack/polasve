@@ -4,13 +4,15 @@ import { useState } from 'react'
 import { Heart, CreditCard, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslation } from '@/utils/translations'
+import { getMenuPageCopy } from '@/utils/menu-page-copy'
 
 interface DonationCardProps {
   compact?: boolean
 }
 
 export default function DonationCard({ compact = false }: DonationCardProps) {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
+  const copy = getMenuPageCopy(lang).donation
   const [selectedAmount, setSelectedAmount] = useState<number>(25)
   const [customAmount, setCustomAmount] = useState<string>('')
   const [loading, setLoading] = useState(false)
@@ -20,7 +22,7 @@ export default function DonationCard({ compact = false }: DonationCardProps) {
   const handleDonate = async () => {
     const finalAmount = customAmount ? parseFloat(customAmount) : selectedAmount
     if (!finalAmount || finalAmount < 5) {
-      return toast.error('Minsta donationsbelopp är 5 kr')
+      return toast.error(copy.minAmountError)
     }
 
     setLoading(true)
@@ -35,10 +37,12 @@ export default function DonationCard({ compact = false }: DonationCardProps) {
       if (data && data.url) {
         window.location.href = data.url
       } else {
-        toast.error(data?.error || 'Kunde inte starta betalningen')
+        console.error('Donation checkout could not be started:', data?.error)
+        toast.error(copy.paymentError)
       }
-    } catch (err: any) {
-      toast.error('Donationen kunde inte startas: ' + err.message)
+    } catch (err) {
+      console.error('Donation checkout request failed:', err)
+      toast.error(copy.startError)
     } finally {
       setLoading(false)
     }

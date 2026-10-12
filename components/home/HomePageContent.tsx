@@ -49,7 +49,7 @@ export default function HomePageContent({ featuredAds, news }: HomePageContentPr
             {/* AD BOXES LEFT */}
             <div className="space-y-4 pt-2">
               <AdBox title={t.advertiseBtn} variant="gold" href="/reklam" />
-              <AdBox title="Reklama Polasve" href="/reklam" />
+              <AdBox title={t.advertiseBtn} href="/reklam" />
             </div>
           </aside>
 

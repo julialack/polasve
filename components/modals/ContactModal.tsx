@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { X, Send, Loader2, MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslation } from '@/utils/translations'
+import { getMenuPageCopy } from '@/utils/menu-page-copy'
 
 interface ContactModalProps {
   isOpen: boolean
@@ -15,6 +17,8 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
   const [message, setMessage] = useState('')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const { lang } = useTranslation()
+  const copy = getMenuPageCopy(lang).common
   const supabase = createClient()
 
   if (!isOpen) return null
@@ -22,7 +26,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!reason || !message || !email) {
-      toast.error('Vänligen fyll i alla fält')
+      toast.error(copy.fillAllFields)
       return
     }
 
@@ -42,13 +46,13 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
 
       if (error) throw error
 
-      toast.success('Ditt meddelande har skickats! Vi återkommer så snart vi kan.')
+      toast.success(copy.contactSent)
       setReason('')
       setMessage('')
       setEmail('')
       onClose()
     } catch (err: any) {
-      toast.error('Kunde inte skicka meddelandet: ' + err.message)
+      toast.error(`${copy.contactFailed} ${err.message}`)
     } finally {
       setLoading(false)
     }
@@ -64,9 +68,9 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
           <div>
             <h2 className="text-xl font-black uppercase tracking-widest flex items-center gap-3">
               <MessageSquare size={24} className="text-pola-red" />
-              Kontakta oss
+              {copy.contactUs}
             </h2>
-            <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest mt-1">Har du frågor? Vi hjälper dig!</p>
+            <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest mt-1">{copy.contactHelp}</p>
           </div>
           <button
             onClick={onClose}
@@ -80,7 +84,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           <div className="space-y-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Din E-post</label>
+              <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">{copy.email}</label>
               <input
                 type="email"
                 value={email}
@@ -92,28 +96,28 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Ärende / Anledning</label>
+              <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">{copy.subject}</label>
               <select
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 required
                 className="w-full bg-zinc-50 border-b-2 border-zinc-100 p-4 text-sm font-bold text-zinc-900 outline-none focus:border-pola-red transition-all appearance-none"
               >
-                <option value="">Välj anledning...</option>
-                <option value="Fråga om annons">Fråga om annons</option>
-                <option value="Tekniskt problem">Tekniskt problem</option>
-                <option value="Anmäl inlägg/användare">Anmäl inlägg/användare</option>
-                <option value="Samarbeten">Samarbeten</option>
-                <option value="Övrigt">Övrigt</option>
+                <option value="">{copy.chooseReason}</option>
+                <option value="Fråga om annons">{copy.listingQuestion}</option>
+                <option value="Tekniskt problem">{copy.technicalIssue}</option>
+                <option value="Anmäl inlägg/användare">{copy.reportPostOrUser}</option>
+                <option value="Samarbeten">{copy.collaboration}</option>
+                <option value="Övrigt">{copy.other}</option>
               </select>
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Meddelande</label>
+              <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">{copy.message}</label>
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Skriv din fråga här..."
+                placeholder={copy.writeQuestion}
                 required
                 rows={4}
                 className="w-full bg-zinc-50 border-b-2 border-zinc-100 p-4 text-sm font-bold text-zinc-900 outline-none focus:border-pola-red transition-all resize-none"
@@ -131,7 +135,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
             ) : (
               <>
                 <Send size={18} />
-                Skicka Meddelande
+                {copy.sendMessage}
               </>
             )}
           </button>
