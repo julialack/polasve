@@ -38,7 +38,7 @@ export default function DonationCard({ compact = false }: DonationCardProps) {
         window.location.href = data.url
       } else {
         console.error('Donation checkout could not be started:', data?.error)
-        toast.error(copy.paymentError)
+        toast.error(data?.error || copy.paymentError)
       }
     } catch (err) {
       console.error('Donation checkout request failed:', err)
