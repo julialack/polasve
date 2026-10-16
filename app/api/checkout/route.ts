@@ -1,41 +1,57 @@
-import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { createClient } from '@/utils/supabase/server';
-
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const stripe = stripeSecretKey
-  ? new Stripe(stripeSecretKey)
-  : null;
-
-const PRICES: Record<string, number> = {
-  standard: 4900,  // 49 SEK in cents
-  premium: 14900,  // 149 SEK in cents
-  featured: 49900, // 499 SEK in cents
-};
+import { NextResponse } from 'next/server'
+import { createClient } from '@/utils/supabase/server'
+import { AD_PACKAGES, getStripeClient, isAdPackageId } from '@/lib/stripe'
 
 export async function POST(req: Request) {
-  let body: any = {};
+  let body: unknown
   try {
-    body = await req.json();
-  } catch (e) {
-    return NextResponse.json({ error: 'Invalid JSON request' }, { status: 400 });
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON request' }, { status: 400 })
   }
 
-  const { adId, packageId, adTitle } = body;
-  const origin = req.headers.get('origin') || 'http://localhost:3000';
+  if (!body || typeof body !== 'object') {
+    return NextResponse.json({ error: 'Invalid checkout request' }, { status: 400 })
+  }
 
-  // Fallback for local development if Stripe key is missing in .env.local
+  const { adId, packageId } = body as { adId?: unknown; packageId?: unknown }
+  if (typeof adId !== 'string' || !adId || !isAdPackageId(packageId)) {
+    return NextResponse.json({ error: 'Invalid ad or package' }, { status: 400 })
+  }
+
+  const stripe = getStripeClient()
   if (!stripe) {
-    console.warn("Stripe secret key missing in .env. Auto-approving ad for testing/development.");
-    if (adId) {
-      const supabase = await createClient();
-      await supabase.from('ads').update({ payment_status: 'paid' }).eq('id', adId);
-      return NextResponse.json({ url: `${origin}/annonser/${adId}?payment=success` });
-    }
-    return NextResponse.json({ error: 'Stripe key is missing' }, { status: 500 });
+    console.error('Stripe checkout is unavailable: STRIPE_SECRET_KEY is not configured')
+    return NextResponse.json({ error: 'Betalning är inte tillgänglig just nu' }, { status: 503 })
   }
 
-  const amount = PRICES[packageId] || 4900;
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError) {
+    console.error('Could not verify checkout user:', authError)
+    return NextResponse.json({ error: 'Kunde inte verifiera användaren' }, { status: 500 })
+  }
+  if (!user) {
+    return NextResponse.json({ error: 'Du måste vara inloggad för att betala' }, { status: 401 })
+  }
+
+  const { data: ad, error: adError } = await supabase
+    .from('ads')
+    .select('id, title, user_id, payment_status')
+    .eq('id', adId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (adError) {
+    console.error('Could not load ad for checkout:', adError)
+    return NextResponse.json({ error: 'Kunde inte hitta annonsen' }, { status: 500 })
+  }
+  if (!ad) {
+    return NextResponse.json({ error: 'Annonsen hittades inte' }, { status: 404 })
+  }
+  if (ad.payment_status !== 'pending_payment') {
+    return NextResponse.json({ error: 'Annonsen väntar inte på betalning' }, { status: 409 })
+  }
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -45,38 +61,33 @@ export async function POST(req: Request) {
           price_data: {
             currency: 'sek',
             product_data: {
-              name: `Annons: ${adTitle || 'Polasve Annons'}`,
+              name: `Annons: ${ad.title}`,
               description: `Betalning för paket: ${packageId}`,
             },
-            unit_amount: amount,
+            unit_amount: AD_PACKAGES[packageId].amount,
           },
           quantity: 1,
         },
       ],
       mode: 'payment',
-      success_url: `${origin}/annonser/${adId}?payment=success`,
-      cancel_url: `${origin}/skapa-annons?payment=cancel`,
+      success_url: `${new URL(process.env.NEXT_PUBLIC_SITE_URL || req.url).origin}/annonser/${ad.id}?payment=success`,
+      cancel_url: `${new URL(process.env.NEXT_PUBLIC_SITE_URL || req.url).origin}/skapa-annons?payment=cancel`,
       metadata: {
-        adId,
+        type: 'ad',
+        adId: ad.id,
+        userId: user.id,
         packageId,
       },
-    });
+    })
 
-    return NextResponse.json({ url: session.url });
-  } catch (error: any) {
-    console.error('Stripe Checkout Error:', error);
-
-    // Fallback: auto-approve ad so user is never stuck during testing
-    if (adId) {
-      try {
-        const supabase = await createClient();
-        await supabase.from('ads').update({ payment_status: 'paid' }).eq('id', adId);
-        return NextResponse.json({ url: `${origin}/annonser/${adId}?payment=success` });
-      } catch (dbErr) {
-        console.error("Database fallback error:", dbErr);
-      }
+    if (!session.url) {
+      console.error('Stripe created a checkout session without a redirect URL')
+      return NextResponse.json({ error: 'Betalningen kunde inte startas' }, { status: 502 })
     }
 
-    return NextResponse.json({ error: error?.message || 'Betalningen kunde inte genomföras' }, { status: 500 });
+    return NextResponse.json({ url: session.url })
+  } catch (error) {
+    console.error('Stripe checkout session creation failed:', error)
+    return NextResponse.json({ error: 'Betalningen kunde inte startas' }, { status: 502 })
   }
 }

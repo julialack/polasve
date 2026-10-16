@@ -1,38 +1,33 @@
-import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const stripe = stripeSecretKey
-  ? new Stripe(stripeSecretKey)
-  : null;
+import { NextResponse } from 'next/server'
+import { getStripeClient } from '@/lib/stripe'
 
 export async function POST(req: Request) {
-  let numAmount = 25;
-  let origin = 'http://localhost:3000';
+  let body: unknown
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON request' }, { status: 400 })
+  }
+
+  const amount = body && typeof body === 'object' && 'amount' in body
+    ? Number(body.amount)
+    : Number.NaN
+  if (!Number.isFinite(amount) || amount < 5 || amount > 10000) {
+    return NextResponse.json({ error: 'Beloppet måste vara mellan 5 och 10 000 kr' }, { status: 400 })
+  }
+
+  const stripe = getStripeClient()
+  if (!stripe) {
+    console.error('Donation checkout is unavailable: STRIPE_SECRET_KEY is not configured')
+    return NextResponse.json({ error: 'Betalning är inte tillgänglig just nu' }, { status: 503 })
+  }
+
+  const amountInCents = Math.round(amount * 100)
+  const siteOrigin = new URL(process.env.NEXT_PUBLIC_SITE_URL || req.url).origin
 
   try {
-    const body = await req.json().catch(() => ({}));
-    const amount = body.amount;
-
-    numAmount = Math.max(5, Math.min(10000, Number(amount) || 25));
-    const amountInCents = Math.round(numAmount * 100);
-
-    const reqOrigin = req.headers.get('origin') || req.headers.get('referer');
-    if (reqOrigin) {
-      try {
-        origin = new URL(reqOrigin).origin;
-      } catch (e) {
-        origin = reqOrigin.replace(/\/$/, '');
-      }
-    }
-
-    // Fallback if Stripe key is missing in .env.local during local development
-    if (!stripe) {
-      console.warn("STRIPE_SECRET_KEY missing in .env.local. Simulating donation checkout for dev.");
-      return NextResponse.json({ url: `${origin}/stod-oss?donation=success&amount=${numAmount}` });
-    }
-
     const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
       line_items: [
         {
           price_data: {
@@ -47,15 +42,53 @@ export async function POST(req: Request) {
         },
       ],
       mode: 'payment',
-      success_url: `${origin}/stod-oss?donation=success&amount=${numAmount}`,
-      cancel_url: `${origin}/stod-oss?donation=cancel`,
-    });
+      success_url: `${siteOrigin}/stod-oss?donation=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteOrigin}/stod-oss?donation=cancel`,
+      metadata: {
+        type: 'donation',
+      },
+    })
 
-    return NextResponse.json({ url: session.url });
-  } catch (error: any) {
-    console.error('Stripe Donation Error:', error);
+    if (!session.url) {
+      console.error('Stripe created a donation session without a redirect URL')
+      return NextResponse.json({ error: 'Betalningen kunde inte startas' }, { status: 502 })
+    }
 
-    // Development/Local Fallback on Stripe error so user is never stuck
-    return NextResponse.json({ url: `${origin}/stod-oss?donation=success&amount=${numAmount}` });
+    return NextResponse.json({ url: session.url })
+  } catch (error) {
+    console.error('Stripe donation session creation failed:', error)
+    return NextResponse.json({ error: 'Betalningen kunde inte startas' }, { status: 502 })
+  }
+}
+
+export async function GET(req: Request) {
+  const sessionId = new URL(req.url).searchParams.get('session_id')
+  if (!sessionId) {
+    return NextResponse.json({ error: 'Missing checkout session ID' }, { status: 400 })
+  }
+
+  const stripe = getStripeClient()
+  if (!stripe) {
+    console.error('Donation verification is unavailable: STRIPE_SECRET_KEY is not configured')
+    return NextResponse.json({ error: 'Betalning är inte tillgänglig just nu' }, { status: 503 })
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId)
+    if (session.mode !== 'payment' || session.metadata?.type !== 'donation') {
+      return NextResponse.json({ error: 'Ogiltig donationssession' }, { status: 404 })
+    }
+
+    const amount = session.payment_status === 'paid' && session.amount_total !== null
+      ? session.amount_total / 100
+      : null
+
+    return NextResponse.json(
+      { paid: amount !== null, amount },
+      { headers: { 'Cache-Control': 'no-store' } },
+    )
+  } catch (error) {
+    console.error('Stripe donation verification failed:', error)
+    return NextResponse.json({ error: 'Kunde inte verifiera betalningen' }, { status: 502 })
   }
 }

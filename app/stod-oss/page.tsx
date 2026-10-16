@@ -18,11 +18,36 @@ function StodOssContent() {
   const { lang } = useTranslation()
   const { donation: copy } = getMenuPageCopy(lang)
   const searchParams = useSearchParams()
+  const sessionId = searchParams.get('session_id')
   const isSuccess = searchParams.get('donation') === 'success'
-  const amount = searchParams.get('amount')
+  const [verifiedDonation, setVerifiedDonation] = useState<{ sessionId: string; amount: number } | null>(null)
+  const verifiedAmount = verifiedDonation?.sessionId === sessionId ? verifiedDonation.amount : null
 
   const [news, setNews] = useState<any[]>([])
   const supabase = createClient()
+
+  useEffect(() => {
+    if (!sessionId || !isSuccess) return
+
+    let cancelled = false
+    fetch(`/api/donate?session_id=${encodeURIComponent(sessionId)}`, { cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) return null
+        return response.json() as Promise<{ paid: boolean; amount: number | null }>
+      })
+      .then((result) => {
+        if (!cancelled && result?.paid && typeof result.amount === 'number') {
+          setVerifiedDonation({ sessionId, amount: result.amount })
+        }
+      })
+      .catch((error) => {
+        console.error('Could not verify donation confirmation:', error)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [isSuccess, sessionId])
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -57,7 +82,7 @@ function StodOssContent() {
           <div className="col-span-1 md:col-span-9 lg:col-span-2 space-y-6 md:space-y-8 text-left">
 
             {/* Thank You Banner on Success */}
-            {isSuccess && (
+            {verifiedAmount !== null && (
               <div className="bg-emerald-50 border-2 border-emerald-500 p-6 md:p-8 rounded-sm shadow-xl text-center animate-in zoom-in-95 duration-300">
                 <div className="w-14 h-14 md:w-16 md:h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <Heart size={32} className="fill-white" />
@@ -66,7 +91,7 @@ function StodOssContent() {
                   {copy.thanks}
                 </h2>
                 <p className="text-emerald-900 font-bold text-xs md:text-base max-w-lg mx-auto leading-relaxed">
-                  {copy.thankYou.replace('{amount}', amount ? `${amount} kr` : copy.voluntaryAmount)}
+                  {copy.thankYou.replace('{amount}', `${verifiedAmount} kr`)}
                 </p>
               </div>
             )}

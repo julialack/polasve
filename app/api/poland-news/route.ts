@@ -35,13 +35,20 @@ function extractImage(itemContent: string) {
 
 async function fetchSourceNews(source: typeof SOURCES[0]) {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+
     const response = await fetch(source.url, {
       next: { revalidate: 300 },
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
     });
 
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
-      console.warn(`Failed to fetch ${source.name}: status ${response.status}`);
       return [];
     }
 
@@ -61,8 +68,7 @@ async function fetchSourceNews(source: typeof SOURCES[0]) {
         pubDate: extractTagContent(itemContent, 'pubDate')
       };
     }).filter(news => news.title && news.link);
-  } catch (error) {
-    console.error(`Error fetching news from ${source.name}:`, error);
+  } catch (_error) {
     return [];
   }
 }
@@ -131,10 +137,8 @@ export async function GET() {
     // Apply strict 50% maximum limit for TVN24
     const balancedNews = balanceNewsSources(sortedNews, 0.5, 'TVN24');
 
-    // Return the top 20 most recent balanced news items
     return NextResponse.json(balancedNews.slice(0, 20));
-  } catch (error) {
-    console.error("Critical error fetching Poland news:", error);
-    return NextResponse.json({ error: 'Failed to fetch news' }, { status: 500 });
+  } catch (_error) {
+    return NextResponse.json([]);
   }
 }

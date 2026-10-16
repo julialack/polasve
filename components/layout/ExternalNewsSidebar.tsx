@@ -3,11 +3,9 @@
 import { useEffect, useState } from 'react'
 import { Newspaper } from 'lucide-react'
 import { useTranslation } from '@/utils/translations'
-import { getMenuPageCopy } from '@/utils/menu-page-copy'
 
 export default function ExternalNewsSidebar() {
-  const { t, lang } = useTranslation()
-  const copy = getMenuPageCopy(lang).common
+  const { t } = useTranslation()
   const [news, setNews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -15,13 +13,14 @@ export default function ExternalNewsSidebar() {
     const fetchNews = async () => {
       try {
         const res = await fetch('/api/poland-news')
-        const data = await res.json()
-        if (Array.isArray(data)) {
-          // Show only top 4
-          setNews(data.slice(0, 4))
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data)) {
+            setNews(data.slice(0, 4))
+          }
         }
-      } catch (e) {
-        console.error("Failed to load external news")
+      } catch (_e) {
+        // Ignore network fetch errors gracefully
       } finally {
         setLoading(false)
       }
@@ -48,6 +47,10 @@ export default function ExternalNewsSidebar() {
     )
   }
 
+  if (news.length === 0) {
+    return null
+  }
+
   return (
     <section className="bg-white border border-zinc-200 shadow-sm overflow-hidden rounded-sm">
       <div className="bg-zinc-800 text-white px-4 py-2 text-[8px] font-black uppercase tracking-[0.2em] flex items-center justify-between">
@@ -58,9 +61,7 @@ export default function ExternalNewsSidebar() {
       </div>
 
       <div className="p-3 space-y-3">
-        {news.length === 0 ? (
-          <p className="text-center py-4 text-[10px] text-zinc-400 italic">{copy.noNews}</p>
-        ) : news.map((item, idx) => (
+        {news.map((item, idx) => (
           <a
             key={idx}
             href={item.link}

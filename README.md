@@ -34,3 +34,31 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Stripe payments
+
+Ad payments and donations use Stripe Checkout. Configure these environment variables
+locally in `.env.local` and in the production hosting environment:
+
+- `STRIPE_SECRET_KEY` — Stripe secret key for the intended mode (`sk_test_...` for testing
+  or `sk_live_...` for real payments).
+- `STRIPE_WEBHOOK_SECRET` — signing secret for the webhook endpoint.
+- `NEXT_PUBLIC_SITE_URL` — canonical site origin, for example `https://example.com`.
+- `SUPABASE_SERVICE_ROLE_KEY` — Supabase service-role key, used only by the verified
+  Stripe webhook to activate paid ads.
+
+The webhook endpoint is `/api/webhook/stripe`. Enable the `checkout.session.completed`
+event for it in Stripe Dashboard. For local testing, run
+`stripe listen --forward-to localhost:3000/api/webhook/stripe` and set
+`STRIPE_WEBHOOK_SECRET` to the signing secret printed by the CLI. Use Stripe test keys
+and test card numbers until test checkouts and webhook delivery have been confirmed.
+Switch both Stripe keys and the webhook signing secret to live-mode values to accept
+real payments.
+
+The `ads` table must include a `payment_status` column before ad checkout can activate
+paid ads:
+
+```sql
+ALTER TABLE public.ads
+ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'pending_payment';
+```
