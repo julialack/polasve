@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
-import { AD_PACKAGES, getStripeClient, isAdPackageId } from '@/lib/stripe'
+import { AD_PACKAGES, getSiteOrigin, getStripeClient, isAdPackageId } from '@/lib/stripe'
 
 export async function POST(req: Request) {
   let body: unknown
@@ -53,6 +53,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Annonsen väntar inte på betalning' }, { status: 409 })
   }
 
+  const siteOrigin = getSiteOrigin(req.url)
+
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -70,8 +72,8 @@ export async function POST(req: Request) {
         },
       ],
       mode: 'payment',
-      success_url: `${new URL(process.env.NEXT_PUBLIC_SITE_URL || req.url).origin}/annonser/${ad.id}?payment=success`,
-      cancel_url: `${new URL(process.env.NEXT_PUBLIC_SITE_URL || req.url).origin}/skapa-annons?payment=cancel`,
+      success_url: `${siteOrigin}/annonser/${ad.id}?payment=success`,
+      cancel_url: `${siteOrigin}/skapa-annons?payment=cancel`,
       metadata: {
         type: 'ad',
         adId: ad.id,
@@ -88,6 +90,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: session.url })
   } catch (error) {
     console.error('Stripe checkout session creation failed:', error)
-    return NextResponse.json({ error: 'Betalningen kunde inte startas' }, { status: 502 })
+    const message = error instanceof Error ? error.message : 'Betalningen kunde inte startas'
+    return NextResponse.json({ error: `Betalningen kunde inte startas: ${message}` }, { status: 502 })
   }
 }

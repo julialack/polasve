@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getStripeClient } from '@/lib/stripe'
+import { getSiteOrigin, getStripeClient } from '@/lib/stripe'
 
 export async function POST(req: Request) {
   let body: unknown
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   }
 
   const amountInCents = Math.round(amount * 100)
-  const siteOrigin = new URL(process.env.NEXT_PUBLIC_SITE_URL || req.url).origin
+  const siteOrigin = getSiteOrigin(req.url)
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -57,7 +57,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: session.url })
   } catch (error) {
     console.error('Stripe donation session creation failed:', error)
-    return NextResponse.json({ error: 'Betalningen kunde inte startas' }, { status: 502 })
+    const message = error instanceof Error ? error.message : 'Betalningen kunde inte startas'
+    return NextResponse.json({ error: `Betalningen kunde inte startas: ${message}` }, { status: 502 })
   }
 }
 
