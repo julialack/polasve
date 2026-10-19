@@ -68,6 +68,7 @@ const OPTIONS = {
 const AVAILABLE_LANGUAGES = [
   { id: 'sv', label: 'Svenska' },
   { id: 'pl', label: 'Polski' },
+  { id: 'ua', label: 'Українська' },
   { id: 'en', label: 'English' },
 ]
 

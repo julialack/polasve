@@ -53,8 +53,8 @@ export default function LanguageSelector({ variant = 'hero' }: LanguageSelectorP
             className="fixed inset-0 z-[150] bg-black/40 backdrop-blur-xs"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute right-0 top-full mt-2 z-[160] w-52 bg-white rounded-xl shadow-2xl border border-zinc-200 p-2 animate-in zoom-in-95 duration-200 text-left text-zinc-900 max-h-[70vh] overflow-y-auto">
-            <div className="px-3 py-2 border-b border-zinc-100 flex items-center justify-between text-zinc-400 sticky top-0 bg-white z-10">
+          <div className="fixed md:absolute right-4 md:right-0 top-16 md:top-full mt-2 z-[999] w-60 bg-white rounded-xl shadow-2xl border border-zinc-200 p-2 animate-in zoom-in-95 duration-200 text-left text-zinc-900">
+            <div className="px-3 py-2 border-b border-zinc-100 flex items-center justify-between text-zinc-400 bg-white rounded-t-xl">
               <span className="text-[9px] font-black uppercase tracking-widest text-[#003366]">{languageLabel}</span>
               <button onClick={() => setOpen(false)} className="text-zinc-400 hover:text-black p-1">
                 <X size={14} />
@@ -67,15 +67,15 @@ export default function LanguageSelector({ variant = 'hero' }: LanguageSelectorP
                   onClick={() => selectLanguage(lang.code)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-bold transition-all text-left ${
                     currentLang === lang.code
-                      ? 'bg-red-50 text-[#a11a2d] font-black'
-                      : 'text-zinc-800 hover:bg-zinc-50'
+                      ? 'bg-red-50 text-[#a11a2d] font-black border border-red-200'
+                      : 'text-zinc-800 hover:bg-zinc-100'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-lg leading-none">{lang.flag}</span>
-                    <span>{lang.nativeName}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl leading-none">{lang.flag}</span>
+                    <span className="font-bold">{lang.nativeName}</span>
                   </div>
-                  {currentLang === lang.code && <Check size={14} className="text-[#a11a2d]" />}
+                  {currentLang === lang.code && <Check size={14} className="text-[#a11a2d] shrink-0" />}
                 </button>
               ))}
             </div>
