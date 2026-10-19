@@ -5,11 +5,11 @@ import { Check, ChevronDown, X } from 'lucide-react'
 import { useTranslation, LanguageCode } from '@/utils/translations'
 import { getMenuPageCopy } from '@/utils/menu-page-copy'
 
-export const LANGUAGES: { code: LanguageCode; flag: string; nativeName: string }[] = [
-  { code: 'pl', flag: '🇵🇱', nativeName: 'Polski (Główny)' },
-  { code: 'sv', flag: '🇸🇪', nativeName: 'Svenska' },
-  { code: 'ua', flag: '🇺🇦', nativeName: 'Українська' },
-  { code: 'en', flag: '🇬🇧', nativeName: 'English' },
+export const LANGUAGES: { code: LanguageCode; label: string; nativeName: string }[] = [
+  { code: 'pl', label: 'PL', nativeName: 'Polski (Główny)' },
+  { code: 'sv', label: 'SE', nativeName: 'Svenska' },
+  { code: 'ua', label: 'UA', nativeName: 'Українська' },
+  { code: 'en', label: 'EN', nativeName: 'English' },
 ]
 
 interface LanguageSelectorProps {
@@ -41,12 +41,11 @@ export default function LanguageSelector({ variant = 'hero' }: LanguageSelectorP
         aria-label={languageLabel}
         title={activeLang.nativeName}
       >
-        <span className="text-base leading-none">{activeLang.flag}</span>
-        <span className="uppercase text-[10px] tracking-wider font-extrabold">{activeLang.code}</span>
+        <span className="bg-red-800 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">{activeLang.label}</span>
         <ChevronDown size={11} className={`transition-transform duration-300 opacity-70 ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Global Clean Popup Modal (Bypasses parent overflow clipping) */}
+      {/* Global Clean Popup Modal */}
       {open && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
           <div
@@ -75,7 +74,7 @@ export default function LanguageSelector({ variant = 'hero' }: LanguageSelectorP
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-xl leading-none">{lang.flag}</span>
+                    <span className="bg-zinc-900 text-white text-[10px] font-black px-2 py-0.5 rounded uppercase">{lang.label}</span>
                     <span className="text-sm font-bold">{lang.nativeName}</span>
                   </div>
                   {currentLang === lang.code && <Check size={16} className="text-[#a11a2d] shrink-0" />}
