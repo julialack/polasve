@@ -53,9 +53,13 @@ export default function GlomtLosenordPage() {
               </p>
 
               <div className="space-y-4">
-                <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">{copy.email}</label>
+                <label htmlFor="reset-email" className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">{copy.email}</label>
                 <div className="relative">
                   <input
+                    id="reset-email"
+                    name="email"
+                    autoComplete="email"
+                    inputMode="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

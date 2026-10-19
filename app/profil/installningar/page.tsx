@@ -641,14 +641,14 @@ export default function InstallningarPage() {
                   <div className="text-left">
                     <label htmlFor="user-fullname-settings" className="block text-[8px] font-black uppercase text-zinc-600 mb-1">Ditt Namn</label>
                     <div className="flex gap-2">
-                      <input id="user-fullname-settings" name="full-name" type="text" readOnly value={fullName} className="flex-1 bg-zinc-50 p-4 rounded-sm text-sm font-bold text-zinc-900 outline-none" />
+                      <input id="user-fullname-settings" name="full-name" autoComplete="name" type="text" readOnly value={fullName} className="flex-1 bg-zinc-50 p-4 rounded-sm text-sm font-bold text-zinc-900 outline-none" />
                       <button type="button" onClick={() => setShowNameRequest(true)} className="bg-sve-blue text-white px-6 py-2 rounded-sm text-[9px] font-black uppercase self-end">Ändra</button>
                     </div>
                   </div>
                   {showNameRequest && (
                     <div className="mt-4 animate-in fade-in slide-in-from-top-2">
                       <label htmlFor="new-name-settings" className="block text-[8px] font-black text-sve-blue uppercase mb-1">Nytt Namn</label>
-                      <input id="new-name-settings" name="new-name" type="text" value={requestedName} onChange={(e) => setRequestedName(e.target.value)} placeholder="Nytt namn..." className="w-full p-4 border rounded-sm text-xs font-bold mb-2 text-zinc-900" />
+                      <input id="new-name-settings" name="new-name" autoComplete="name" type="text" value={requestedName} onChange={(e) => setRequestedName(e.target.value)} placeholder="Nytt namn..." className="w-full p-4 border rounded-sm text-xs font-bold mb-2 text-zinc-900" />
                       <div className="flex gap-2">
                         <button type="button" onClick={handleRequestNameChange} className="bg-pola-red text-white px-4 py-2 rounded-sm text-[9px] font-black uppercase">Skicka</button>
                         <button type="button" onClick={() => setShowNameRequest(false)} className="text-zinc-500 text-[9px] font-black uppercase">Avbryt</button>
@@ -657,12 +657,12 @@ export default function InstallningarPage() {
                   )}
                   <div className="text-left">
                     <label htmlFor="user-city-settings" className="block text-[8px] font-black uppercase text-zinc-600 mb-1">Stad / Region</label>
-                    <input id="user-city-settings" name="city" type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Stad / Region" className="w-full bg-zinc-50 p-4 rounded-sm text-sm font-bold text-zinc-900 outline-none focus:border-sve-blue" />
+                    <input id="user-city-settings" name="city" autoComplete="address-level2" type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Stad / Region" className="w-full bg-zinc-50 p-4 rounded-sm text-sm font-bold text-zinc-900 outline-none focus:border-sve-blue" />
                   </div>
                   <div className="text-left">
                     <label htmlFor="user-phone-settings" className="block text-[8px] font-black uppercase text-zinc-600 mb-1">Telefonnummer</label>
                     <div className="flex gap-2">
-                      <input id="user-phone-settings" name="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+46 70 000 00 00" className="flex-1 bg-zinc-50 p-4 rounded-sm text-sm font-bold text-zinc-900 outline-none focus:border-sve-blue" />
+                      <input id="user-phone-settings" name="phone" autoComplete="tel" inputMode="tel" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+46 70 000 00 00" className="flex-1 bg-zinc-50 p-4 rounded-sm text-sm font-bold text-zinc-900 outline-none focus:border-sve-blue" />
                       {!user?.phone_confirmed_at ? (
                         <button type="button" onClick={handleSendPhoneOtp} disabled={verifying} className="bg-pola-red text-white px-4 py-2 rounded-sm text-[9px] font-black uppercase self-end shadow-md hover:bg-sve-blue transition-all">Verifiera</button>
                       ) : (

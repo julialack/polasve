@@ -360,8 +360,11 @@ export default function SkapaAnnonsPage() {
 
                   <div className="grid gap-5">
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Annonsens titel</label>
+                      <label htmlFor="create-ad-title" className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Annonsens titel</label>
                       <input
+                        id="create-ad-title"
+                        name="title"
+                        autoComplete="off"
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
@@ -373,8 +376,10 @@ export default function SkapaAnnonsPage() {
 
                     <div className="grid md:grid-cols-2 gap-5">
                       <div className="space-y-1">
-                        <label className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Kategori</label>
+                        <label htmlFor="create-ad-category" className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Kategori</label>
                         <select
+                          id="create-ad-category"
+                          name="category"
                           value={category}
                           onChange={(e) => setCategory(e.target.value)}
                           required
@@ -396,8 +401,11 @@ export default function SkapaAnnonsPage() {
                         </select>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Pris / Ersättning</label>
+                        <label htmlFor="create-ad-price" className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Pris / Ersättning</label>
                         <input
+                          id="create-ad-price"
+                          name="price"
+                          inputMode="numeric"
                           type="text"
                           value={price}
                           onChange={(e) => setPrice(e.target.value)}
@@ -408,8 +416,11 @@ export default function SkapaAnnonsPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Stad / Plats</label>
+                      <label htmlFor="create-ad-location" className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Stad / Plats</label>
                       <input
+                        id="create-ad-location"
+                        name="address-level2"
+                        autoComplete="address-level2"
                         type="text"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}

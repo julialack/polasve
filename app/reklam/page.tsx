@@ -34,6 +34,7 @@ export default function AnnonseraForetagPage() {
   const [companyName, setCompanyName] = useState('')
   const [contactPerson, setContactPerson] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [duration, setDuration] = useState('30 dagar')
   const [message, setMessage] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
@@ -77,6 +78,7 @@ export default function AnnonseraForetagPage() {
           company_name: capitalizeFirst(companyName),
           contact_person: capitalizeFirst(contactPerson),
           email,
+          phone,
           duration,
           message: capitalizeFirst(message),
           image_url: imageUrl,
@@ -205,19 +207,25 @@ export default function AnnonseraForetagPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Företagsnamn</label>
-                  <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-950" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Kontaktperson</label>
-                  <input type="text" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-950" />
-                </div>
+                  <div className="space-y-2">
+                    <label htmlFor="reklam-company" className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Företagsnamn</label>
+                    <input id="reklam-company" name="organization" autoComplete="organization" type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-950" />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="reklam-name" className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Kontaktperson</label>
+                    <input id="reklam-name" name="name" autoComplete="name" type="text" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-950" />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">E-postadress</label>
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-950" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label htmlFor="reklam-email" className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">E-postadress</label>
+                    <input id="reklam-email" name="email" autoComplete="email" inputMode="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-950" />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="reklam-phone" className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Telefonnummer</label>
+                    <input id="reklam-phone" name="tel" autoComplete="tel" inputMode="tel" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required placeholder="070-123 45 67" className="w-full p-4 bg-zinc-50 border-2 border-zinc-100 rounded-sm focus:border-[#003366] focus:bg-white outline-none font-bold text-zinc-950" />
+                  </div>
                 </div>
 
                 {/* Hidden pricing selection - defaults to personal contact */}

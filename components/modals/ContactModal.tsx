@@ -84,8 +84,12 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           <div className="space-y-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">{copy.email}</label>
+              <label htmlFor="contact-modal-email" className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">{copy.email}</label>
               <input
+                id="contact-modal-email"
+                name="email"
+                autoComplete="email"
+                inputMode="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

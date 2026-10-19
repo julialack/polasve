@@ -72,11 +72,10 @@ export async function POST(req: Request) {
         const { postId } = payload || {}
         if (!postId) return NextResponse.json({ error: 'Inläggs-ID saknas' }, { status: 400 })
 
-        // Delete comments first if foreign key requires it, or delete post directly
         await adminSupabase.from('comments').delete().eq('post_id', postId)
         const { error } = await adminSupabase.from('posts').delete().eq('id', postId)
         if (error) throw error
-        return NextResponse.json({ success: true, message: 'Inlägg och dess kommentarer raderade permanent' })
+        return NextResponse.json({ success: true, message: 'Inlägg raderat' })
       }
 
       case 'toggle_ban_user': {
@@ -207,6 +206,43 @@ export async function POST(req: Request) {
           if (error) throw error
           return NextResponse.json({ success: true, message: 'Kontaktförfrågan hanterad' })
         }
+      }
+
+      case 'handle_business_request': {
+        const { reqId, deleteItem } = payload || {}
+        if (!reqId) return NextResponse.json({ error: 'ID saknas' }, { status: 400 })
+
+        if (deleteItem) {
+          const { error } = await adminSupabase.from('business_ad_requests').delete().eq('id', reqId)
+          if (error) throw error
+          return NextResponse.json({ success: true, message: 'Reklamförfrågan raderad' })
+        } else {
+          const { error } = await adminSupabase.from('business_ad_requests').update({ status: 'handled' }).eq('id', reqId)
+          if (error) throw error
+          return NextResponse.json({ success: true, message: 'Reklamförfrågan markerad som hanterad' })
+        }
+      }
+
+      case 'publish_business_banner': {
+        const { reqId, companyName, message, imageUrl } = payload || {}
+        if (!reqId || !companyName) return NextResponse.json({ error: 'Data saknas' }, { status: 400 })
+
+        // Get admin's user id or system user id to set as user_id for the ad
+        const { error: adError } = await adminSupabase.from('ads').insert([{
+          title: companyName,
+          description: message || `Officiell företagsreklam för ${companyName}`,
+          image_url: imageUrl || null,
+          category: 'Företag & Reklam',
+          is_premium: true,
+          payment_status: 'paid',
+          status: 'active',
+          user_id: user.id
+        }])
+
+        if (adError) throw adError
+
+        await adminSupabase.from('business_ad_requests').update({ status: 'published' }).eq('id', reqId)
+        return NextResponse.json({ success: true, message: 'Banner publicerad live på hemsidan som Premium-annons!' })
       }
 
       default:

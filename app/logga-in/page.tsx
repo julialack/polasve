@@ -52,8 +52,12 @@ export default function LoggaInPage() {
         <div className="bg-white p-12 rounded-sm border border-zinc-100 shadow-2xl shadow-zinc-100">
           <form onSubmit={handleLogin} className="space-y-10">
             <div className="space-y-4">
-              <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">{copy.email}</label>
+              <label htmlFor="login-email" className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">{copy.email}</label>
               <input
+                id="login-email"
+                name="email"
+                autoComplete="email"
+                inputMode="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -65,11 +69,14 @@ export default function LoggaInPage() {
 
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">{copy.password}</label>
+                <label htmlFor="login-password" className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">{copy.password}</label>
                 <Link href="/glomt-losenord" className="text-[10px] font-bold uppercase tracking-widest text-pola-red hover:text-red-600 transition-colors">{copy.forgotShort}</Link>
               </div>
               <div className="relative">
                 <input
+                  id="login-password"
+                  name="password"
+                  autoComplete="current-password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

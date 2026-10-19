@@ -75,8 +75,11 @@ export default function RegistreraPage() {
         <div className="bg-white p-8 md:p-10 rounded-sm border border-zinc-100 shadow-2xl shadow-zinc-100">
           <form onSubmit={handleSignUp} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">{copy.signupName}</label>
+              <label htmlFor="reg-fullname" className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">{copy.signupName}</label>
               <input
+                id="reg-fullname"
+                name="name"
+                autoComplete="name"
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
@@ -87,8 +90,12 @@ export default function RegistreraPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">{copy.email}</label>
+              <label htmlFor="reg-email" className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">{copy.email}</label>
               <input
+                id="reg-email"
+                name="email"
+                autoComplete="email"
+                inputMode="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -99,9 +106,12 @@ export default function RegistreraPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">{copy.password}</label>
+              <label htmlFor="reg-password" className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-300">{copy.password}</label>
               <div className="relative">
                 <input
+                  id="reg-password"
+                  name="password"
+                  autoComplete="new-password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

@@ -9,7 +9,7 @@ import {
   Building2, MessageSquare, AlertTriangle, Users, BarChart3,
   ShieldAlert, Tags, Megaphone, Search, Trash2, Plus, Ban, Unlock,
   Settings, ExternalLink, UserPlus, ChevronRight, RotateCcw,
-  FileText, FolderTrash
+  Archive, Image as ImageIcon, PhoneCall, Globe
 } from 'lucide-react'
 import Link from 'next/link'
 import { capitalizeFirst } from '@/utils/capitalize'
@@ -41,6 +41,7 @@ export default function AdminPage() {
 
   // Request States
   const [nameRequests, setNameRequests] = useState<any[]>([])
+  const [businessRequests, setBusinessRequests] = useState<any[]>([])
   const [contactRequests, setContactRequests] = useState<any[]>([])
 
   // Form States
@@ -83,7 +84,7 @@ export default function AdminPage() {
       { count: pCount },
       { count: rCount },
       { count: annCount },
-      { count: trashCount }
+      { count: adTrashCount }
     ] = await Promise.all([
       supabase.from('profiles').select('*', { count: 'exact', head: true }),
       supabase.from('ads').select('*', { count: 'exact', head: true }).neq('status', 'finished'),
@@ -98,7 +99,7 @@ export default function AdminPage() {
       posts: pCount || 0,
       reports: rCount || 0,
       announcements: annCount || 0,
-      trash: trashCount || 0
+      trash: adTrashCount || 0
     })
   }, [supabase])
 
@@ -277,11 +278,13 @@ export default function AdminPage() {
   }, [supabase])
 
   const fetchRequests = useCallback(async () => {
-    const [nameRes, contactRes] = await Promise.all([
+    const [nameRes, bizRes, contactRes] = await Promise.all([
       supabase.from('name_change_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false }),
+      supabase.from('business_ad_requests').select('*').order('created_at', { ascending: false }),
       supabase.from('contact_requests').select('*').order('created_at', { ascending: false })
     ])
     if (nameRes.data) setNameRequests(nameRes.data)
+    if (bizRes.data) setBusinessRequests(bizRes.data)
     if (contactRes.data) setContactRequests(contactRes.data)
   }, [supabase])
 
@@ -344,7 +347,7 @@ export default function AdminPage() {
   }
 
   const handleDeletePost = async (postId: string) => {
-    if (!confirm('Vill du radera detta community-inlägg permanent?')) return
+    if (!confirm('Vill du radera detta inlägg permanent ur databasen?')) return
     const ok = await callAdminApi('delete_post', { postId })
     if (ok) {
       fetchPosts()
@@ -418,6 +421,26 @@ export default function AdminPage() {
     if (ok) fetchRequests()
   }
 
+  const handleBusinessRequestAction = async (reqId: string, deleteItem = false) => {
+    const ok = await callAdminApi('handle_business_request', { reqId, deleteItem })
+    if (ok) fetchRequests()
+  }
+
+  const handlePublishBusinessBanner = async (biz: any) => {
+    if (!confirm(`Vill du publicera ${biz.company_name} som en live Premium-banner på hemsidan?`)) return
+    const ok = await callAdminApi('publish_business_banner', {
+      reqId: biz.id,
+      companyName: biz.company_name,
+      message: biz.message,
+      imageUrl: biz.image_url
+    })
+    if (ok) {
+      fetchRequests()
+      fetchAds()
+      fetchStats()
+    }
+  }
+
   const handlePostNews = async (e: React.FormEvent) => {
     e.preventDefault()
     const ok = await callAdminApi('add_news', {
@@ -478,13 +501,13 @@ export default function AdminPage() {
           <NavItem icon={<BarChart3 size={18} />} label="Dashboard" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
           <NavItem icon={<MessageSquare size={18} />} label="Inlägg (Forum)" active={activeTab === 'posts'} badge={posts.length} onClick={() => setActiveTab('posts')} />
           <NavItem icon={<Building2 size={18} />} label="Annonser" active={activeTab === 'ads'} badge={stats.ads} onClick={() => setActiveTab('ads')} />
-          <NavItem icon={<FolderTrash size={18} />} label="Borttagna" active={activeTab === 'trash'} badge={stats.trash} onClick={() => setActiveTab('trash')} />
+          <NavItem icon={<Archive size={18} />} label="Borttagna" active={activeTab === 'trash'} badge={stats.trash} onClick={() => setActiveTab('trash')} />
           <NavItem icon={<ShieldAlert size={18} />} label="Moderering" active={activeTab === 'reports'} badge={stats.reports} onClick={() => setActiveTab('reports')} />
           <NavItem icon={<Users size={18} />} label="Användare" active={activeTab === 'users'} onClick={() => setActiveTab('users')} />
 
           <div className="h-px bg-white/5 my-3" />
 
-          <NavItem icon={<UserCheck size={18} />} label="Begäran" active={activeTab === 'requests'} badge={nameRequests.length} onClick={() => setActiveTab('requests')} />
+          <NavItem icon={<UserCheck size={18} />} label="Begäran & Reklam" active={activeTab === 'requests'} badge={nameRequests.length + businessRequests.filter(b => b.status === 'pending').length} onClick={() => setActiveTab('requests')} />
           <NavItem icon={<Newspaper size={18} />} label="Nyheter" active={activeTab === 'news'} onClick={() => setActiveTab('news')} />
           <NavItem icon={<Settings size={18} />} label="System & Kategori" active={activeTab === 'system'} onClick={() => setActiveTab('system')} />
           <NavItem icon={<MessageSquare size={18} />} label="Support" active={activeTab === 'contact'} badge={contactRequests.filter(c => c.status === 'pending').length} onClick={() => setActiveTab('contact')} />
@@ -533,8 +556,8 @@ export default function AdminPage() {
                 onClick={() => setActiveTab('posts')}
               />
               <StatCard
-                icon={<FolderTrash className="text-red-400" />}
-                label="Borttagna/Avslutade"
+                icon={<Archive className="text-red-400" />}
+                label="Borttagna / Papperskorg"
                 value={stats.trash}
                 onClick={() => setActiveTab('trash')}
               />
@@ -549,8 +572,8 @@ export default function AdminPage() {
                     <span className="bg-amber-500 text-black px-2 py-0.5 rounded text-[10px] font-black">{stats.reports}</span>
                   </button>
                   <button onClick={() => setActiveTab('requests')} className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 p-4 rounded-lg flex items-center justify-between font-bold text-xs transition-all border border-blue-500/20">
-                    <span className="flex items-center gap-2"><UserCheck size={18} /> Namnändringar</span>
-                    <span className="bg-blue-500 text-white px-2 py-0.5 rounded text-[10px] font-black">{nameRequests.length}</span>
+                    <span className="flex items-center gap-2"><UserCheck size={18} /> Reklam & Namn</span>
+                    <span className="bg-blue-500 text-white px-2 py-0.5 rounded text-[10px] font-black">{businessRequests.filter(b => b.status === 'pending').length + nameRequests.length}</span>
                   </button>
                   <button onClick={() => setActiveTab('news')} className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 p-4 rounded-lg flex items-center gap-2 font-bold text-xs transition-all border border-emerald-500/20">
                     <Newspaper size={18} /> Skapa Nyhet
@@ -844,9 +867,9 @@ export default function AdminPage() {
             <div className="bg-[#0f172a] border border-white/5 p-6 rounded-xl flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-black uppercase tracking-widest text-white flex items-center gap-2">
-                  <FolderTrash className="text-red-400" /> Papperskorg & Borttaget Innehåll
+                  <Archive className="text-red-400" /> Papperskorg & Borttagna Annonser
                 </h3>
-                <p className="text-xs text-zinc-500 mt-1">Här samlas alla avslutade och borttagna annonser. Du kan återställa dem eller radera dem permanent.</p>
+                <p className="text-xs text-zinc-500 mt-1">Här samlas alla avslutade och borttagna annonser. Du kan återställa dem till live eller radera dem permanent.</p>
               </div>
               <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-lg text-xs font-black uppercase">
                 {trashedAds.length} Objekt i papperskorgen
@@ -895,7 +918,7 @@ export default function AdminPage() {
                   ))}
                   {trashedAds.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="text-center py-16 text-zinc-600 italic">Papperskorgen är tom. ✨</td>
+                      <td colSpan={5} className="text-center py-12 text-zinc-600 italic">Papperskorgen är tom. ✨</td>
                     </tr>
                   )}
                 </tbody>
@@ -1049,27 +1072,147 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* --- REQUESTS TAB --- */}
+        {/* --- REQUESTS & BUSINESS AD TAB --- */}
         {activeTab === 'requests' && (
-          <div className="space-y-6 max-w-2xl">
-            <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
-              <UserPlus size={16} className="text-blue-500" /> Begäran om namnändringar
-            </h3>
-            <div className="space-y-4">
-              {nameRequests.map(req => (
-                <div key={req.id} className="bg-[#0f172a] border border-white/5 p-6 rounded-xl flex justify-between items-center">
-                  <div>
-                    <p className="text-[9px] text-zinc-500 font-bold uppercase mb-1">Nuvarande: {req.current_name}</p>
-                    <p className="text-base font-black text-white italic">Önskat namn: <span className="text-blue-400">{req.requested_name}</span></p>
+          <div className="space-y-10">
+            {/* Business Ad Requests Section */}
+            <section className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-300 flex items-center gap-2">
+                  <Megaphone size={16} className="text-amber-500" /> Företagsreklam & Banner-förfrågningar ({businessRequests.length})
+                </h3>
+                <span className="text-[10px] text-zinc-500 font-bold uppercase">
+                  Väntande: {businessRequests.filter(b => b.status === 'pending').length}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {businessRequests.map(biz => (
+                  <div key={biz.id} className={`bg-[#0f172a] border rounded-xl p-6 space-y-4 ${
+                    biz.status === 'published' ? 'border-emerald-500/30' :
+                    biz.status === 'pending' ? 'border-amber-500/30' : 'border-white/5 opacity-70'
+                  }`}>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-bold text-white text-sm">{biz.company_name}</h4>
+                        <p className="text-xs text-zinc-400 mt-0.5">Kontakt: <span className="text-white font-medium">{biz.contact_person}</span></p>
+                      </div>
+                      <span className={`text-[8px] font-black uppercase px-2.5 py-1 rounded ${
+                        biz.status === 'published' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                        biz.status === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-zinc-700 text-zinc-300'
+                      }`}>
+                        {biz.status === 'published' ? 'LIVE PÅ SAJTEN 🚀' : biz.status === 'pending' ? 'VÄNTANDE' : 'HANTERAD'}
+                      </span>
+                    </div>
+
+                    {/* Contact Info (Phone & Email) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-white/5 p-3 rounded-lg border border-white/5">
+                      <div>
+                        <p className="text-[9px] font-black uppercase text-zinc-500">Telefonnummer</p>
+                        {biz.phone ? (
+                          <a href={`tel:${biz.phone}`} className="font-bold text-amber-400 hover:underline flex items-center gap-1.5 mt-0.5">
+                            <PhoneCall size={12} /> {biz.phone}
+                          </a>
+                        ) : (
+                          <p className="text-zinc-500 italic">Ej angivet</p>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-black uppercase text-zinc-500">E-postadress</p>
+                        <a href={`mailto:${biz.email}`} className="font-bold text-blue-400 hover:underline line-clamp-1 mt-0.5">
+                          {biz.email}
+                        </a>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs bg-white/5 p-3 rounded-lg border border-white/5">
+                      <div>
+                        <p className="text-[9px] font-black uppercase text-zinc-500">Önskad Period</p>
+                        <p className="font-bold text-zinc-200">{biz.duration || 'Ej angiven'}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-black uppercase text-zinc-500">Datum för förfrågan</p>
+                        <p className="font-bold text-zinc-200">{new Date(biz.created_at).toLocaleDateString('sv-SE')}</p>
+                      </div>
+                    </div>
+
+                    {biz.message && (
+                      <div>
+                        <p className="text-[9px] font-black uppercase text-zinc-500 mb-1">Meddelande / Önskemål</p>
+                        <p className="text-xs text-zinc-300 italic bg-black/30 p-3 rounded-lg border border-white/5">&quot;{biz.message}&quot;</p>
+                      </div>
+                    )}
+
+                    {biz.image_url && (
+                      <div>
+                        <p className="text-[9px] font-black uppercase text-zinc-500 mb-1 flex items-center gap-1">
+                          <ImageIcon size={12} /> Uppladdad Banner / Bild
+                        </p>
+                        <a href={biz.image_url} target="_blank" rel="noopener noreferrer" className="block w-full h-32 bg-black/40 rounded-lg overflow-hidden border border-white/10 group relative">
+                          <img src={biz.image_url} alt="Banner" className="w-full h-full object-contain group-hover:scale-105 transition-transform" />
+                          <span className="absolute bottom-2 right-2 bg-black/80 text-white text-[9px] font-black uppercase px-2 py-1 rounded flex items-center gap-1">
+                            <ExternalLink size={10} /> Öppna fullbild ↗
+                          </span>
+                        </a>
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/5">
+                      <button
+                        onClick={() => handlePublishBusinessBanner(biz)}
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-lg shadow-emerald-600/20"
+                      >
+                        <Globe size={14} /> Publicera som Live-Banner 🚀
+                      </button>
+
+                      <div className="flex items-center gap-2">
+                        {biz.status === 'pending' && (
+                          <button
+                            onClick={() => handleBusinessRequestAction(biz.id, false)}
+                            className="bg-white/10 hover:bg-white/20 text-zinc-200 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1"
+                          >
+                            <Check size={14} /> Hanterad
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleBusinessRequestAction(biz.id, true)}
+                          className="text-zinc-500 hover:text-red-500 text-[10px] font-black uppercase tracking-wider px-2 py-1"
+                        >
+                          Radera
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => handleApproveNameChange(req)} className="bg-emerald-500 text-white p-2.5 rounded-lg hover:bg-emerald-600 transition-all"><Check size={18} /></button>
-                    <button onClick={() => handleRejectNameChange(req.id)} className="bg-red-500 text-white p-2.5 rounded-lg hover:bg-red-600 transition-all"><X size={18} /></button>
+                ))}
+                {businessRequests.length === 0 && (
+                  <div className="col-span-1 lg:col-span-2 bg-[#0f172a] border border-white/5 p-12 rounded-xl text-center">
+                    <p className="text-zinc-600 italic text-xs">Inga förfrågningar om företagsreklam just nu. ✨</p>
                   </div>
-                </div>
-              ))}
-              {nameRequests.length === 0 && <p className="text-zinc-600 italic text-xs py-8 text-center bg-[#0f172a] rounded-xl border border-white/5">Inga väntande namnändringar. ✨</p>}
-            </div>
+                )}
+              </div>
+            </section>
+
+            {/* Name Change Requests Section */}
+            <section className="space-y-4 pt-6 border-t border-white/5">
+              <h3 className="text-xs font-black uppercase tracking-widest text-zinc-300 flex items-center gap-2">
+                <UserPlus size={16} className="text-blue-500" /> Begäran om namnändringar ({nameRequests.length})
+              </h3>
+              <div className="space-y-4">
+                {nameRequests.map(req => (
+                  <div key={req.id} className="bg-[#0f172a] border border-white/5 p-6 rounded-xl flex justify-between items-center">
+                    <div>
+                      <p className="text-[9px] text-zinc-500 font-bold uppercase mb-1">Nuvarande: {req.current_name}</p>
+                      <p className="text-base font-black text-white italic">Önskat namn: <span className="text-blue-400">{req.requested_name}</span></p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => handleApproveNameChange(req)} className="bg-emerald-500 text-white p-2.5 rounded-lg hover:bg-emerald-600 transition-all"><Check size={18} /></button>
+                      <button onClick={() => handleRejectNameChange(req.id)} className="bg-red-500 text-white p-2.5 rounded-lg hover:bg-red-600 transition-all"><X size={18} /></button>
+                    </div>
+                  </div>
+                ))}
+                {nameRequests.length === 0 && <p className="text-zinc-600 italic text-xs py-8 text-center bg-[#0f172a] rounded-xl border border-white/5">Inga väntande namnändringar. ✨</p>}
+              </div>
+            </section>
           </div>
         )}
 
