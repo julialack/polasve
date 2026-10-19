@@ -46,41 +46,44 @@ export default function LanguageSelector({ variant = 'hero' }: LanguageSelectorP
         <ChevronDown size={11} className={`transition-transform duration-300 opacity-70 ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Mobile-Friendly Popup Modal / Dropdown */}
+      {/* Global Clean Popup Modal (Bypasses parent overflow clipping) */}
       {open && (
-        <>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
           <div
-            className="fixed inset-0 z-[150] bg-black/40 backdrop-blur-xs"
+            className="fixed inset-0"
             onClick={() => setOpen(false)}
           />
-          <div className="fixed md:absolute right-4 md:right-0 top-16 md:top-full mt-2 z-[999] w-60 bg-white rounded-xl shadow-2xl border border-zinc-200 p-2 animate-in zoom-in-95 duration-200 text-left text-zinc-900">
-            <div className="px-3 py-2 border-b border-zinc-100 flex items-center justify-between text-zinc-400 bg-white rounded-t-xl">
-              <span className="text-[9px] font-black uppercase tracking-widest text-[#003366]">{languageLabel}</span>
-              <button onClick={() => setOpen(false)} className="text-zinc-400 hover:text-black p-1">
-                <X size={14} />
+          <div className="relative z-10 w-full max-w-xs bg-white rounded-2xl shadow-2xl border border-zinc-200 p-4 text-left text-zinc-900 animate-in zoom-in-95 duration-200">
+            <div className="px-2 pb-3 border-b border-zinc-100 flex items-center justify-between text-zinc-400">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#003366]">{languageLabel}</span>
+              <button
+                onClick={() => setOpen(false)}
+                className="p-1 text-zinc-400 hover:text-black rounded-full hover:bg-zinc-100 transition-colors"
+              >
+                <X size={16} />
               </button>
             </div>
-            <div className="py-1 space-y-1">
+            <div className="py-2 space-y-1.5">
               {LANGUAGES.map((lang) => (
                 <button
                   key={lang.code}
                   onClick={() => selectLanguage(lang.code)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-bold transition-all text-left ${
+                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all text-left ${
                     currentLang === lang.code
-                      ? 'bg-red-50 text-[#a11a2d] font-black border border-red-200'
+                      ? 'bg-red-50 text-[#a11a2d] font-black border border-red-200 shadow-sm'
                       : 'text-zinc-800 hover:bg-zinc-100'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-xl leading-none">{lang.flag}</span>
-                    <span className="font-bold">{lang.nativeName}</span>
+                    <span className="text-sm font-bold">{lang.nativeName}</span>
                   </div>
-                  {currentLang === lang.code && <Check size={14} className="text-[#a11a2d] shrink-0" />}
+                  {currentLang === lang.code && <Check size={16} className="text-[#a11a2d] shrink-0" />}
                 </button>
               ))}
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   )
