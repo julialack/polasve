@@ -113,29 +113,91 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
     if (activeCommentPost) fetchComments()
   }, [activeCommentPost, fetchComments])
 
+  const likedPostsKey = currentUser ? `polasve_liked_posts_${currentUser.id}` : 'polasve_liked_posts_guest'
+
   useEffect(() => {
     setLocalLikes(post.likes_count || 0)
-  }, [post.likes_count])
+    try {
+      const stored = localStorage.getItem(likedPostsKey)
+      if (stored) {
+        const likedIds: string[] = JSON.parse(stored)
+        setUserLikes(likedIds.includes(post.id))
+      } else {
+        setUserLikes(false)
+      }
+    } catch {
+      setUserLikes(false)
+    }
+  }, [post.id, post.likes_count, likedPostsKey])
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (!currentUser) return toast.error('Logga in för att gilla')
-    if (userLikes || loadingLikes) return
+    if (!currentUser) return toast.error('Logga in för att gilla inlägg')
+    if (loadingLikes) return
 
-    setLocalLikes(prev => prev + 1)
-    setUserLikes(true)
     setLoadingLikes(true)
 
-    const { error } = await supabase.from('posts').update({ likes_count: (post.likes_count || 0) + 1 }).eq('id', post.id)
-
-    if (error) {
-      setLocalLikes(prev => prev - 1)
-      setUserLikes(false)
-      toast.error('Kunde inte gilla inlägget')
-    } else {
-      onUpdate()
+    let likedIds: string[] = []
+    try {
+      const stored = localStorage.getItem(likedPostsKey)
+      if (stored) likedIds = JSON.parse(stored)
+    } catch {
+      likedIds = []
     }
+
+    const alreadyLiked = likedIds.includes(post.id)
+
+    if (alreadyLiked) {
+      // UNLIKE
+      const newLikesCount = Math.max(0, localLikes - 1)
+      setLocalLikes(newLikesCount)
+      setUserLikes(false)
+
+      const updatedLikedIds = likedIds.filter(id => id !== post.id)
+      try {
+        localStorage.setItem(likedPostsKey, JSON.stringify(updatedLikedIds))
+      } catch {}
+
+      const { error } = await supabase
+        .from('posts')
+        .update({ likes_count: Math.max(0, (post.likes_count || 1) - 1) })
+        .eq('id', post.id)
+
+      if (error) {
+        setLocalLikes(prev => prev + 1)
+        setUserLikes(true)
+        toast.error('Kunde inte ta bort gillning')
+      } else {
+        toast.success('Gillning borttagen')
+        onUpdate()
+      }
+    } else {
+      // LIKE
+      const newLikesCount = localLikes + 1
+      setLocalLikes(newLikesCount)
+      setUserLikes(true)
+
+      const updatedLikedIds = [...likedIds, post.id]
+      try {
+        localStorage.setItem(likedPostsKey, JSON.stringify(updatedLikedIds))
+      } catch {}
+
+      const { error } = await supabase
+        .from('posts')
+        .update({ likes_count: (post.likes_count || 0) + 1 })
+        .eq('id', post.id)
+
+      if (error) {
+        setLocalLikes(prev => Math.max(0, prev - 1))
+        setUserLikes(false)
+        toast.error('Kunde inte gilla inlägget')
+      } else {
+        toast.success('Du gillade inlägget! ❤️')
+        onUpdate()
+      }
+    }
+
     setLoadingLikes(false)
   }
 
@@ -216,8 +278,17 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
       )}
 
       <div className="flex items-center gap-3 sm:gap-6 pt-3 border-t border-zinc-50 min-w-0">
-        <button onClick={handleLike} disabled={loadingLikes || userLikes} className={`flex items-center gap-1.5 transition-colors ${userLikes ? 'text-[#a11a2d]' : 'text-zinc-400 hover:text-[#a11a2d]'}`}>
-          {loadingLikes ? <Loader2 size={12} className="animate-spin" /> : <Heart size={15} className={userLikes || localLikes > 0 ? "fill-current" : ""} />}
+        <button
+          onClick={handleLike}
+          disabled={loadingLikes}
+          className={`flex items-center gap-1.5 transition-colors ${userLikes ? 'text-[#a11a2d]' : 'text-zinc-400 hover:text-[#a11a2d]'}`}
+          title={userLikes ? 'Klicka för att ångra gillning' : 'Klicka för att gilla inlägget'}
+        >
+          {loadingLikes ? (
+            <Loader2 size={12} className="animate-spin" />
+          ) : (
+            <Heart size={15} className={userLikes ? 'fill-[#a11a2d] text-[#a11a2d]' : ''} />
+          )}
           <span className="text-xs font-black">{localLikes}</span>
         </button>
         <button onClick={() => setActiveCommentPost(!activeCommentPost)} className={`flex items-center gap-1.5 transition-colors ${activeCommentPost ? 'text-[#003366]' : 'text-zinc-400 hover:text-black'}`}>

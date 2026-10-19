@@ -97,7 +97,10 @@ export default function SkapaAnnonsPage() {
     e.preventDefault()
     if (!selectedPackage) return toast.error('Välj en annonsnivå först')
 
-    setLoading(true)
+    if (!imageFile) {
+      toast.error('Vänligen ladda upp en huvudbild för din annons')
+      return
+    }
     try {
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -324,7 +327,7 @@ export default function SkapaAnnonsPage() {
                           <Camera className="w-10 h-10 text-zinc-300 group-hover:text-[#003366] transition-colors mb-3" />
                           <p className="font-black uppercase tracking-widest text-[10px] text-zinc-400 group-hover:text-zinc-600">Ladda upp huvudbild (Bild 1)</p>
                         </div>
-                        <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} required />
+                        <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
                       </label>
                     )}
                   </div>
@@ -431,8 +434,10 @@ export default function SkapaAnnonsPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Beskrivning</label>
+                      <label htmlFor="create-ad-desc" className="text-[9px] font-black uppercase text-zinc-400 tracking-widest ml-1">Beskrivning</label>
                       <textarea
+                        id="create-ad-desc"
+                        name="description"
                         rows={5}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
