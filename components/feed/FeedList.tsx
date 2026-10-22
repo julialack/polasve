@@ -100,9 +100,13 @@ export default function FeedList({ categoryFilter }: FeedListProps = {}) {
     const postChannel = supabase
       .channel('realtime_posts_all')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
-        fetchPosts()
+        if (isMounted) fetchPosts()
       })
-      .subscribe()
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          // Realtime might be disabled in Supabase dashboard
+        }
+      })
 
     return () => {
       isMounted = false
