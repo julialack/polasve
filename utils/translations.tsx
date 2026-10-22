@@ -121,6 +121,7 @@ export interface TranslationDict {
   newsArchive: string
   rightsReserved: string
   communityTrustQuality: string
+  online: string
 }
 
 export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
@@ -232,6 +233,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     newsArchive: 'Archiwum wiadomości',
     rightsReserved: 'Wszelkie prawa zastrzeżone',
     communityTrustQuality: 'Społeczność • Zaufanie • Jakość',
+    online: 'online',
   },
   sv: {
     heroTitle: 'Polacker i Sverige',
@@ -341,6 +343,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     newsArchive: 'Nyhetsarkiv',
     rightsReserved: 'Alla rättigheter förbehållna',
     communityTrustQuality: 'Gemenskap • Förtroende • Kvalitet',
+    online: 'online',
   },
   ua: {
     heroTitle: 'Поляки в Швеції',
@@ -450,6 +453,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     newsArchive: 'Архів новин',
     rightsReserved: 'Усі права захищені',
     communityTrustQuality: 'Спільнота • Довіра • Якість',
+    online: 'онлайн',
   },
   en: {
     heroTitle: 'Poles in Sweden',
@@ -559,6 +563,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     newsArchive: 'News archive',
     rightsReserved: 'All rights reserved',
     communityTrustQuality: 'Community • Trust • Quality',
+    online: 'online',
   }
 }
 

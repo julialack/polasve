@@ -116,6 +116,7 @@ export default function Navbar() {
 
   // Hide main navbar on pages that have the HomeHero component included
   const hideOnPaths = [
+    '/redesign-preview',
     '/annonser',
     '/nyheter',
     '/evenemang',
