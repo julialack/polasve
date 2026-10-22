@@ -1,24 +1,49 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef, Suspense } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { formatDisplayName } from '@/utils/formatName'
 import { Package, MessageSquare, PlusCircle, Settings, Globe, Info, Trash2, CheckCircle, Edit3, Send, Camera, X, Loader2, ChevronLeft, Mail, Phone, Eye, EyeOff, Bookmark } from 'lucide-react'
 import HomeHero from '@/components/HomeHero'
 import { toast } from 'sonner'
 import UserAvatar from '@/components/ui/UserAvatar'
 import { capitalizeFirst } from '@/utils/capitalize'
+import type { Ad as DomainAd, Message as DomainMessage } from '@/types/database'
 
-interface Ad {
-  id: string
-  title: string
-  image_url: string | null
-  category: string
-  price: string | null
+type ProfileAd = Pick<DomainAd, 'id' | 'title' | 'image_url' | 'category' | 'price' | 'location'> & {
   status?: string
-  payment_status?: string
+  payment_status?: string | null
+}
+
+type ActiveView = 'ads' | 'chat' | 'saved'
+
+interface ConversationMessage {
+  sender_id: string
+  receiver_id: string
+  content: string
+  created_at: string
+}
+
+type ProfileMessage = Pick<DomainMessage, 'id' | 'created_at' | 'sender_id' | 'receiver_id' | 'content' | 'is_read' | 'sender_name'> & {
+  image_url?: string | null
+}
+
+interface Conversation {
+  otherId: string
+  lastMessage: string
+  time: string
+  name: string
+  avatar?: string | null
+}
+
+interface ConversationProfile {
+  id: string
+  full_name: string | null
+  avatar_url: string | null
 }
 
 const LANGUAGE_LABELS: Record<string, string> = {
@@ -29,19 +54,19 @@ const LANGUAGE_LABELS: Record<string, string> = {
 
 function ProfilContent() {
   const searchParams = useSearchParams()
-  const initialView = searchParams.get('view') === 'chat' ? 'chat' : 'ads'
+  const initialView: ActiveView = searchParams.get('view') === 'chat' ? 'chat' : 'ads'
   const otherIdFromUrl = searchParams.get('otherId')
 
-  const [user, setUser] = useState<any>(null)
-  const [ads, setAds] = useState<Ad[]>([])
+  const [user, setUser] = useState<User | null>(null)
+  const [ads, setAds] = useState<ProfileAd[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
-  const [activeView, setActiveView] = useState<'ads' | 'chat' | 'saved'>(initialView as any)
-  const [savedAds, setSavedAds] = useState<any[]>([])
-  const [conversations, setConversations] = useState<any[]>([])
+  const [activeView, setActiveView] = useState<ActiveView>(initialView)
+  const [savedAds, setSavedAds] = useState<ProfileAd[]>([])
+  const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedChat, setSelectedChat] = useState<string | null>(otherIdFromUrl)
-  const [chatMessages, setChatMessages] = useState<any[]>([])
+  const [chatMessages, setChatMessages] = useState<ProfileMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [sending, setSending] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -66,11 +91,11 @@ function ProfilContent() {
       .order('created_at', { ascending: false })
 
     if (data) {
-      const uniqueChats: any[] = []
-      const seenIds = new Set()
+      const uniqueChats: Conversation[] = []
+      const seenIds = new Set<string>()
       const otherUserIds: string[] = []
 
-      data.forEach(msg => {
+      ;(data as ConversationMessage[]).forEach(msg => {
         const otherId = msg.sender_id === userId ? msg.receiver_id : msg.sender_id
         if (!seenIds.has(otherId)) {
           seenIds.add(otherId)
@@ -82,13 +107,13 @@ function ProfilContent() {
       if (otherUserIds.length > 0) {
         const { data: profiles } = await supabase.from('profiles').select('id, full_name, avatar_url').in('id', otherUserIds)
         if (profiles) {
-          const profileMap = profiles.reduce((acc: any, p: any) => {
-            acc[p.id] = { name: p.full_name, avatar: p.avatar_url }
-            return acc
-          }, {})
+          const profileMap = new Map<string, Pick<ConversationProfile, 'full_name' | 'avatar_url'>>()
+          ;(profiles as ConversationProfile[]).forEach(profile => {
+            profileMap.set(profile.id, { full_name: profile.full_name, avatar_url: profile.avatar_url })
+          })
           uniqueChats.forEach(chat => {
-            const p = profileMap[chat.otherId]
-            if (p) { chat.name = p.name || 'Medlem'; chat.avatar = p.avatar }
+            const profile = profileMap.get(chat.otherId)
+            if (profile) { chat.name = profile.full_name || 'Medlem'; chat.avatar = profile.avatar_url }
           })
         }
       }
@@ -102,12 +127,11 @@ function ProfilContent() {
 
     await supabase.from('messages').update({ is_read: true }).eq('receiver_id', u.id).eq('sender_id', otherId).eq('is_read', false)
     const { data } = await supabase.from('messages').select('*').or(`and(sender_id.eq.${u.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${u.id})`).order('created_at', { ascending: true })
-    if (data) setChatMessages(data)
+    if (data) setChatMessages(data as ProfileMessage[])
     fetchConversations(u.id)
   }, [supabase, fetchConversations])
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const sendMessage = async () => {
     if (!newMessage.trim() && !imageFile || !selectedChat || !user) return
     setSending(true)
     let imageUrl = null
@@ -127,6 +151,11 @@ function ProfilContent() {
     setSending(false)
   }
 
+  const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    void sendMessage()
+  }
+
   const fetchUserData = useCallback(async () => {
     try {
       const { data: { user: currentUser } } = await supabase.auth.getUser()
@@ -134,7 +163,7 @@ function ProfilContent() {
       setUser(currentUser)
 
       const { data: userAds } = await supabase.from('ads').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false })
-      if (userAds) setAds(userAds as any)
+      if (userAds) setAds(userAds as ProfileAd[])
 
       const { count } = await supabase.from('messages').select('id', { count: 'exact', head: true }).eq('receiver_id', currentUser.id).eq('is_read', false)
       setUnreadCount(count || 0)
@@ -146,12 +175,12 @@ function ProfilContent() {
         .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
         .order('created_at', { ascending: false })
 
-      const uniqueChats: any[] = []
-      const seenIds = new Set()
+      const uniqueChats: Conversation[] = []
+      const seenIds = new Set<string>()
       const otherUserIds: string[] = []
 
       if (msgData) {
-        msgData.forEach(msg => {
+        ;(msgData as ConversationMessage[]).forEach(msg => {
           const otherId = msg.sender_id === currentUser.id ? msg.receiver_id : msg.sender_id
           if (!seenIds.has(otherId)) {
             seenIds.add(otherId)
@@ -170,13 +199,13 @@ function ProfilContent() {
       if (otherUserIds.length > 0) {
         const { data: profiles } = await supabase.from('profiles').select('id, full_name, avatar_url').in('id', otherUserIds)
         if (profiles) {
-          const profileMap = profiles.reduce((acc: any, p: any) => {
-            acc[p.id] = { name: p.full_name, avatar: p.avatar_url }
-            return acc
-          }, {})
+          const profileMap = new Map<string, Pick<ConversationProfile, 'full_name' | 'avatar_url'>>()
+          ;(profiles as ConversationProfile[]).forEach(profile => {
+            profileMap.set(profile.id, { full_name: profile.full_name, avatar_url: profile.avatar_url })
+          })
           uniqueChats.forEach(chat => {
-            const p = profileMap[chat.otherId]
-            if (p) { chat.name = p.name || 'Medlem'; chat.avatar = p.avatar }
+            const profile = profileMap.get(chat.otherId)
+            if (profile) { chat.name = profile.full_name || 'Medlem'; chat.avatar = profile.avatar_url }
           })
         }
       }
@@ -237,8 +266,8 @@ function ProfilContent() {
         toast.error('Kunde inte radera annonsen. Kontrollera RLS-policyn i Supabase Dashboard.')
       }
 
-    } catch (e: any) {
-      console.error('Borttagningsfel:', e)
+    } catch (error) {
+      console.error('Borttagningsfel:', error)
       toast.error('Ett oväntat fel uppstod vid radering.')
     } finally {
       setLoading(false)
@@ -250,7 +279,7 @@ function ProfilContent() {
       await supabase.from('ads').update({ status: 'finished' }).eq('id', adId)
       toast.success('Markerad som klar')
       setAds(prev => prev.map(ad => ad.id === adId ? { ...ad, status: 'finished' } : ad))
-    } catch (e) { toast.error('Fel uppstod') }
+    } catch { toast.error('Fel uppstod') }
   }
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -413,16 +442,16 @@ function ProfilContent() {
                       <div className="py-16 text-center opacity-50">
                         <Bookmark size={40} className="mx-auto mb-4 text-[#003366]" />
                         <p className="text-zinc-500 font-bold italic text-sm text-center">Du har inga sparade annonser än.</p>
-                        <p className="text-zinc-400 text-xs text-center mt-1">Klicka på knappen "Spara" på någon annons för att spara den här.</p>
+                        <p className="text-zinc-400 text-xs text-center mt-1">Klicka på knappen &quot;Spara&quot; på någon annons för att spara den här.</p>
                       </div>
                     ) : (
                       <div className="grid gap-4 text-left">
-                        {savedAds.map((ad: any) => (
+                        {savedAds.map(ad => (
                           <div key={ad.id} className="group relative flex flex-col md:flex-row items-center gap-6 p-4 border border-zinc-100 rounded-sm hover:border-[#003366]/20 transition-all bg-white">
                             <Link href={`/annonser/${ad.id}`} className="flex flex-1 items-center gap-6 min-w-0">
                               <div className="w-16 h-16 md:w-20 md:h-20 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border text-left relative">
                                 {ad.image_url ? (
-                                  <img src={ad.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                                  <Image src={ad.image_url} fill unoptimized sizes="80px" className="object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[8px] font-bold uppercase text-left">Ingen bild</div>
                                 )}
@@ -476,12 +505,12 @@ function ProfilContent() {
                       </div>
                     ) : (
                       <div className="grid gap-4 text-left">
-                        {ads.map((ad: any) => (
+                        {ads.map(ad => (
                           <div key={ad.id} className={`group relative flex flex-col md:flex-row items-center gap-6 p-4 border border-zinc-50 rounded-sm transition-all ${ad.status === 'finished' ? 'opacity-60 bg-zinc-50' : 'hover:border-[#003366]/20 hover:bg-zinc-50/50'}`}>
                             <Link href={`/annonser/${ad.id}`} className="flex flex-1 items-center gap-6 min-w-0">
                               <div className="w-16 h-16 md:w-20 md:h-20 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border text-left relative">
                                 {ad.image_url ? (
-                                  <img src={ad.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
+                                  <Image src={ad.image_url} fill unoptimized sizes="80px" className="object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[8px] font-bold uppercase text-left">Bild saknas</div>
                                 )}
@@ -543,12 +572,12 @@ function ProfilContent() {
                     <div className="flex-1 overflow-y-auto min-h-0">
                       {conversations.length === 0 ? <div className="p-10 text-center text-zinc-400 text-[10px] uppercase italic">Inga chatter än</div> : conversations.map(chat => (
                         <button key={chat.otherId} onClick={() => { setSelectedChat(chat.otherId); fetchChatMessages(chat.otherId) }} className={`w-full p-4 flex gap-3 hover:bg-white border-b border-zinc-100 text-left ${selectedChat === chat.otherId ? 'bg-white border-l-4 border-l-[#a11a2d]' : ''}`}>
-                          <div className="w-8 h-8 rounded-full overflow-hidden bg-zinc-100 flex-shrink-0 border border-zinc-200 shadow-inner">
-                            {chat.avatar ? <img src={chat.avatar} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-[#003366]">{chat.name?.[0]}</div>}
+                          <div className="w-8 h-8 rounded-full overflow-hidden bg-zinc-100 flex-shrink-0 border border-zinc-200 shadow-inner relative">
+                            {chat.avatar ? <Image src={chat.avatar} fill unoptimized sizes="32px" alt="" className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-[#003366]">{chat.name?.[0]}</div>}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-[10px] text-[#003366] truncate uppercase tracking-tight">{chat.name}</p>
-                            <p className="text-[9px] text-zinc-500 truncate italic">"{chat.lastMessage}"</p>
+                            <p className="text-[9px] text-zinc-500 truncate italic">&quot;{chat.lastMessage}&quot;</p>
                           </div>
                         </button>
                       ))}
@@ -561,8 +590,8 @@ function ProfilContent() {
                           <div className="flex items-center gap-3 min-w-0">
                             <button onClick={() => setSelectedChat(null)} className="md:hidden p-1 text-zinc-400 shrink-0"><ChevronLeft size={20} /></button>
                             <Link href={`/profil/${selectedChat}`} className="font-black text-[10px] uppercase tracking-widest text-[#003366] hover:underline flex items-center gap-2 min-w-0">
-                               <div className="w-6 h-6 rounded-full overflow-hidden bg-[#003366] flex items-center justify-center text-white text-[8px] font-bold shrink-0">
-                                 {conversations.find(c => c.otherId === selectedChat)?.avatar ? <img src={conversations.find(c => c.otherId === selectedChat)?.avatar} className="w-full h-full object-cover" /> : conversations.find(c => c.otherId === selectedChat)?.name?.[0]}
+                               <div className="w-6 h-6 rounded-full overflow-hidden bg-[#003366] flex items-center justify-center text-white text-[8px] font-bold shrink-0 relative">
+                                 {conversations.find(c => c.otherId === selectedChat)?.avatar ? <Image src={conversations.find(c => c.otherId === selectedChat)!.avatar!} fill unoptimized sizes="24px" alt="" className="object-cover" /> : conversations.find(c => c.otherId === selectedChat)?.name?.[0]}
                                </div>
                                <span className="truncate">{conversations.find(c => c.otherId === selectedChat)?.name}</span>
                             </Link>
@@ -571,11 +600,11 @@ function ProfilContent() {
                         </div>
                         <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 bg-zinc-50/20" ref={scrollRef}>
                           {chatMessages.map(msg => (
-                            <div key={msg.id} className={`flex ${msg.sender_id === user.id ? 'justify-end' : 'justify-start'}`}>
-                              <div className={`max-w-[85%] p-3 rounded-xl text-xs shadow-sm ${msg.sender_id === user.id ? 'bg-[#003366] text-white rounded-br-none' : 'bg-white border text-zinc-800 rounded-bl-none'}`}>
-                                {msg.image_url && <div className="mb-2 rounded-lg overflow-hidden border"><img src={msg.image_url} className="max-w-full h-auto" /></div>}
+                            <div key={msg.id} className={`flex ${msg.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-[85%] p-3 rounded-xl text-xs shadow-sm ${msg.sender_id === user?.id ? 'bg-[#003366] text-white rounded-br-none' : 'bg-white border text-zinc-800 rounded-bl-none'}`}>
+                                {msg.image_url && <div className="mb-2 rounded-lg overflow-hidden border"><Image src={msg.image_url} width={640} height={480} unoptimized sizes="(max-width: 768px) 85vw, 640px" alt="" className="max-w-full h-auto" /></div>}
                                 <p className="font-medium leading-relaxed break-words">{msg.content}</p>
-                                <span className={`text-[7px] mt-1 block opacity-50 text-right ${msg.sender_id === user.id ? 'text-white/70' : 'text-zinc-400'}`}>{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span className={`text-[7px] mt-1 block opacity-50 text-right ${msg.sender_id === user?.id ? 'text-white/70' : 'text-zinc-400'}`}>{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                               </div>
                             </div>
                           ))}
@@ -583,14 +612,14 @@ function ProfilContent() {
                         <form onSubmit={handleSendMessage} className="border-t bg-white p-3 w-full">
                           {imagePreview && (
                             <div className="mb-2 relative w-12 h-12 rounded-sm overflow-hidden border border-zinc-200">
-                              <img src={imagePreview} className="w-full h-full object-cover" />
+                              <Image src={imagePreview} fill unoptimized sizes="48px" alt="Förhandsvisning av bifogad bild" className="object-cover" />
                               <button type="button" onClick={() => { setImagePreview(null); setImageFile(null) }} className="absolute top-0 right-0 bg-black/50 text-white p-0.5"><X size={10} /></button>
                             </div>
                           )}
                           <div className="flex w-full items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 shadow-inner transition-colors focus-within:border-[#003366] min-w-0">
                             <button type="button" onClick={() => fileInputRef.current?.click()} className="shrink-0 text-zinc-400 hover:text-[#003366] p-1.5 transition-colors"><Camera size={16} /></button>
                             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageSelect} />
-                            <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(e as any) } }} placeholder="Skriv svar..." className="min-w-0 w-full flex-1 bg-transparent border-none py-2 text-[11px] font-bold outline-none text-zinc-950 placeholder:text-zinc-400" />
+                            <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void sendMessage() } }} placeholder="Skriv svar..." className="min-w-0 w-full flex-1 bg-transparent border-none py-2 text-[11px] font-bold outline-none text-zinc-950 placeholder:text-zinc-400" />
                             <button type="submit" disabled={sending || (!newMessage.trim() && !imageFile)} className="shrink-0 text-[#a11a2d] hover:text-[#003366] p-1.5 transition-all active:scale-90 disabled:opacity-50">{sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}</button>
                           </div>
                         </form>

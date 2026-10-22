@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState, Suspense, useCallback } from 'react'
+import { useEffect, useMemo, useState, Suspense } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { MapPin, Users, ArrowRight, X } from 'lucide-react'
+import { MapPin, X } from 'lucide-react'
 import SearchBar from '@/components/search/SearchBar'
 import HomeHero from "@/components/HomeHero";
 import InfoBar from "@/components/layout/InfoBar";
@@ -14,23 +14,6 @@ import SafeImage from "@/components/ui/SafeImage";
 import { useTranslation } from "@/utils/translations";
 import { getMenuPageCopy } from "@/utils/menu-page-copy";
 import { translateCategoryLabel } from "@/utils/category-landing-translations";
-
-const CATEGORIES = [
-  "Alla",
-  "Köp / Acceptera",
-  "Sälj / Bortskänkes",
-  "Bytes",
-  "Leta jobb",
-  "Jobb",
-  "Sökes",
-  "Hyra",
-  "Lokaler",
-  "Bostad",
-  "Tjänster",
-  "Transport",
-  "Marketplace",
-  "Övrigt"
-]
 
 interface Ad {
   id: string
@@ -52,48 +35,35 @@ function AnnonserList() {
   const categoryParam = searchParams.get('category')
 
   const [ads, setAds] = useState<Ad[]>([])
-  const [featuredAds, setFeaturedAds] = useState<Ad[]>([])
-  const [loading, setLoading] = useState(true)
-  const [categoryFilter, setCategoryFilter] = useState(categoryParam || 'Alla')
-  const supabase = createClient()
+  const [loadedFilterKey, setLoadedFilterKey] = useState<string | null>(null)
+  const categoryFilter = categoryParam || 'Alla'
+  const filterKey = JSON.stringify([categoryFilter, locationFilter])
+  const loading = loadedFilterKey !== filterKey
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
-    if (categoryParam) {
-      setCategoryFilter(categoryParam)
-    } else {
-      setCategoryFilter('Alla')
+    let cancelled = false
+    const fetchData = async () => {
+      let query = supabase.from('ads').select('*').eq('payment_status', 'paid').order('created_at', { ascending: false })
+
+      if (categoryFilter !== 'Alla') {
+        query = query.eq('category', categoryFilter)
+      }
+
+      if (locationFilter) {
+        query = query.ilike('location', `%${locationFilter}%`)
+      }
+
+      const { data } = await query
+      if (cancelled) return
+      setAds(data || [])
+      setLoadedFilterKey(filterKey)
     }
-  }, [categoryParam])
-
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-
-    // Build Query for main ads
-    let query = supabase.from('ads').select('*').eq('payment_status', 'paid').order('created_at', { ascending: false })
-
-    // Apply category filter
-    if (categoryFilter !== 'Alla') {
-      query = query.eq('category', categoryFilter)
+    void fetchData()
+    return () => {
+      cancelled = true
     }
-
-    // Apply location filter (from the map)
-    if (locationFilter) {
-      query = query.ilike('location', `%${locationFilter}%`)
-    }
-
-    const { data } = await query
-    if (data) setAds(data)
-    setLoading(false)
-  }, [categoryFilter, locationFilter, supabase])
-
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
-
-  const dateLocale = { pl: 'pl-PL', sv: 'sv-SE', ua: 'uk-UA', en: 'en-US' }[lang]
-  const today = new Date().toLocaleDateString(dateLocale, {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-  });
+  }, [categoryFilter, filterKey, locationFilter, supabase])
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fa] font-sans">

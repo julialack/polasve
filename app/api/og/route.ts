@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
       image,
       url
     })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch metadata' }, { status: 500 })
   }
 }

@@ -1,6 +1,8 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
@@ -10,7 +12,7 @@ import { useTranslation } from '@/utils/translations'
 
 export default function HomeHero() {
   const { t } = useTranslation()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<SupabaseUser | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -125,10 +127,13 @@ export default function HomeHero() {
 
   return (
     <header className={`relative bg-gradient-to-r from-[#d60000] to-[#005bbb] text-white overflow-hidden shadow-2xl transition-all duration-500`}>
-      <div className="absolute inset-0 z-0">
-        <img
+      <div className="absolute inset-0 z-0 relative">
+        <Image
           src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?q=80&w=2000&auto=format&fit=crop"
           alt=""
+          fill
+          sizes="100vw"
+          unoptimized
           className="w-full h-full object-cover opacity-20 mix-blend-overlay"
         />
         <div className="absolute inset-x-0 bottom-0 h-6 bg-white/40 blur-md"></div>
@@ -148,8 +153,8 @@ export default function HomeHero() {
                 <MessageSquare size={24} className="scale-x-[-1]" />
                 {unreadCount > 0 && <span className="absolute top-1 right-1 bg-white text-red-600 text-[8px] w-5 h-5 flex items-center justify-center rounded-full font-black shadow-lg">{unreadCount}</span>}
               </Link>
-              <Link href="/profil" className="w-10 h-10 rounded-full border-2 border-white overflow-hidden bg-white shadow-md">
-                {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[#003366]"><User size={20} /></div>}
+              <Link href="/profil" className="relative w-10 h-10 rounded-full border-2 border-white overflow-hidden bg-white shadow-md">
+                {avatarUrl ? <Image src={avatarUrl} alt="" fill sizes="40px" unoptimized className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[#003366]"><User size={20} /></div>}
               </Link>
             </>
           ) : (
@@ -221,8 +226,8 @@ export default function HomeHero() {
               <>
                 <Link href="/profil" className="hover:opacity-70 transition-opacity" title={t.navProfile}>
                   {avatarUrl ? (
-                    <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden shadow-md bg-white flex items-center justify-center">
-                      <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                    <div className="relative w-8 h-8 rounded-full border-2 border-white overflow-hidden shadow-md bg-white flex items-center justify-center">
+                      <Image src={avatarUrl} alt="" fill sizes="32px" unoptimized className="w-full h-full object-cover" />
                     </div>
                   ) : (
                     <User size={22} />

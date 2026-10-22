@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useSyncExternalStore } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { formatDisplayName } from '@/utils/formatName'
 import { Heart, MessageSquare, Loader2, Send, Trash2, Edit2, X, Check, Share2, Flag } from 'lucide-react'
@@ -14,10 +14,35 @@ import { capitalizeFirst } from '@/utils/capitalize'
 import { useTranslation } from '@/utils/translations'
 
 interface PostCardProps {
-  post: Post & { category?: string }
-  currentUser: any
+  post: Post & { category?: string; avatar_url?: string | null }
+  currentUser: PostCardUser | null
   onDelete: (id: string) => void
   onUpdate: () => void
+}
+
+interface PostCardUser {
+  id: string
+  email?: string
+  user_metadata?: {
+    full_name?: string
+    avatar_url?: string
+  }
+}
+
+interface PostComment {
+  id: string
+  user_id: string
+  user_name: string
+  content: string
+  created_at: string
+  likes_count: number
+  edited: boolean
+  avatar_url?: string | null
+}
+
+interface CommentProfile {
+  id: string
+  avatar_url: string | null
 }
 
 const CATEGORY_STYLES: Record<string, string> = {
@@ -33,10 +58,12 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
   const [loadingLikes, setLoadingLikes] = useState(false)
   const [activeCommentPost, setActiveCommentPost] = useState(false)
   const [commentContent, setCommentContent] = useState('')
-  const [comments, setComments] = useState<any[]>([])
+  const [comments, setComments] = useState<PostComment[]>([])
   const [commentCount, setCommentCount] = useState(0)
-  const [userLikes, setUserLikes] = useState(false)
-  const [localLikes, setLocalLikes] = useState(post.likes_count || 0)
+  const [likeOverride, setLikeOverride] = useState<{ postId: string; baseline: number; count: number } | null>(null)
+  const localLikes = likeOverride?.postId === post.id && likeOverride.baseline === (post.likes_count || 0)
+    ? likeOverride.count
+    : post.likes_count || 0
 
   const [editingPost, setEditingPost] = useState(false)
   const [editPostContent, setEditPostContent] = useState(post.content)
@@ -86,12 +113,12 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
         .select('id, avatar_url')
         .in('id', userIds)
 
-      const profileMap = (profilesData || []).reduce((acc: any, p: any) => {
+      const profileMap = (profilesData || []).reduce<Record<string, string | null>>((acc, p: CommentProfile) => {
         acc[p.id] = p.avatar_url
         return acc
       }, {})
 
-      const commentsWithProfiles = commentsData.map(c => ({
+      const commentsWithProfiles: PostComment[] = commentsData.map(c => ({
         ...c,
         avatar_url: profileMap[c.user_id]
       }))
@@ -109,26 +136,37 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
     fetchCommentCount()
   }, [post.id, supabase])
 
-  useEffect(() => {
-    if (activeCommentPost) fetchComments()
-  }, [activeCommentPost, fetchComments])
-
   const likedPostsKey = currentUser ? `polasve_liked_posts_${currentUser.id}` : 'polasve_liked_posts_guest'
 
-  useEffect(() => {
-    setLocalLikes(post.likes_count || 0)
+  const subscribeToLikes = useCallback((onStoreChange: () => void) => {
+    window.addEventListener('storage', onStoreChange)
+    window.addEventListener('polasve-liked-posts-changed', onStoreChange)
+    return () => {
+      window.removeEventListener('storage', onStoreChange)
+      window.removeEventListener('polasve-liked-posts-changed', onStoreChange)
+    }
+  }, [])
+
+  const getUserLikesSnapshot = useCallback(() => {
     try {
       const stored = localStorage.getItem(likedPostsKey)
-      if (stored) {
-        const likedIds: string[] = JSON.parse(stored)
-        setUserLikes(likedIds.includes(post.id))
-      } else {
-        setUserLikes(false)
-      }
+      return stored ? (JSON.parse(stored) as string[]).includes(post.id) : false
     } catch {
-      setUserLikes(false)
+      return false
     }
-  }, [post.id, post.likes_count, likedPostsKey])
+  }, [likedPostsKey, post.id])
+  const userLikes = useSyncExternalStore(subscribeToLikes, getUserLikesSnapshot, () => false)
+
+  const updateLocalLikes = (nextCount: number | ((count: number) => number)) => {
+    const currentCount = likeOverride?.postId === post.id && likeOverride.baseline === (post.likes_count || 0)
+      ? likeOverride.count
+      : post.likes_count || 0
+    setLikeOverride({
+      postId: post.id,
+      baseline: post.likes_count || 0,
+      count: typeof nextCount === 'function' ? nextCount(currentCount) : nextCount
+    })
+  }
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -151,13 +189,13 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
     if (alreadyLiked) {
       // UNLIKE
       const newLikesCount = Math.max(0, localLikes - 1)
-      setLocalLikes(newLikesCount)
-      setUserLikes(false)
+      updateLocalLikes(newLikesCount)
 
       const updatedLikedIds = likedIds.filter(id => id !== post.id)
       try {
         localStorage.setItem(likedPostsKey, JSON.stringify(updatedLikedIds))
       } catch {}
+      window.dispatchEvent(new Event('polasve-liked-posts-changed'))
 
       const { error } = await supabase
         .from('posts')
@@ -165,8 +203,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
         .eq('id', post.id)
 
       if (error) {
-        setLocalLikes(prev => prev + 1)
-        setUserLikes(true)
+        updateLocalLikes(prev => prev + 1)
         toast.error('Kunde inte ta bort gillning')
       } else {
         toast.success('Gillning borttagen')
@@ -175,13 +212,13 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
     } else {
       // LIKE
       const newLikesCount = localLikes + 1
-      setLocalLikes(newLikesCount)
-      setUserLikes(true)
+      updateLocalLikes(newLikesCount)
 
       const updatedLikedIds = [...likedIds, post.id]
       try {
         localStorage.setItem(likedPostsKey, JSON.stringify(updatedLikedIds))
       } catch {}
+      window.dispatchEvent(new Event('polasve-liked-posts-changed'))
 
       const { error } = await supabase
         .from('posts')
@@ -189,8 +226,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
         .eq('id', post.id)
 
       if (error) {
-        setLocalLikes(prev => Math.max(0, prev - 1))
-        setUserLikes(false)
+        updateLocalLikes(prev => Math.max(0, prev - 1))
         toast.error('Kunde inte gilla inlägget')
       } else {
         toast.success('Du gillade inlägget! ❤️')
@@ -235,7 +271,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
       <div className="flex justify-between items-start gap-3 mb-3">
         <div className="flex items-center gap-2 md:gap-2.5 min-w-0 flex-1">
           <UserAvatar
-            avatarUrl={(post as any).avatar_url}
+            avatarUrl={post.avatar_url}
             userId={post.user_id}
             userName={post.user_name}
             size="sm"
@@ -291,7 +327,14 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
           )}
           <span className="text-xs font-black">{localLikes}</span>
         </button>
-        <button onClick={() => setActiveCommentPost(!activeCommentPost)} className={`flex items-center gap-1.5 transition-colors ${activeCommentPost ? 'text-[#003366]' : 'text-zinc-400 hover:text-black'}`}>
+        <button
+          onClick={() => {
+            const shouldOpen = !activeCommentPost
+            setActiveCommentPost(shouldOpen)
+            if (shouldOpen) void fetchComments()
+          }}
+          className={`flex items-center gap-1.5 transition-colors ${activeCommentPost ? 'text-[#003366]' : 'text-zinc-400 hover:text-black'}`}
+        >
           <MessageSquare size={15} className="scale-x-[-1]" />
           <span className="text-xs font-black">{commentCount}</span>
         </button>
@@ -321,7 +364,7 @@ export default function PostCard({ post, currentUser, onDelete, onUpdate }: Post
                 <div key={comment.id} className="group/comment">
                   <div className="flex items-start gap-2.5 mb-1">
                     <UserAvatar
-                      avatarUrl={(comment as any).avatar_url}
+                      avatarUrl={comment.avatar_url}
                       userId={comment.user_id}
                       userName={comment.user_name}
                       size="xs"

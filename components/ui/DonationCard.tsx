@@ -10,7 +10,8 @@ interface DonationCardProps {
   compact?: boolean
 }
 
-export default function DonationCard({ compact = false }: DonationCardProps) {
+export default function DonationCard(props: DonationCardProps) {
+  const { compact = false } = props
   const { t, lang } = useTranslation()
   const copy = getMenuPageCopy(lang).donation
   const [selectedAmount, setSelectedAmount] = useState<number>(25)
@@ -51,7 +52,7 @@ export default function DonationCard({ compact = false }: DonationCardProps) {
   const effectiveAmount = customAmount ? (parseFloat(customAmount) || 0) : selectedAmount
 
   return (
-    <div className="bg-gradient-to-br from-amber-50/90 via-white to-red-50/50 border-2 border-dashed border-amber-300 rounded-sm p-4 md:p-6 text-left shadow-sm relative overflow-hidden group">
+    <div className={`bg-gradient-to-br from-amber-50/90 via-white to-red-50/50 border-2 border-dashed border-amber-300 rounded-sm ${compact ? 'p-3' : 'p-4 md:p-6'} text-left shadow-sm relative overflow-hidden group`}>
       <div className="flex items-center gap-2 mb-3">
         <div className="w-8 h-8 rounded-full bg-[#a11a2d] text-white flex items-center justify-center shrink-0 shadow-md">
           <Heart size={16} className="fill-white" />

@@ -48,8 +48,8 @@ export default function ReportModal({ isOpen, onClose, contentId, contentType, r
       toast.success(copy.reportSent)
       setReason('')
       onClose()
-    } catch (err: any) {
-      console.error('Report error:', err)
+    } catch (error: unknown) {
+      console.error('Report error:', error)
       toast.error(copy.reportFailed)
     } finally {
       setSubmitting(false)

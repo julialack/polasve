@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
+import Image from "next/image";
 import SwedenMap from "@/components/map/SwedenMap";
 import { useTranslation } from "@/utils/translations";
 import { getMenuPageCopy } from "@/utils/menu-page-copy";
@@ -25,7 +26,7 @@ export default function PremiumAdsSidebar() {
   useEffect(() => {
     const fetchPremiumAds = async () => {
       setLoading(true)
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('ads')
         .select('id, title, image_url, price, location, status')
         .eq('is_premium', true)
@@ -67,7 +68,7 @@ export default function PremiumAdsSidebar() {
               >
                 <div className="flex gap-4">
                   <div className="w-16 h-16 bg-zinc-100 relative overflow-hidden border border-zinc-200 rounded-sm flex-shrink-0">
-                    <img src={ad.image_url || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <Image src={ad.image_url || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop"} alt="" fill sizes="64px" unoptimized className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="text-[12px] font-black text-[#003366] italic leading-tight truncate group-hover:text-[#a11a2d] transition-colors">{ad.title}</h4>

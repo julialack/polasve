@@ -1,84 +1,107 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-import { Search, Box, MessageSquare, ChevronRight, AlertCircle, Loader2 } from 'lucide-react'
+import { Search, Box, MessageSquare, ChevronRight, Loader2 } from 'lucide-react'
 import PostCard from '@/components/feed/PostCard'
+import type { Ad, Post } from '@/types/database'
+import type { User } from '@supabase/supabase-js'
+import SafeImage from '@/components/ui/SafeImage'
+
+type SearchAd = Omit<Ad, 'price'> & { price: string | null }
 
 function SearchResultsContent() {
   const searchParams = useSearchParams()
   const query = searchParams.get('q') || ''
-  const [ads, setAds] = useState<any[]>([])
-  const [posts, setPosts] = useState<any[]>([])
-  const [currentUser, setCurrentUser] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
+  const [ads, setAds] = useState<SearchAd[]>([])
+  const [posts, setPosts] = useState<Post[]>([])
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [searchedQuery, setSearchedQuery] = useState<string | null>(null)
+  const searchRequestId = useRef(0)
+  const supabase = useMemo(() => createClient(), [])
+  const visibleAds = query.trim() ? ads : []
+  const visiblePosts = query.trim() ? posts : []
+  const loading = Boolean(query.trim()) && searchedQuery !== query
 
-  const performSearch = async () => {
+  const fetchSearchResults = useCallback(async () => {
     if (!query || query.trim().length < 1) {
-      setAds([])
-      setPosts([])
-      setLoading(false)
-      return
+      return { ads: [] as SearchAd[], posts: [] as Post[] }
     }
 
-    setLoading(true)
-    setError(null)
+    const { data: adsData, error: adsError } = await supabase
+      .from('ads')
+      .select('*')
+      .or(`title.ilike.%${query}%,description.ilike.%${query}%,location.ilike.%${query}%`)
+      .order('is_premium', { ascending: false })
+      .order('created_at', { ascending: false })
+    if (adsError) throw adsError
 
+    const { data: postsData, error: postsError } = await supabase
+      .from('posts')
+      .select('*')
+      .ilike('content', `%${query}%`)
+      .order('created_at', { ascending: false })
+    if (postsError) throw postsError
+
+    return { ads: adsData || [], posts: postsData || [] }
+  }, [query, supabase])
+
+  const performSearch = useCallback(async () => {
+    const requestId = ++searchRequestId.current
     try {
-      // 1. Search in Ads - Sorted by Premium first
-      const { data: adsData, error: adsError } = await supabase
-        .from('ads')
-        .select('*')
-        .or(`title.ilike.%${query}%,description.ilike.%${query}%,location.ilike.%${query}%`)
-        .order('is_premium', { ascending: false })
-        .order('created_at', { ascending: false })
-
-      if (adsError) throw adsError
-
-      // 2. Search in Posts
-      const { data: postsData, error: postsError } = await supabase
-        .from('posts')
-        .select('*')
-        .ilike('content', `%${query}%`)
-        .order('created_at', { ascending: false })
-
-      if (postsError) throw postsError
-
-      setAds(adsData || [])
-      setPosts(postsData || [])
-    } catch (err: any) {
-      setError(err.message)
+      const results = await fetchSearchResults()
+      if (searchRequestId.current === requestId) {
+        setAds(results.ads)
+        setPosts(results.posts)
+      }
+    } catch (err: unknown) {
+      console.error('Search error:', err)
     } finally {
-      setLoading(false)
+      if (searchRequestId.current === requestId) setSearchedQuery(query)
     }
-  }
+  }, [fetchSearchResults, query, setAds, setPosts, setSearchedQuery])
 
   useEffect(() => {
+    let cancelled = false
+    const loadSearchResults = async () => {
+      try {
+        const results = await fetchSearchResults()
+        if (!cancelled) {
+          setAds(results.ads)
+          setPosts(results.posts)
+        }
+      } catch (err: unknown) {
+        console.error('Search error:', err)
+      } finally {
+        if (!cancelled) setSearchedQuery(query)
+      }
+    }
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      setCurrentUser(user)
+      if (!cancelled) setCurrentUser(user)
     }
-    getUser()
-    performSearch()
-  }, [query])
+    void getUser()
+    void loadSearchResults()
+    return () => {
+      cancelled = true
+    }
+  }, [fetchSearchResults, query, setAds, setCurrentUser, setPosts, setSearchedQuery, supabase])
 
-  const handleDeletePost = async (id: string) => {
+  const handleDeletePost = useCallback(async (id: string) => {
     if(confirm('Ta bort inlägget?')) {
       await supabase.from('posts').delete().eq('id', id)
       performSearch()
     }
-  }
+  }, [performSearch, supabase])
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] py-16 px-4 md:px-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-12 text-left">
           <h1 className="text-3xl font-bold text-[#003366] uppercase tracking-tight">
-            Sökning: <span className="text-[#a11a2d] italic">"{query || '...'}"</span>
+            Sökning: <span className="text-[#a11a2d] italic">&quot;{query || '...'}&quot;</span>
           </h1>
           <div className="h-1 w-20 bg-[#a11a2d] mt-4"></div>
         </div>
@@ -88,7 +111,7 @@ function SearchResultsContent() {
             <Loader2 className="w-12 h-12 text-[#003366] animate-spin" />
             <p className="font-serif italic text-zinc-400 text-lg">Söker igenom portalen...</p>
           </div>
-        ) : (ads.length === 0 && posts.length === 0) ? (
+        ) : (visibleAds.length === 0 && visiblePosts.length === 0) ? (
           <div className="text-center py-20 bg-white border border-zinc-200 rounded-sm shadow-sm px-10">
             <Search className="mx-auto text-zinc-200 mb-6" size={48} />
             <h2 className="text-xl font-bold text-[#003366] mb-2">Inga träffar</h2>
@@ -100,20 +123,20 @@ function SearchResultsContent() {
         ) : (
           <div className="space-y-16 text-left">
             {/* Ads Results */}
-            {ads.length > 0 && (
+            {visibleAds.length > 0 && (
               <section>
                 <div className="flex items-center gap-4 mb-8">
                   <div className="bg-[#a11a2d] text-white px-5 py-2 text-[11px] font-bold uppercase tracking-[0.2em] shadow-sm flex items-center gap-2">
-                    <Box size={16} /> Bazar / Annonser ({ads.length})
+                    <Box size={16} /> Bazar / Annonser ({visibleAds.length})
                   </div>
                   <div className="h-px flex-1 bg-zinc-200"></div>
                 </div>
                 <div className="space-y-4">
-                  {ads.map((ad) => (
+                  {visibleAds.map((ad) => (
                     <Link href={`/annonser/${ad.id}`} key={ad.id} className={`group bg-white p-5 border rounded-sm shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row gap-6 items-center text-left ${ad.is_premium ? 'border-red-100 ring-1 ring-red-50' : 'border-zinc-200'}`}>
                       <div className="w-full md:w-20 md:h-20 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border border-zinc-100 relative">
                         {ad.image_url ? (
-                          <img src={ad.image_url} className="w-full h-full object-cover" alt="" />
+                          <SafeImage src={ad.image_url} className="w-full h-full object-cover" alt="" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[8px] font-bold uppercase text-center px-1">Ingen bild</div>
                         )}
@@ -132,16 +155,16 @@ function SearchResultsContent() {
             )}
 
             {/* Posts Results */}
-            {posts.length > 0 && (
+            {visiblePosts.length > 0 && (
               <section>
                 <div className="flex items-center gap-4 mb-8">
                   <div className="bg-[#003366] text-white px-5 py-2 text-[11px] font-bold uppercase tracking-[0.2em] shadow-sm flex items-center gap-2">
-                    <MessageSquare size={16} /> Community Flöde ({posts.length})
+                    <MessageSquare size={16} /> Community Flöde ({visiblePosts.length})
                   </div>
                   <div className="h-px flex-1 bg-zinc-200"></div>
                 </div>
                 <div className="space-y-6">
-                  {posts.map((post) => (
+                  {visiblePosts.map((post) => (
                     <PostCard
                       key={post.id}
                       post={post}

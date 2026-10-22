@@ -14,6 +14,7 @@ export default function RegistreraPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -38,6 +39,11 @@ export default function RegistreraPage() {
 
     if (password.length < 8) {
       toast.error(copy.passwordMin);
+      return;
+    }
+
+    if (!acceptTerms) {
+      toast.error("Du måste godkänna användarvillkoren och integritetspolicyn.");
       return;
     }
 
@@ -129,6 +135,27 @@ export default function RegistreraPage() {
               </div>
             </div>
 
+            <div className="flex items-start gap-3 pt-2">
+              <input
+                id="accept-terms"
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-zinc-300 text-red-800 focus:ring-red-800 cursor-pointer"
+                required
+              />
+              <label htmlFor="accept-terms" className="text-[11px] text-zinc-600 leading-tight cursor-pointer">
+                Jag godkänner{" "}
+                <Link href="/villkor" target="_blank" className="text-red-800 hover:underline font-bold">
+                  Användarvillkoren
+                </Link>{" "}
+                och har läst{" "}
+                <Link href="/integritetspolicy" target="_blank" className="text-red-800 hover:underline font-bold">
+                  Integritetspolicyn
+                </Link>.
+              </label>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
@@ -146,4 +173,5 @@ export default function RegistreraPage() {
       </div>
     </div>
   );
+}
 }

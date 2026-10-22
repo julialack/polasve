@@ -21,6 +21,8 @@ export default function Footer() {
               <li><Link href="/evenemang" className="hover:text-white transition-colors">{t.navEvents}</Link></li>
               <li><Link href="/annonser" className="hover:text-white transition-colors">{t.bazarTitle}</Link></li>
               <li><Link href="/villkor" className="hover:text-white transition-colors">{t.terms}</Link></li>
+              <li><Link href="/integritetspolicy" className="hover:text-white transition-colors">Integritetspolicy</Link></li>
+              <li><Link href="/cookiepolicy" className="hover:text-white transition-colors">Cookiepolicy</Link></li>
             </ul>
           </div>
         </div>

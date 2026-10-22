@@ -69,7 +69,7 @@ export default function ContentActions({ contentId, contentTitle, contentType, c
         isOpen={reportModalOpen}
         onClose={() => setReportModalOpen(false)}
         contentId={contentId}
-        contentType={contentType === 'news' ? 'post' : contentType as any} // Map news to post or just handle news in modal
+        contentType={contentType === 'news' ? 'post' : contentType}
         reporterId={currentUserId}
       />
     </>

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from "next/link";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
@@ -10,7 +11,7 @@ import { useTranslation } from "@/utils/translations";
 
 export default function Navbar() {
   const { t } = useTranslation();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const supabase = createClient();

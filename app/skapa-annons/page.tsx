@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Check, Camera, X, Loader2, PlusCircle, Building2, ArrowRight, ArrowLeft } from 'lucide-react'
@@ -59,14 +59,11 @@ export default function SkapaAnnonsPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  useEffect(() => {
-    const count = selectedPackage === 'standard' ? 1 : selectedPackage === 'premium' ? 2 : 4
+  const handleSelectPackage = (pkgId: string) => {
+    const count = pkgId === 'standard' ? 1 : pkgId === 'premium' ? 2 : 4
+    setSelectedPackage(pkgId)
     setExtraFiles(new Array(count).fill(null))
     setExtraPreviews(new Array(count).fill(null))
-  }, [selectedPackage])
-
-  const handleSelectPackage = (pkgId: string) => {
-    setSelectedPackage(pkgId)
     setStep(2)
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 200, behavior: 'smooth' })
@@ -177,8 +174,9 @@ export default function SkapaAnnonsPage() {
       } else {
         toast.error(checkoutData?.error || 'Betalningen kunde inte startas')
       }
-    } catch (err: any) {
-      toast.error(`Kunde inte skapa annons: ${err.message || 'Okänt fel'}`)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Okänt fel'
+      toast.error(`Kunde inte skapa annons: ${message}`)
       console.error("Payment flow error:", err)
     } finally {
       setLoading(false)

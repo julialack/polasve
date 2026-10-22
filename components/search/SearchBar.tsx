@@ -55,7 +55,7 @@ export default function SearchBar() {
         {query && (
           <button
             type="button"
-            aria-label="Wyczyszczenie szukania"
+            aria-label={t.clearSearch}
             onClick={clearQuery}
             className="absolute right-12 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-[#a11a2d] transition-colors"
           >
@@ -64,7 +64,7 @@ export default function SearchBar() {
         )}
         <button
           type="submit"
-          aria-label="Szukaj"
+          aria-label={t.searchBtn}
           className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#003366] text-white p-2 rounded-sm hover:bg-[#a11a2d] transition-colors shadow-sm"
         >
           <Search size={16} className="text-white" />

@@ -1,10 +1,12 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Mail, Phone, MapPin, Info, Globe, Package, MessageSquare, ChevronLeft } from 'lucide-react'
 import HomeHero from '@/components/HomeHero'
 import UserAvatar from '@/components/ui/UserAvatar'
 import { formatDisplayName } from '@/utils/formatName'
+import type { Ad as DomainAd } from '@/types/database'
 
 // Force dynamic rendering to ensure the ID is always read correctly
 export const dynamic = 'force-dynamic'
@@ -13,28 +15,46 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
+interface PublicProfile {
+  full_name: string | null
+  email: string | null
+  phone: string | null
+  city: string | null
+  bio: string | null
+  languages: unknown
+  show_email_publicly: boolean | null
+  show_phone_publicly: boolean | null
+}
+
+type PublicAd = Pick<DomainAd, 'id' | 'title' | 'category' | 'price' | 'image_url'>
+
 export default async function UserProfilePage({ params }: PageProps) {
   const { id } = await params
   const supabase = await createClient()
 
   // 1. Fetch profile
-  const { data: profile } = await supabase
+  const { data: profileData } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', id)
     .single()
 
-  if (!profile) {
+  if (!profileData) {
     return notFound()
   }
+  const profile = profileData as PublicProfile
 
   // 2. Fetch ads
-  const { data: ads } = await supabase
+  const { data: adsData } = await supabase
     .from('ads')
     .select('*')
     .eq('user_id', id)
     .order('created_at', { ascending: false })
 
+  const ads = (adsData ?? []) as PublicAd[]
+  const languages = Array.isArray(profile.languages)
+    ? profile.languages.filter((language): language is string => typeof language === 'string')
+    : []
   const meta = profile
   const displayName = formatDisplayName(meta.full_name || 'Medlem')
 
@@ -102,10 +122,10 @@ export default async function UserProfilePage({ params }: PageProps) {
                       <Globe size={10} /> Språk
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {meta.languages && (meta.languages as any).length > 0 ? (
-                        (meta.languages as string[]).map((l: string) => (
-                          <span key={l} className="bg-zinc-50 text-[10px] font-bold text-[#003366] px-3 py-1 rounded-full border border-zinc-100 uppercase">
-                            {l}
+                      {languages.length > 0 ? (
+                        languages.map(language => (
+                          <span key={language} className="bg-zinc-50 text-[10px] font-bold text-[#003366] px-3 py-1 rounded-full border border-zinc-100 uppercase">
+                            {language}
                           </span>
                         ))
                       ) : (
@@ -128,7 +148,7 @@ export default async function UserProfilePage({ params }: PageProps) {
           <div className="lg:col-span-8">
             <section className="bg-white border border-zinc-200 rounded-sm shadow-sm overflow-hidden min-h-[600px]">
               <div className="bg-[#003366] text-white px-8 py-4 text-xs font-black uppercase tracking-widest flex items-center gap-3">
-                <Package size={18} /> Aktiva Annonser ({(ads as any)?.length || 0})
+                <Package size={18} /> Aktiva Annonser ({ads.length})
               </div>
 
               <div className="p-6 md:p-10">
@@ -145,9 +165,9 @@ export default async function UserProfilePage({ params }: PageProps) {
                         href={`/annonser/${ad.id}`}
                         className="group flex flex-col md:flex-row gap-6 p-4 border border-zinc-50 rounded-sm hover:border-[#003366]/20 hover:bg-zinc-50/50 transition-all"
                       >
-                        <div className="w-full md:w-32 h-32 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border">
+                        <div className="w-full md:w-32 h-32 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border relative">
                           {ad.image_url ? (
-                            <img src={ad.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
+                            <Image src={ad.image_url} fill unoptimized sizes="(max-width: 768px) 100vw, 128px" className="object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[10px] font-black uppercase">Ingen bild</div>
                           )}

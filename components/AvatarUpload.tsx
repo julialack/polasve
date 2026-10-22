@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
 interface AvatarUploadProps {
-  currentUser: any
+  currentUser: { id: string } | null
   onUploaded?: () => void
 }
 
@@ -31,8 +31,8 @@ export default function AvatarUpload({ currentUser, onUploaded }: AvatarUploadPr
       } else {
         onUploaded?.()
       }
-    } catch (e: any) {
-      setError(e?.message || 'Upload failed')
+    } catch (uploadError: unknown) {
+      setError(uploadError instanceof Error ? uploadError.message : 'Upload failed')
     } finally {
       setLoading(false)
     }

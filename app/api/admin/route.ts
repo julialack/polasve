@@ -4,6 +4,36 @@ import { createAdminClient } from '@/lib/supabase-admin'
 
 const ADMIN_EMAIL = 'julia.lackchristensen@gmail.com'
 
+interface AdminPayload {
+  adId?: string
+  permanent?: boolean
+  postId?: string
+  userId?: string
+  isBanned?: boolean
+  reportId?: string
+  status?: string
+  contentType?: string
+  contentId?: string
+  title?: string
+  content?: string
+  id?: string
+  name?: string
+  slug?: string
+  reqId?: string
+  requestedName?: string
+  description?: string
+  image_url?: string
+  deleteItem?: boolean
+  companyName?: string
+  message?: string
+  imageUrl?: string
+}
+
+interface AdminRequestBody {
+  action?: string
+  payload?: AdminPayload
+}
+
 export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -24,9 +54,9 @@ export async function POST(req: Request) {
     )
   }
 
-  let body: any
+  let body: AdminRequestBody
   try {
-    body = await req.json()
+    body = await req.json() as AdminRequestBody
   } catch {
     return NextResponse.json({ error: 'Ogiltigt JSON-format.' }, { status: 400 })
   }
@@ -248,8 +278,8 @@ export async function POST(req: Request) {
       default:
         return NextResponse.json({ error: 'Okänd åtgärd' }, { status: 400 })
     }
-  } catch (err: any) {
-    console.error('Admin API error:', err)
-    return NextResponse.json({ error: err.message || 'Ett fel uppstod vid adminåtgärd' }, { status: 500 })
+  } catch (error: unknown) {
+    console.error('Admin API error:', error)
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Ett fel uppstod vid adminåtgärd' }, { status: 500 })
   }
 }

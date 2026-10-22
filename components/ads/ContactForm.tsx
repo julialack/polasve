@@ -13,7 +13,7 @@ interface ContactFormProps {
   adTitle: string
 }
 
-export default function ContactForm({ receiverId, adId, adTitle }: ContactFormProps) {
+export default function ContactForm({ receiverId, adId }: ContactFormProps) {
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)

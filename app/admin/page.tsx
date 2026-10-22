@@ -1,20 +1,123 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, type ReactNode } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
-  Loader2, Newspaper, Calendar, ArrowLeft, UserCheck, Check, X,
+  Loader2, Newspaper, ArrowLeft, UserCheck, Check, X,
   Building2, MessageSquare, AlertTriangle, Users, BarChart3,
-  ShieldAlert, Tags, Megaphone, Search, Trash2, Plus, Ban, Unlock,
+  ShieldAlert, Tags, Megaphone, Search, Trash2, Ban, Unlock,
   Settings, ExternalLink, UserPlus, ChevronRight, RotateCcw,
   Archive, Image as ImageIcon, PhoneCall, Globe
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { capitalizeFirst } from '@/utils/capitalize'
 
 type TabType = 'dashboard' | 'posts' | 'ads' | 'trash' | 'reports' | 'users' | 'requests' | 'system' | 'news' | 'contact'
+type AdminApiPayload = Record<string, string | boolean | null>
+
+interface AdminProfile {
+  id: string
+  full_name: string | null
+  email: string | null
+  avatar_url?: string | null
+  created_at?: string
+  is_banned?: boolean
+}
+
+interface AdminAd {
+  id: string
+  user_id: string
+  title: string
+  description: string
+  image_url: string | null
+  price: string | null
+  category: string
+  created_at: string
+  status: string
+  payment_status?: string | null
+  profiles?: Pick<AdminProfile, 'full_name' | 'email'> | null
+}
+
+interface AdminPost {
+  id: string
+  user_id: string
+  content: string
+  category?: string | null
+  image_url?: string | null
+  created_at: string
+  profiles?: Pick<AdminProfile, 'full_name' | 'email' | 'avatar_url'> | null
+}
+
+interface AdminReport {
+  id: string
+  reporter_id: string
+  content_type: string
+  content_id: string
+  reason: string
+  status: string
+  created_at: string
+  profiles?: Pick<AdminProfile, 'full_name'> | null
+  targetContent?: {
+    id?: string
+    title?: string | null
+    content?: string | null
+    email?: string | null
+    avatar_url?: string | null
+  } | null
+  contentExists?: boolean
+  contentUrl?: string
+}
+
+interface AdminAnnouncement {
+  id: string
+  title: string
+  content: string
+}
+
+interface AdminCategory {
+  id: string
+  name: string
+  slug: string
+}
+
+interface AdminNews {
+  id: string
+  title: string
+  description: string
+  image_url: string | null
+  date: string
+}
+
+interface NameChangeRequest {
+  id: string
+  user_id: string
+  current_name: string
+  requested_name: string
+}
+
+interface BusinessRequest {
+  id: string
+  company_name: string
+  contact_person: string
+  status: string
+  phone: string | null
+  email: string
+  duration: string | null
+  created_at: string
+  message: string | null
+  image_url: string | null
+}
+
+interface ContactRequest {
+  id: string
+  reason: string
+  email: string
+  status: string
+  message: string
+}
 
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false)
@@ -23,13 +126,13 @@ export default function AdminPage() {
 
   // Data States
   const [stats, setStats] = useState({ users: 0, ads: 0, posts: 0, reports: 0, announcements: 0, trash: 0 })
-  const [users, setUsers] = useState<any[]>([])
-  const [ads, setAds] = useState<any[]>([])
-  const [posts, setPosts] = useState<any[]>([])
-  const [reports, setReports] = useState<any[]>([])
-  const [announcements, setAnnouncements] = useState<any[]>([])
-  const [categories, setCategories] = useState<any[]>([])
-  const [news, setNews] = useState<any[]>([])
+  const [users, setUsers] = useState<AdminProfile[]>([])
+  const [ads, setAds] = useState<AdminAd[]>([])
+  const [posts, setPosts] = useState<AdminPost[]>([])
+  const [reports, setReports] = useState<AdminReport[]>([])
+  const [announcements, setAnnouncements] = useState<AdminAnnouncement[]>([])
+  const [categories, setCategories] = useState<AdminCategory[]>([])
+  const [news, setNews] = useState<AdminNews[]>([])
 
   // Search and Filter States
   const [searchUser, setSearchUser] = useState('')
@@ -40,9 +143,9 @@ export default function AdminPage() {
   const [adPaymentFilter, setAdPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all')
 
   // Request States
-  const [nameRequests, setNameRequests] = useState<any[]>([])
-  const [businessRequests, setBusinessRequests] = useState<any[]>([])
-  const [contactRequests, setContactRequests] = useState<any[]>([])
+  const [nameRequests, setNameRequests] = useState<NameChangeRequest[]>([])
+  const [businessRequests, setBusinessRequests] = useState<BusinessRequest[]>([])
+  const [contactRequests, setContactRequests] = useState<ContactRequest[]>([])
 
   // Form States
   const [newAnnounce, setNewAnnounce] = useState({ title: '', content: '' })
@@ -55,7 +158,7 @@ export default function AdminPage() {
   const ADMIN_EMAIL = 'julia.lackchristensen@gmail.com'
 
   // Helper for Calling Server-Side Admin API (bypasses client RLS)
-  const callAdminApi = async (action: string, payload: any = {}) => {
+  const callAdminApi = async (action: string, payload: AdminApiPayload = {}) => {
     try {
       const res = await fetch('/api/admin', {
         method: 'POST',
@@ -69,8 +172,8 @@ export default function AdminPage() {
       }
       toast.success(data.message || 'Åtgärden genomfördes')
       return true
-    } catch (err: any) {
-      toast.error('Kunde inte nå servern: ' + err.message)
+    } catch (err) {
+      toast.error('Kunde inte nå servern: ' + (err instanceof Error ? err.message : String(err)))
       return false
     }
   }
@@ -127,7 +230,7 @@ export default function AdminPage() {
 
       if (adsData && adsData.length > 0) {
         const userIds = Array.from(new Set(adsData.map(a => a.user_id).filter(Boolean)))
-        let profilesMap: Record<string, any> = {}
+        const profilesMap: Record<string, Pick<AdminProfile, 'id' | 'full_name' | 'email'>> = {}
 
         if (userIds.length > 0) {
           const { data: profilesData } = await supabase
@@ -170,7 +273,7 @@ export default function AdminPage() {
 
       if (postsData && postsData.length > 0) {
         const userIds = Array.from(new Set(postsData.map(p => p.user_id).filter(Boolean)))
-        let profilesMap: Record<string, any> = {}
+        const profilesMap: Record<string, Pick<AdminProfile, 'id' | 'full_name' | 'email' | 'avatar_url'>> = {}
 
         if (userIds.length > 0) {
           const { data: profilesData } = await supabase
@@ -215,9 +318,9 @@ export default function AdminPage() {
         ...reporterIds
       ]))
 
-      let adsMap: Record<string, any> = {}
-      let postsMap: Record<string, any> = {}
-      let profilesMap: Record<string, any> = {}
+      const adsMap: Record<string, Pick<AdminAd, 'id' | 'title' | 'description' | 'image_url' | 'price'>> = {}
+      const postsMap: Record<string, Pick<AdminPost, 'id' | 'content' | 'image_url'>> = {}
+      const profilesMap: Record<string, Pick<AdminProfile, 'id' | 'full_name' | 'email' | 'avatar_url'>> = {}
 
       if (adIds.length > 0) {
         const { data: adsData } = await supabase.from('ads').select('id, title, description, image_url, price').in('id', adIds)
@@ -225,7 +328,7 @@ export default function AdminPage() {
       }
 
       if (postIds.length > 0) {
-        const { data: postsData } = await supabase.from('posts').select('id, content, image_url').in('id', postIds)
+        const { data: postsData } = await supabase.from('posts').select('id, content, image_url, category').in('id', postIds)
         if (postsData) postsData.forEach(p => { postsMap[p.id] = p })
       }
 
@@ -234,8 +337,8 @@ export default function AdminPage() {
         if (profilesData) profilesData.forEach(p => { profilesMap[p.id] = p })
       }
 
-      const enriched = data.map(rep => {
-        let targetContent = null
+      const enriched: AdminReport[] = data.map(rep => {
+        let targetContent: AdminReport['targetContent'] = null
         let contentUrl = '#'
         let contentExists = false
 
@@ -407,7 +510,7 @@ export default function AdminPage() {
     if (ok) fetchSystemData()
   }
 
-  const handleApproveNameChange = async (req: any) => {
+  const handleApproveNameChange = async (req: NameChangeRequest) => {
     const ok = await callAdminApi('approve_name_change', {
       reqId: req.id,
       userId: req.user_id,
@@ -426,7 +529,7 @@ export default function AdminPage() {
     if (ok) fetchRequests()
   }
 
-  const handlePublishBusinessBanner = async (biz: any) => {
+  const handlePublishBusinessBanner = async (biz: BusinessRequest) => {
     if (!confirm(`Vill du publicera ${biz.company_name} som en live Premium-banner på hemsidan?`)) return
     const ok = await callAdminApi('publish_business_banner', {
       reqId: biz.id,
@@ -781,7 +884,7 @@ export default function AdminPage() {
                           <td className="px-6 py-4">
                             <Link href={`/annonser/${ad.id}`} target="_blank" className="flex items-center gap-3 hover:text-blue-400 transition-colors">
                               <div className="w-12 h-10 bg-white/5 rounded flex items-center justify-center overflow-hidden border border-white/5 shrink-0">
-                                {ad.image_url ? <img src={ad.image_url} className="w-full h-full object-cover" /> : <Building2 size={16} className="text-zinc-700" />}
+                                {ad.image_url ? <Image src={ad.image_url} alt="" fill unoptimized sizes="48px" className="object-cover" /> : <Building2 size={16} className="text-zinc-700" />}
                               </div>
                               <div>
                                 <p className="font-bold text-white line-clamp-1 text-xs">{capitalizeFirst(ad.title)}</p>
@@ -1057,7 +1160,7 @@ export default function AdminPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <button
-                          onClick={() => handleToggleBan(u.id, u.is_banned)}
+                          onClick={() => handleToggleBan(u.id, u.is_banned ?? false)}
                           className={`p-2 rounded-lg transition-all ${u.is_banned ? 'text-emerald-500 hover:bg-emerald-500/10' : 'text-red-500 hover:bg-red-500/10'}`}
                           title={u.is_banned ? 'Återställ användare' : 'Stäng av användare'}
                         >
@@ -1149,7 +1252,7 @@ export default function AdminPage() {
                           <ImageIcon size={12} /> Uppladdad Banner / Bild
                         </p>
                         <a href={biz.image_url} target="_blank" rel="noopener noreferrer" className="block w-full h-32 bg-black/40 rounded-lg overflow-hidden border border-white/10 group relative">
-                          <img src={biz.image_url} alt="Banner" className="w-full h-full object-contain group-hover:scale-105 transition-transform" />
+                          <Image src={biz.image_url} alt="Banner" fill unoptimized sizes="100vw" className="object-contain group-hover:scale-105 transition-transform" />
                           <span className="absolute bottom-2 right-2 bg-black/80 text-white text-[9px] font-black uppercase px-2 py-1 rounded flex items-center gap-1">
                             <ExternalLink size={10} /> Öppna fullbild ↗
                           </span>
@@ -1336,7 +1439,7 @@ export default function AdminPage() {
 
 // --- Helper Components ---
 
-function NavItem({ icon, label, active, onClick, badge }: { icon: any, label: string, active: boolean, onClick: () => void, badge?: number }) {
+function NavItem({ icon, label, active, onClick, badge }: { icon: ReactNode, label: string, active: boolean, onClick: () => void, badge?: number }) {
   return (
     <button
       onClick={onClick}
@@ -1357,7 +1460,7 @@ function NavItem({ icon, label, active, onClick, badge }: { icon: any, label: st
   )
 }
 
-function StatCard({ icon, label, value, onClick }: { icon: any, label: string, value: number, onClick?: () => void }) {
+function StatCard({ icon, label, value, onClick }: { icon: ReactNode, label: string, value: number, onClick?: () => void }) {
   return (
     <button
       onClick={onClick}

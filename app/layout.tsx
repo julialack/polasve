@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Pacifico } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import CookieConsent from "@/components/CookieConsent";
 import { Toaster } from "sonner";
 import { LanguageProvider } from "@/utils/translations";
 
@@ -106,8 +107,10 @@ export default function RootLayout({
             {children}
           </main>
           <Toaster position="top-center" richColors />
+          <CookieConsent />
         </LanguageProvider>
       </body>
     </html>
   );
 }
+

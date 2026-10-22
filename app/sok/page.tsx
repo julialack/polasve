@@ -1,107 +1,138 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { Search, Box, MessageSquare, ChevronRight, MapPin, Filter, X, Loader2 } from 'lucide-react'
 import PostCard from '@/components/feed/PostCard'
 import { capitalizeFirst } from '@/utils/capitalize'
+import type { Ad, Post } from '@/types/database'
+import type { User } from '@supabase/supabase-js'
+import SafeImage from '@/components/ui/SafeImage'
 
 function SearchResultsContent() {
   const searchParams = useSearchParams()
   const queryParam = searchParams.get('q') || ''
   const locationParam = searchParams.get('location') || ''
 
-  const [query, setQuery] = useState(queryParam)
+  return (
+    <SearchResultsView
+      key={`${queryParam}\u0000${locationParam}`}
+      queryParam={queryParam}
+      locationParam={locationParam}
+    />
+  )
+}
+
+function SearchResultsView({ queryParam, locationParam }: { queryParam: string; locationParam: string }) {
+  const query = queryParam
   const [location, setLocation] = useState(locationParam)
   const [category, setCategory] = useState('')
   const [minPrice, setMinPrice] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
 
-  const [ads, setAds] = useState<any[]>([])
-  const [posts, setPosts] = useState<any[]>([])
-  const [currentUser, setCurrentUser] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
-  const supabase = createClient()
+  const [ads, setAds] = useState<Ad[]>([])
+  const [posts, setPosts] = useState<Post[]>([])
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [searchedKey, setSearchedKey] = useState<string | null>(null)
+  const searchRequestId = useRef(0)
+  const supabase = useMemo(() => createClient(), [])
+  const searchKey = JSON.stringify([query, location, category, minPrice, maxPrice])
+  const loading = searchedKey !== searchKey
 
-  useEffect(() => {
-    setQuery(queryParam)
-    if (locationParam) setLocation(locationParam)
-  }, [queryParam, locationParam])
+  const fetchSearchResults = useCallback(async () => {
+    let adsQuery = supabase.from('ads').select('*').order('is_premium', { ascending: false }).order('created_at', { ascending: false })
 
-  const performSearch = async () => {
-    setLoading(true)
+    if (query.trim()) {
+      adsQuery = adsQuery.or(`title.ilike.%${query.trim()}%,description.ilike.%${query.trim()}%,location.ilike.%${query.trim()}%`)
+    }
 
+    if (location.trim()) {
+      adsQuery = adsQuery.ilike('location', `%${location.trim()}%`)
+    }
+
+    if (category) {
+      adsQuery = adsQuery.eq('category', category)
+    }
+
+    const { data: adsData } = await adsQuery
+    let filteredAds = adsData || []
+
+    if (minPrice && !isNaN(Number(minPrice))) {
+      filteredAds = filteredAds.filter(a => {
+        const p = parseFloat(a.price?.replace(/[^0-9.]/g, '') || '0')
+        return p >= Number(minPrice)
+      })
+    }
+
+    if (maxPrice && !isNaN(Number(maxPrice))) {
+      filteredAds = filteredAds.filter(a => {
+        const p = parseFloat(a.price?.replace(/[^0-9.]/g, '') || '0')
+        return p <= Number(maxPrice)
+      })
+    }
+
+    let postsData: Post[] = []
+    if (query.trim()) {
+      const { data } = await supabase
+        .from('posts')
+        .select('*')
+        .ilike('content', `%${query.trim()}%`)
+        .order('created_at', { ascending: false })
+      postsData = data || []
+    }
+
+    return { ads: filteredAds, posts: postsData }
+  }, [category, location, maxPrice, minPrice, query, supabase])
+
+  const performSearch = useCallback(async () => {
+    const requestId = ++searchRequestId.current
     try {
-      let adsQuery = supabase.from('ads').select('*').order('is_premium', { ascending: false }).order('created_at', { ascending: false })
-
-      if (query.trim()) {
-        adsQuery = adsQuery.or(`title.ilike.%${query.trim()}%,description.ilike.%${query.trim()}%,location.ilike.%${query.trim()}%`)
+      const results = await fetchSearchResults()
+      if (searchRequestId.current === requestId) {
+        setAds(results.ads)
+        setPosts(results.posts)
       }
-
-      if (location.trim()) {
-        adsQuery = adsQuery.ilike('location', `%${location.trim()}%`)
-      }
-
-      if (category) {
-        adsQuery = adsQuery.eq('category', category)
-      }
-
-      const { data: adsData } = await adsQuery
-
-      let filteredAds = adsData || []
-
-      // Client side price filtering
-      if (minPrice && !isNaN(Number(minPrice))) {
-        filteredAds = filteredAds.filter(a => {
-          const p = parseFloat(a.price?.replace(/[^0-9.]/g, '') || '0')
-          return p >= Number(minPrice)
-        })
-      }
-
-      if (maxPrice && !isNaN(Number(maxPrice))) {
-        filteredAds = filteredAds.filter(a => {
-          const p = parseFloat(a.price?.replace(/[^0-9.]/g, '') || '0')
-          return p <= Number(maxPrice)
-        })
-      }
-
-      // Search posts
-      let postsData: any[] = []
-      if (query.trim()) {
-        const { data } = await supabase
-          .from('posts')
-          .select('*')
-          .ilike('content', `%${query.trim()}%`)
-          .order('created_at', { ascending: false })
-        postsData = data || []
-      }
-
-      setAds(filteredAds)
-      setPosts(postsData)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Search error:', err)
     } finally {
-      setLoading(false)
+      if (searchRequestId.current === requestId) setSearchedKey(searchKey)
     }
-  }
+  }, [fetchSearchResults, searchKey, setAds, setPosts, setSearchedKey])
 
   useEffect(() => {
+    let cancelled = false
+    const loadSearchResults = async () => {
+      try {
+        const results = await fetchSearchResults()
+        if (!cancelled) {
+          setAds(results.ads)
+          setPosts(results.posts)
+          setSearchedKey(searchKey)
+        }
+      } catch (err: unknown) {
+        console.error('Search error:', err)
+        if (!cancelled) setSearchedKey(searchKey)
+      }
+    }
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      setCurrentUser(user)
+      if (!cancelled) setCurrentUser(user)
     }
-    getUser()
-    performSearch()
-  }, [query, location, category, minPrice, maxPrice])
+    void getUser()
+    void loadSearchResults()
+    return () => {
+      cancelled = true
+    }
+  }, [fetchSearchResults, searchKey, setAds, setCurrentUser, setPosts, setSearchedKey, supabase])
 
-  const handleDeletePost = async (id: string) => {
+  const handleDeletePost = useCallback(async (id: string) => {
     if(confirm('Ta bort?')) {
       await supabase.from('posts').delete().eq('id', id)
       performSearch()
     }
-  }
+  }, [performSearch, supabase])
 
   const handleResetFilters = () => {
     setLocation('')
@@ -116,7 +147,7 @@ function SearchResultsContent() {
         {/* Search Header */}
         <div className="mb-8 text-left">
           <h1 className="text-2xl md:text-3xl font-black text-[#003366] uppercase tracking-tight">
-            Sökresultat: <span className="text-[#a11a2d] italic">"{query || location || 'Alla Annonser'}"</span>
+            Sökresultat: <span className="text-[#a11a2d] italic">&quot;{query || location || 'Alla Annonser'}&quot;</span>
           </h1>
           <div className="h-1 w-20 bg-[#a11a2d] mt-3"></div>
         </div>
@@ -227,7 +258,7 @@ function SearchResultsContent() {
                     <Link href={`/annonser/${ad.id}`} key={ad.id} className={`group bg-white p-4 border rounded-sm shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row gap-4 items-center text-left ${ad.is_premium ? 'border-amber-200 bg-amber-50/20' : 'border-zinc-200'}`}>
                       <div className="w-full sm:w-24 h-24 sm:h-20 bg-zinc-100 flex-shrink-0 rounded-sm overflow-hidden border border-zinc-100 relative">
                         {ad.image_url ? (
-                          <img src={ad.image_url} className="w-full h-full object-cover" alt="" />
+                          <SafeImage src={ad.image_url} className="w-full h-full object-cover" alt="" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[8px] font-bold uppercase">Ingen bild</div>
                         )}

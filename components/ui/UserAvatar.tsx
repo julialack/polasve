@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { User } from 'lucide-react'
+import Image from 'next/image'
 
 interface UserAvatarProps {
   avatarUrl?: string | null
@@ -21,14 +22,9 @@ const sizeClasses = {
 }
 
 export default function UserAvatar({ avatarUrl, userId, userName, size = 'sm', className = '' }: UserAvatarProps) {
-  const [imageError, setImageError] = useState(false)
-  const [fetchedUrl, setFetchedUrl] = useState<string | null>(null)
+  const [failedUrl, setFailedUrl] = useState<string | null>(null)
+  const [fetchedAvatar, setFetchedAvatar] = useState<{ userId: string; url: string } | null>(null)
   const supabase = createClient()
-
-  useEffect(() => {
-    setImageError(false)
-    setFetchedUrl(null)
-  }, [avatarUrl, userId])
 
   useEffect(() => {
     let mounted = true
@@ -49,9 +45,9 @@ export default function UserAvatar({ avatarUrl, userId, userName, size = 'sm', c
           .single()
 
         if (profile?.avatar_url && mounted) {
-          setFetchedUrl(profile.avatar_url)
+          setFetchedAvatar({ userId, url: profile.avatar_url })
         }
-      } catch (err) {
+      } catch {
         // Fail silently
       }
     }
@@ -60,17 +56,20 @@ export default function UserAvatar({ avatarUrl, userId, userName, size = 'sm', c
     return () => { mounted = false }
   }, [userId, avatarUrl, supabase])
 
-  const finalUrl = avatarUrl || fetchedUrl
-  const showImage = finalUrl && !imageError
+  const finalUrl = avatarUrl || (fetchedAvatar && fetchedAvatar.userId === userId ? fetchedAvatar.url : null)
+  const showImage = finalUrl && failedUrl !== finalUrl
 
   return (
-    <div className={`${sizeClasses[size]} rounded-full bg-zinc-100 flex items-center justify-center overflow-hidden border border-zinc-200 shadow-inner shrink-0 ${className}`}>
+    <div className={`${sizeClasses[size]} relative rounded-full bg-zinc-100 flex items-center justify-center overflow-hidden border border-zinc-200 shadow-inner shrink-0 ${className}`}>
       {showImage ? (
-        <img
+        <Image
           src={finalUrl!}
           alt=""
+          fill
+          sizes="48px"
+          unoptimized
           className="w-full h-full object-cover"
-          onError={() => setImageError(true)}
+          onError={() => setFailedUrl(finalUrl)}
         />
       ) : userName ? (
         <span className="font-black text-zinc-400 uppercase">{userName[0]}</span>

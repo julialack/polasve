@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { ExternalLink } from 'lucide-react'
+import Image from 'next/image'
 
 interface Metadata {
   title?: string
@@ -42,8 +43,8 @@ export default function LinkPreview({ url }: { url: string }) {
     >
       <div className="flex flex-col sm:flex-row">
         {metadata.image && (
-          <div className="w-full sm:w-32 h-32 flex-shrink-0 bg-zinc-200 overflow-hidden border-b sm:border-b-0 sm:border-r border-zinc-100">
-            <img src={metadata.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div className="relative w-full sm:w-32 h-32 flex-shrink-0 bg-zinc-200 overflow-hidden border-b sm:border-b-0 sm:border-r border-zinc-100">
+            <Image src={metadata.image} alt="" fill sizes="(max-width: 640px) 100vw, 128px" unoptimized className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           </div>
         )}
         <div className="p-3 flex-1 min-w-0 flex flex-col justify-center">

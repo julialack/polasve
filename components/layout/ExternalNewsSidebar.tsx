@@ -2,11 +2,21 @@
 
 import { useEffect, useState } from 'react'
 import { Newspaper } from 'lucide-react'
+import Image from 'next/image'
 import { useTranslation } from '@/utils/translations'
+
+interface NewsItem {
+  title: string
+  link: string
+  image: string | null
+  source: string
+  color: string
+  pubDate: string
+}
 
 export default function ExternalNewsSidebar() {
   const { t } = useTranslation()
-  const [news, setNews] = useState<any[]>([])
+  const [news, setNews] = useState<NewsItem[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -19,7 +29,7 @@ export default function ExternalNewsSidebar() {
             setNews(data.slice(0, 4))
           }
         }
-      } catch (_e) {
+      } catch {
         // Ignore network fetch errors gracefully
       } finally {
         setLoading(false)
@@ -61,9 +71,9 @@ export default function ExternalNewsSidebar() {
       </div>
 
       <div className="p-3 space-y-3">
-        {news.map((item, idx) => (
+        {news.map((item) => (
           <a
-            key={idx}
+            key={item.link}
             href={item.link}
             target="_blank"
             rel="noopener noreferrer"
@@ -71,7 +81,7 @@ export default function ExternalNewsSidebar() {
           >
             <div className="w-12 h-12 relative flex-shrink-0 rounded-sm overflow-hidden border border-zinc-100 bg-zinc-50">
               {item.image ? (
-                <img src={item.image} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                <Image src={item.image} alt="" fill sizes="48px" unoptimized className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-[7px] font-black uppercase text-zinc-300 p-1 text-center leading-none" style={{ color: item.color }}>
                   {item.source}

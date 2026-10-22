@@ -49,7 +49,7 @@ export default async function AnnonsDetaljPage({
     .limit(4)
 
   const relatedAds = relatedAdsData || []
-  const memberYear = new Date(seller?.created_at || ad.created_at || Date.now()).getFullYear()
+  const memberYear = new Date(seller?.created_at || ad.created_at).getFullYear()
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col text-left font-sans">
@@ -131,7 +131,7 @@ export default async function AnnonsDetaljPage({
                   <div className="flex items-center gap-4 mb-6">
                     <div className="w-12 h-12 rounded-full bg-white border border-zinc-200 flex items-center justify-center overflow-hidden shadow-sm shrink-0">
                       {seller?.avatar_url ? (
-                        <img src={seller.avatar_url} alt="" className="w-full h-full object-cover" />
+                        <SafeImage src={seller.avatar_url} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <User size={24} className="text-zinc-300" />
                       )}
@@ -192,7 +192,7 @@ export default async function AnnonsDetaljPage({
 
                 <div className="p-6 border border-zinc-100 rounded-sm italic bg-white shadow-sm">
                   <h4 className="text-[10px] font-black uppercase tracking-widest mb-3 text-zinc-400">Säkerhetstips</h4>
-                  <p className="text-[10px] text-zinc-500 leading-relaxed">"Träffas alltid på en offentlig plats vid affärer. Betala aldrig i förskott."</p>
+                  <p className="text-[10px] text-zinc-500 leading-relaxed">&quot;Träffas alltid på en offentlig plats vid affärer. Betala aldrig i förskott.&quot;</p>
                 </div>
               </div>
 

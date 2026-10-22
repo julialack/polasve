@@ -14,12 +14,22 @@ interface PostBoxProps {
   hideCategorySelector?: boolean
 }
 
+interface PostBoxUser {
+  id: string
+  email?: string
+  user_metadata?: {
+    full_name?: string
+    avatar_url?: string
+  }
+}
+
 export default function PostBox({ defaultCategory = 'allmänt', hideCategorySelector = false }: PostBoxProps = {}) {
   const { t } = useTranslation()
   const [content, setContent] = useState('')
-  const [category, setCategory] = useState(defaultCategory.toLowerCase())
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const category = selectedCategory ?? defaultCategory.toLowerCase()
   const [loading, setLoading] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<PostBoxUser | null>(null)
   const supabase = createClient()
   const router = useRouter()
 
@@ -31,12 +41,6 @@ export default function PostBox({ defaultCategory = 'allmänt', hideCategorySele
     { id: 'hjälp', label: t.feedHelp, color: 'bg-orange-50 text-orange-700' },
     { id: 'mötesplats', label: t.feedMeetingPlace, color: 'bg-pink-50 text-pink-700' }
   ]
-
-  useEffect(() => {
-    if (defaultCategory) {
-      setCategory(defaultCategory.toLowerCase())
-    }
-  }, [defaultCategory])
 
   useEffect(() => {
     const getUser = async () => {
@@ -77,7 +81,7 @@ export default function PostBox({ defaultCategory = 'allmänt', hideCategorySele
     } else {
       toast.success('Inlägget har publicerats!')
       setContent('')
-      setCategory(defaultCategory.toLowerCase())
+      setSelectedCategory(null)
     }
     setLoading(false)
   }
@@ -109,7 +113,7 @@ export default function PostBox({ defaultCategory = 'allmänt', hideCategorySele
                   {feedCategories.map((cat) => (
                     <button
                       key={cat.id}
-                      onClick={() => setCategory(cat.id)}
+                      onClick={() => setSelectedCategory(cat.id)}
                       className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest px-2.5 md:px-3 py-1 rounded-full transition-all border ${
                         category === cat.id
                         ? 'border-sve-blue bg-sve-blue text-white shadow-md'

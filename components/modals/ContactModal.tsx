@@ -51,8 +51,8 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
       setMessage('')
       setEmail('')
       onClose()
-    } catch (err: any) {
-      toast.error(`${copy.contactFailed} ${err.message}`)
+    } catch (error: unknown) {
+      toast.error(`${copy.contactFailed} ${error instanceof Error ? error.message : ''}`)
     } finally {
       setLoading(false)
     }

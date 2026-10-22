@@ -1,8 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import Image, { type ImageProps } from 'next/image'
 
-interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface SafeImageProps extends Omit<ImageProps, 'src' | 'alt' | 'fill' | 'onError'> {
+  src?: string
+  alt?: string
   fallbackSrc?: string
 }
 
@@ -13,27 +16,23 @@ export default function SafeImage({
   className,
   ...props
 }: SafeImageProps) {
-  const [imgSrc, setImgSrc] = useState(src || fallbackSrc)
-  const [hasError, setHasError] = useState(false)
-
-  useEffect(() => {
-    setImgSrc(src || fallbackSrc)
-    setHasError(false)
-  }, [src, fallbackSrc])
+  const source = src || fallbackSrc
+  const [failedSource, setFailedSource] = useState<string | null>(null)
+  const imgSrc = failedSource === source ? fallbackSrc : source
 
   const handleError = () => {
-    if (!hasError) {
-      setImgSrc(fallbackSrc)
-      setHasError(true)
-    }
+    setFailedSource(source)
   }
 
-  if (!imgSrc && !src) return null
+  if (!imgSrc) return null
 
   return (
-    <img
+    <Image
       src={imgSrc || fallbackSrc}
       alt={alt}
+      fill
+      sizes="100vw"
+      unoptimized
       onError={handleError}
       className={className}
       {...props}

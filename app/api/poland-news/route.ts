@@ -8,6 +8,15 @@ const SOURCES = [
   { name: 'Polsat News', url: 'https://www.polsatnews.pl/rss/wszystkie.xml', color: '#e60000' },
 ];
 
+interface NewsItem {
+  title: string
+  link: string
+  image: string | null
+  source: string
+  color: string
+  pubDate: string
+}
+
 function extractTagContent(xml: string, tag: string) {
   const match = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, 'i'));
   if (!match) return '';
@@ -68,7 +77,7 @@ async function fetchSourceNews(source: typeof SOURCES[0]) {
         pubDate: extractTagContent(itemContent, 'pubDate')
       };
     }).filter(news => news.title && news.link);
-  } catch (_error) {
+  } catch {
     return [];
   }
 }
@@ -77,7 +86,7 @@ async function fetchSourceNews(source: typeof SOURCES[0]) {
  * Balances the news list so that a dominant source (like TVN24)
  * accounts for at most `maxRatio` (e.g. 50%) of the total items.
  */
-function balanceNewsSources(newsList: any[], maxRatio = 0.5, dominantSource = 'TVN24') {
+function balanceNewsSources(newsList: NewsItem[], maxRatio = 0.5, dominantSource = 'TVN24') {
   const tvn24Items = newsList.filter(item => item.source === dominantSource);
   const otherItems = newsList.filter(item => item.source !== dominantSource);
 
@@ -85,7 +94,7 @@ function balanceNewsSources(newsList: any[], maxRatio = 0.5, dominantSource = 'T
     return newsList;
   }
 
-  const result: any[] = [];
+  const result: NewsItem[] = [];
   let tvnIdx = 0;
   let othIdx = 0;
 
@@ -138,7 +147,7 @@ export async function GET() {
     const balancedNews = balanceNewsSources(sortedNews, 0.5, 'TVN24');
 
     return NextResponse.json(balancedNews.slice(0, 20));
-  } catch (_error) {
+  } catch {
     return NextResponse.json([]);
   }
 }

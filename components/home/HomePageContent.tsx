@@ -17,8 +17,20 @@ import MobileDonationBanner from "@/components/home/MobileDonationBanner";
 import { useTranslation } from "@/utils/translations";
 
 interface HomePageContentProps {
-  featuredAds: any[]
-  news: any[]
+  featuredAds: {
+    id: string
+    title: string
+    image_url: string | null
+    price: string | null
+    location: string
+    status?: string
+  }[]
+  news: {
+    id: string
+    title: string
+    description: string
+    image_url: string | null
+  }[]
 }
 
 export default function HomePageContent({ featuredAds, news }: HomePageContentProps) {

@@ -5,7 +5,7 @@ import InfoBar from "@/components/layout/InfoBar";
 import SidebarNav from "@/components/layout/SidebarNav";
 import SwedenMap from "@/components/map/SwedenMap";
 import Link from "next/link";
-import { Building2, Landmark, Library, GraduationCap, Church, MapPin, ExternalLink, Users, Wrench, Truck, Phone, Mail, ShieldCheck, PlusCircle, ArrowRight } from "lucide-react";
+import { Building2, Landmark, Library, GraduationCap, Church, MapPin, ExternalLink, Users, Phone, Mail, ShieldCheck, PlusCircle, ArrowRight } from "lucide-react";
 import { useTranslation } from "@/utils/translations";
 import { getMenuPageCopy } from "@/utils/menu-page-copy";
 

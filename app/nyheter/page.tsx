@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import Link from 'next/link'
 import Image from 'next/image'
-import { Newspaper, Calendar, Box, Info, Users, ArrowRight, Clock, Share2 } from 'lucide-react'
+import { Users, ArrowRight, Clock, Share2 } from 'lucide-react'
 import SearchBar from '@/components/search/SearchBar'
 import HomeHero from "@/components/HomeHero";
 import { toast } from 'sonner';
@@ -13,22 +12,40 @@ import PremiumAdsSidebar from "@/components/ads/PremiumAdsSidebar";
 import ContentActions from '@/components/ui/ContentActions';
 import { useTranslation } from '@/utils/translations';
 import { getMenuPageCopy } from '@/utils/menu-page-copy';
+import SafeImage from '@/components/ui/SafeImage'
+import type { User } from '@supabase/supabase-js'
+
+interface NewsArticle {
+  id: string
+  title: string
+  description: string
+  image_url: string
+  date: string
+}
+
+interface PolandNewsItem {
+  link: string
+  image?: string
+  color: string
+  source: string
+  title: string
+  pubDate: string
+}
 
 export default function NyheterPage() {
   const { lang } = useTranslation()
   const pageText = getMenuPageCopy(lang)
-  const [news, setNews] = useState<any[]>([])
-  const [polandNews, setPolandNews] = useState<any[]>([])
+  const [news, setNews] = useState<NewsArticle[]>([])
+  const [polandNews, setPolandNews] = useState<PolandNewsItem[]>([])
   const [loading, setLoading] = useState(true)
   const [polandLoading, setPolandLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
-  const supabase = createClient()
+  const [user, setUser] = useState<User | null>(null)
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true)
       const { data: newsData } = await supabase.from('news').select('*').order('created_at', { ascending: false })
-      if (newsData) setNews(newsData)
+      if (newsData) setNews(newsData as NewsArticle[])
       setLoading(false)
     }
 
@@ -38,13 +55,12 @@ export default function NyheterPage() {
     }
 
     const fetchPolandNews = async () => {
-      setPolandLoading(true)
       try {
         const res = await fetch('/api/poland-news')
         const data = await res.json()
-        if (Array.isArray(data)) setPolandNews(data)
-      } catch (e) {
-        console.error("Failed to fetch Poland news")
+        if (Array.isArray(data)) setPolandNews(data as PolandNewsItem[])
+      } catch (error) {
+        console.error('Failed to fetch Poland news:', error)
       } finally {
         setPolandLoading(false)
       }
@@ -53,7 +69,7 @@ export default function NyheterPage() {
     fetchData()
     fetchPolandNews()
     fetchUser()
-  }, [])
+  }, [supabase])
 
   const dateLocale = { pl: 'pl-PL', sv: 'sv-SE', ua: 'uk-UA', en: 'en-US' }[lang]
   const today = new Date().toLocaleDateString(dateLocale, {
@@ -115,7 +131,7 @@ export default function NyheterPage() {
                         >
                           <div className="aspect-video w-full relative mb-3 overflow-hidden rounded-sm bg-white border border-zinc-100">
                             {item.image ? (
-                              <img src={item.image} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                              <SafeImage src={item.image} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase text-zinc-300 p-4 text-center leading-tight" style={{ color: item.color }}>
                                 {item.source}

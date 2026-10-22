@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import Link from 'next/link'
 import Image from 'next/image'
-import { Newspaper, Calendar, Box, Info, Users, ArrowRight, MapPin } from 'lucide-react'
+import { Calendar, Users, MapPin } from 'lucide-react'
 import SearchBar from '@/components/search/SearchBar'
 import HomeHero from "@/components/HomeHero";
 import SidebarNav from "@/components/layout/SidebarNav";
@@ -12,22 +11,30 @@ import PremiumAdsSidebar from "@/components/ads/PremiumAdsSidebar";
 import { useTranslation } from "@/utils/translations";
 import { getMenuPageCopy } from "@/utils/menu-page-copy";
 
+interface EventItem {
+  id: string
+  image_url: string
+  date: string
+  title: string
+  description: string
+  location: string
+}
+
 export default function EvenemangPage() {
   const { lang } = useTranslation()
   const pageText = getMenuPageCopy(lang)
-  const [events, setEvents] = useState<any[]>([])
+  const [events, setEvents] = useState<EventItem[]>([])
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true)
       const { data: eventsData } = await supabase.from('events').select('*').order('created_at', { ascending: false })
-      if (eventsData) setEvents(eventsData)
+      if (eventsData) setEvents(eventsData as EventItem[])
       setLoading(false)
     }
-    fetchData()
-  }, [])
+    void fetchData()
+  }, [supabase])
 
   const dateLocale = { pl: 'pl-PL', sv: 'sv-SE', ua: 'uk-UA', en: 'en-US' }[lang]
   const today = new Date().toLocaleDateString(dateLocale, {

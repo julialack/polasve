@@ -29,7 +29,7 @@ export default function AdActions({ adId, adTitle, currentUserId }: AdActionsPro
           .eq('ad_id', adId)
           .maybeSingle()
         if (data) setIsSaved(true)
-      } catch (err) {
+      } catch {
         // Localstorage fallback
         const localSaved = JSON.parse(localStorage.getItem(`saved_ads_${currentUserId}`) || '[]')
         if (localSaved.includes(adId)) setIsSaved(true)

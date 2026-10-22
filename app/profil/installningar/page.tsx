@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   ArrowLeft,
   Loader2,
@@ -11,8 +13,6 @@ import {
   Smile,
   Shirt,
   Scissors,
-  Mars,
-  Venus,
   Palette,
   Glasses,
   Lock,
@@ -49,6 +49,22 @@ interface AvatarConfig {
   skinColor: string
   circleColor: string
   [key: string]: string
+}
+
+const DEFAULT_AVATAR_CONFIG: AvatarConfig = {
+  avatarStyle: 'Circle',
+  topType: 'ShortHairShortFlat',
+  hairColor: 'BrownDark',
+  facialHairType: 'Blank',
+  eyeType: 'Default',
+  eyebrowType: 'Default',
+  mouthType: 'Smile',
+  accessoriesType: 'Blank',
+  clotheType: 'ShirtCrewNeck',
+  clotheColor: 'Gray01',
+  graphicType: 'Bat',
+  skinColor: 'Light',
+  circleColor: '#65C9FF'
 }
 
 const OPTIONS = {
@@ -105,7 +121,7 @@ const CLOTHE_COLOR_MAP: Record<string, string> = {
 
 export default function InstallningarPage() {
   const [activeTab, setActiveTab] = useState('topType')
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [avatarSvg, setAvatarSvg] = useState<string>('')
@@ -132,21 +148,7 @@ export default function InstallningarPage() {
   const [showOtpInput, setShowOtpInput] = useState(false)
   const [verifying, setVerifying] = useState(false)
 
-  const [config, setConfig] = useState<AvatarConfig>({
-    avatarStyle: 'Circle',
-    topType: 'ShortHairShortFlat',
-    hairColor: 'BrownDark',
-    facialHairType: 'Blank',
-    eyeType: 'Default',
-    eyebrowType: 'Default',
-    mouthType: 'Smile',
-    accessoriesType: 'Blank',
-    clotheType: 'ShirtCrewNeck',
-    clotheColor: 'Gray01',
-    graphicType: 'Bat',
-    skinColor: 'Light',
-    circleColor: '#65C9FF'
-  })
+  const [config, setConfig] = useState<AvatarConfig>(DEFAULT_AVATAR_CONFIG)
 
   const [history, setHistory] = useState<AvatarConfig[]>([])
 
@@ -156,7 +158,7 @@ export default function InstallningarPage() {
   const refreshAvatarMarkup = useCallback(async (currentConfig: AvatarConfig) => {
     setImageLoading(true)
     try {
-      const params = new URLSearchParams(currentConfig as any).toString()
+      const params = new URLSearchParams(currentConfig).toString()
       const res = await fetch(`/api/avatar?${params}`)
       const svg = await res.text()
 
@@ -187,12 +189,12 @@ export default function InstallningarPage() {
       setShowPhone(currentUser.user_metadata?.show_phone_publicly || false)
 
       const savedUrl = currentUser.user_metadata?.avatar_url || ''
-      let finalConfig = { ...config }
+      const finalConfig = { ...DEFAULT_AVATAR_CONFIG }
       if (savedUrl.includes('api/avatar')) {
         try {
           const url = new URL(savedUrl, window.location.origin)
           url.searchParams.forEach((val, key) => { if (key in finalConfig) finalConfig[key] = val })
-        } catch (e) {}
+        } catch {}
       }
       setConfig(finalConfig)
       refreshAvatarMarkup(finalConfig)
@@ -233,9 +235,10 @@ export default function InstallningarPage() {
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!user) return
     setSaving(true)
     try {
-      const params = new URLSearchParams(config as any).toString()
+      const params = new URLSearchParams(config).toString()
       const avatarUrl = `/api/avatar?${params}`
 
       const { error } = await supabase.auth.updateUser({
@@ -272,7 +275,7 @@ export default function InstallningarPage() {
 
       toast.success('Dina inställningar har sparats!')
       router.refresh()
-    } catch (err) {
+    } catch {
       toast.error('Kunde inte spara inställningarna')
     } finally {
       setSaving(false)
@@ -292,6 +295,10 @@ export default function InstallningarPage() {
   }
 
   const handleChangePassword = async () => {
+    if (!user?.email) {
+      toast.error('Kunde inte hitta e-postadressen för kontot')
+      return
+    }
     if (!oldPassword) {
       toast.error('Du måste ange ditt nuvarande lösenord')
       return
@@ -319,8 +326,8 @@ export default function InstallningarPage() {
       setOldPassword('')
       setNewPassword('')
       setShowPasswordChange(false)
-    } catch (err: any) {
-      toast.error(err.message || 'Kunde inte byta lösenord')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Kunde inte byta lösenord')
     } finally {
       setChangingPassword(false)
     }
@@ -440,7 +447,7 @@ export default function InstallningarPage() {
                                 onClick={() => updateConfig('topType', opt)}
                                 className={`aspect-square rounded-full border-2 overflow-hidden bg-zinc-50 transition-all flex items-center justify-center p-1 ${config.topType === opt ? 'border-sve-blue shadow-lg scale-105' : 'border-zinc-100 hover:border-zinc-300'}`}
                              >
-                                <img src={`/api/avatar?topType=${opt}&hairColor=${config.hairColor}&skinColor=${config.skinColor}&circleColor=${encodeURIComponent(config.circleColor)}&clotheType=ShirtCrewNeck&clotheColor=Gray01`} className="w-full h-full object-cover" alt="" />
+                                <Image src={`/api/avatar?topType=${opt}&hairColor=${config.hairColor}&skinColor=${config.skinColor}&circleColor=${encodeURIComponent(config.circleColor)}&clotheType=ShirtCrewNeck&clotheColor=Gray01`} width={80} height={80} unoptimized className="w-full h-full object-cover" alt="" />
                              </button>
                            ))}
                          </div>
@@ -466,7 +473,7 @@ export default function InstallningarPage() {
                               onClick={() => updateConfig('facialHairType', opt)}
                               className={`aspect-square rounded-full border-2 overflow-hidden bg-zinc-50 transition-all flex items-center justify-center p-1 ${config.facialHairType === opt ? 'border-sve-blue shadow-lg scale-105' : 'border-zinc-100 hover:border-zinc-300'}`}
                            >
-                              <img src={`/api/avatar?facialHairType=${opt}&topType=NoHair&skinColor=${config.skinColor}&circleColor=${encodeURIComponent(config.circleColor)}&clotheType=ShirtCrewNeck&clotheColor=Gray01`} className="w-full h-full object-contain" alt="" />
+                              <Image src={`/api/avatar?facialHairType=${opt}&topType=NoHair&skinColor=${config.skinColor}&circleColor=${encodeURIComponent(config.circleColor)}&clotheType=ShirtCrewNeck&clotheColor=Gray01`} width={80} height={80} unoptimized className="w-full h-full object-contain" alt="" />
                            </button>
                          ))}
                        </div>
@@ -483,7 +490,7 @@ export default function InstallningarPage() {
                               onClick={() => updateConfig('eyeType', opt)}
                               className={`aspect-square rounded-full border-2 overflow-hidden bg-zinc-50 transition-all flex items-center justify-center p-1 ${config.eyeType === opt ? 'border-sve-blue shadow-lg scale-105' : 'border-zinc-100 hover:border-zinc-300'}`}
                            >
-                              <img src={`/api/avatar?eyeType=${opt}&topType=NoHair&skinColor=${config.skinColor}&circleColor=${encodeURIComponent(config.circleColor)}&clotheType=ShirtCrewNeck&clotheColor=Gray01`} className="w-full h-full object-contain" alt="" />
+                              <Image src={`/api/avatar?eyeType=${opt}&topType=NoHair&skinColor=${config.skinColor}&circleColor=${encodeURIComponent(config.circleColor)}&clotheType=ShirtCrewNeck&clotheColor=Gray01`} width={80} height={80} unoptimized className="w-full h-full object-contain" alt="" />
                            </button>
                          ))}
                        </div>
@@ -500,7 +507,7 @@ export default function InstallningarPage() {
                               onClick={() => updateConfig('mouthType', opt)}
                               className={`aspect-square rounded-full border-2 overflow-hidden bg-zinc-50 transition-all flex items-center justify-center p-1 ${config.mouthType === opt ? 'border-sve-blue shadow-lg scale-105' : 'border-zinc-100 hover:border-zinc-300'}`}
                            >
-                              <img src={`/api/avatar?mouthType=${opt}&topType=NoHair&skinColor=${config.skinColor}&circleColor=${encodeURIComponent(config.circleColor)}&clotheType=ShirtCrewNeck&clotheColor=Gray01`} className="w-full h-full object-contain" alt="" />
+                              <Image src={`/api/avatar?mouthType=${opt}&topType=NoHair&skinColor=${config.skinColor}&circleColor=${encodeURIComponent(config.circleColor)}&clotheType=ShirtCrewNeck&clotheColor=Gray01`} width={80} height={80} unoptimized className="w-full h-full object-contain" alt="" />
                            </button>
                          ))}
                        </div>
@@ -517,7 +524,7 @@ export default function InstallningarPage() {
                               onClick={() => updateConfig('accessoriesType', opt)}
                               className={`aspect-square rounded-full border-2 overflow-hidden bg-zinc-50 transition-all flex items-center justify-center p-1 ${config.accessoriesType === opt ? 'border-sve-blue shadow-lg scale-105' : 'border-zinc-100 hover:border-zinc-300'}`}
                            >
-                              <img src={`/api/avatar?accessoriesType=${opt}&topType=NoHair&skinColor=${config.skinColor}&circleColor=${encodeURIComponent(config.circleColor)}&clotheType=ShirtCrewNeck&clotheColor=Gray01`} className="w-full h-full object-contain" alt="" />
+                              <Image src={`/api/avatar?accessoriesType=${opt}&topType=NoHair&skinColor=${config.skinColor}&circleColor=${encodeURIComponent(config.circleColor)}&clotheType=ShirtCrewNeck&clotheColor=Gray01`} width={80} height={80} unoptimized className="w-full h-full object-contain" alt="" />
                            </button>
                          ))}
                        </div>
@@ -535,7 +542,7 @@ export default function InstallningarPage() {
                                 onClick={() => updateConfig('clotheType', opt)}
                                 className={`aspect-square rounded-sm border-2 overflow-hidden bg-zinc-50 transition-all flex items-center justify-center p-2 ${config.clotheType === opt ? 'border-sve-blue shadow-lg scale-105' : 'border-zinc-100 hover:border-zinc-300'}`}
                              >
-                                <img src={`/api/avatar?clotheType=${opt}&topType=NoHair&skinColor=${config.skinColor}&clotheColor=${config.clotheColor}&circleColor=${encodeURIComponent(config.circleColor)}`} className="w-full h-full object-contain translate-y-3" alt="" />
+                                <Image src={`/api/avatar?clotheType=${opt}&topType=NoHair&skinColor=${config.skinColor}&clotheColor=${config.clotheColor}&circleColor=${encodeURIComponent(config.circleColor)}`} width={80} height={80} unoptimized className="w-full h-full object-contain translate-y-3" alt="" />
                              </button>
                            ))}
                          </div>
@@ -556,7 +563,7 @@ export default function InstallningarPage() {
                        <label className="block text-[10px] font-black uppercase text-zinc-600 mb-4 tracking-widest">Tryck på tröjan</label>
                        {config.clotheType !== 'GraphicShirt' && (
                          <div className="bg-amber-50 p-4 border border-amber-100 rounded-sm mb-4">
-                           <p className="text-[10px] font-bold text-amber-700 uppercase italic text-left">Tips: Välj "Graphic Shirt" under Kläder för att se trycket!</p>
+                           <p className="text-[10px] font-bold text-amber-700 uppercase italic text-left">Tips: Välj &quot;Graphic Shirt&quot; under Kläder för att se trycket!</p>
                          </div>
                        )}
                        <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-3">
@@ -566,7 +573,7 @@ export default function InstallningarPage() {
                               onClick={() => updateConfig('graphicType', opt)}
                               className={`aspect-square rounded-full border-2 overflow-hidden bg-zinc-50 transition-all flex items-center justify-center p-1 ${config.graphicType === opt ? 'border-sve-blue shadow-lg scale-105' : 'border-zinc-100 hover:border-zinc-300'}`}
                            >
-                              <img src={`/api/avatar?graphicType=${opt}&clotheType=GraphicShirt&topType=NoHair&skinColor=${config.skinColor}&circleColor=${encodeURIComponent(config.circleColor)}`} className="w-full h-full object-contain" alt="" />
+                              <Image src={`/api/avatar?graphicType=${opt}&clotheType=GraphicShirt&topType=NoHair&skinColor=${config.skinColor}&circleColor=${encodeURIComponent(config.circleColor)}`} width={80} height={80} unoptimized className="w-full h-full object-contain" alt="" />
                            </button>
                          ))}
                        </div>
@@ -583,7 +590,7 @@ export default function InstallningarPage() {
                             onClick={() => updateConfig('skinColor', color)}
                             className={`aspect-square rounded-full border-2 overflow-hidden bg-zinc-50 transition-all flex items-center justify-center p-1 ${config.skinColor === color ? 'border-sve-blue shadow-lg scale-105' : 'border-zinc-100 hover:border-zinc-300'}`}
                            >
-                            <img src={`/api/avatar?skinColor=${color}&topType=NoHair&circleColor=${encodeURIComponent(config.circleColor)}&clotheType=ShirtCrewNeck&clotheColor=Gray01`} className="w-full h-full object-cover" alt="" />
+                            <Image src={`/api/avatar?skinColor=${color}&topType=NoHair&circleColor=${encodeURIComponent(config.circleColor)}&clotheType=ShirtCrewNeck&clotheColor=Gray01`} width={80} height={80} unoptimized className="w-full h-full object-cover" alt="" />
                            </button>
                          ))}
                        </div>

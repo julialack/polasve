@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { useRouter } from 'next/navigation'
 import {
   Building2,
   Send,
@@ -10,8 +9,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   ShieldCheck,
-  Clock,
-  CreditCard,
   Camera,
   X
 } from 'lucide-react'
@@ -19,12 +16,6 @@ import { toast } from 'sonner'
 import HomeHero from '@/components/HomeHero'
 import Link from 'next/link'
 import Image from 'next/image'
-
-const PRICING = [
-  { days: "7 dagar", price: "249 kr", desc: "Perfekt för korta kampanjer." },
-  { days: "30 dagar", price: "799 kr", desc: "Mest populär för långsiktig synlighet.", featured: true },
-  { days: "90 dagar", price: "1999 kr", desc: "Maximal effekt för etablerade företag." },
-]
 
 export default function AnnonseraForetagPage() {
   const [loading, setLoading] = useState(false)
@@ -34,13 +25,12 @@ export default function AnnonseraForetagPage() {
   const [contactPerson, setContactPerson] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
-  const [duration, setDuration] = useState('30 dagar')
+  const duration = '30 dagar'
   const [message, setMessage] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   const supabase = createClient()
-  const router = useRouter()
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -88,9 +78,9 @@ export default function AnnonseraForetagPage() {
 
       setSubmitted(true)
       toast.success('Din förfrågan har skickats!')
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Business ad request error:", err)
-      const errorMsg = err.message || err.details || "Okänt fel uppstod"
+      const errorMsg = err instanceof Error ? err.message : "Okänt fel uppstod"
       toast.error(`Kunde inte skicka förfrågan: ${errorMsg}`)
     } finally {
       setLoading(false)

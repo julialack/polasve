@@ -13,15 +13,11 @@ export default function RedigeraAnnonsPage({ params }: { params: Promise<{ id: s
   const { id } = use(params)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [ad, setAd] = useState<any>(null)
-
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('')
   const [price, setPrice] = useState('')
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
-  const [extraImages, setExtraImages] = useState<string[]>([])
   const [extraFiles, setExtraFiles] = useState<(File | null)[]>([null, null])
   const [extraPreviews, setExtraPreviews] = useState<(string | null)[]>([null, null])
   const [selectedLangs, setSelectedLangs] = useState<string[]>([])
@@ -51,14 +47,11 @@ export default function RedigeraAnnonsPage({ params }: { params: Promise<{ id: s
         return
       }
 
-      setAd(data)
       setTitle(data.title)
       setCategory(data.category)
       setPrice(data.price || '')
       setLocation(data.location)
       setDescription(data.description)
-      setImageUrl(data.image_url)
-      setExtraImages(data.extra_images || [])
       setExtraPreviews(data.extra_images || [null, null])
       setSelectedLangs(data.languages || [])
       setLoading(false)

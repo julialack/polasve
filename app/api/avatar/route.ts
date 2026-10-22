@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
         'Access-Control-Allow-Origin': '*',
       },
     })
-  } catch (error) {
+  } catch {
     return new Response('<svg xmlns="http://www.w3.org/2000/svg" />', {
       status: 500,
       headers: { 'Content-Type': 'image/svg+xml' }

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useSyncExternalStore } from 'react'
 
 export type LanguageCode = 'pl' | 'sv' | 'ua' | 'en'
 
@@ -52,6 +52,7 @@ export interface TranslationDict {
   createAdBtn: string
   searchPlaceholder: string
   searchBtn: string
+  clearSearch: string
   advertiseBtn: string
   contactBtn: string
   loginRegisterBtn: string
@@ -168,6 +169,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     createAdBtn: 'Dodaj ogłoszenie',
     searchPlaceholder: 'Szukaj pracy, mieszkań, usług i ogłoszeń...',
     searchBtn: 'Szukaj',
+    clearSearch: 'Wyczyść wyszukiwanie',
     advertiseBtn: 'Dodaj reklamę',
     contactBtn: 'Pytania? Napisz do nas!',
     loginRegisterBtn: 'Zaloguj się / Rejestracja',
@@ -263,8 +265,8 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     sellGiveaway: 'Sälj / Bortskänkes',
     exchange: 'Bytes',
     findJob: 'Leta jobb',
-    housingWanted: 'Mieszkanie - Sökes',
-    housingRent: 'Mieszkanie - Uthyres',
+    housingWanted: 'Bostad sökes',
+    housingRent: 'Bostad uthyres',
     commercialLocales: 'Lokaler',
     tipsTricks: 'Tips & Guider',
     institutions: 'Institutioner',
@@ -276,6 +278,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     createAdBtn: 'Skapa Annons',
     searchPlaceholder: 'Sök jobb, bostäder, tjänster och prylannonser...',
     searchBtn: 'Sök',
+    clearSearch: 'Rensa sökningen',
     advertiseBtn: 'Lägg reklam',
     contactBtn: 'Frågor? Kontakta oss!',
     loginRegisterBtn: 'Bli medlem / Logga in',
@@ -384,6 +387,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     createAdBtn: 'Створити оголошення',
     searchPlaceholder: 'Шукати роботу, житло, послуги...',
     searchBtn: 'Пошук',
+    clearSearch: 'Очистити пошук',
     advertiseBtn: 'Додати рекламу',
     contactBtn: 'Питання? Напишіть нам!',
     loginRegisterBtn: 'Увійти / Реєстрація',
@@ -492,6 +496,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDict> = {
     createAdBtn: 'Post Ad',
     searchPlaceholder: 'Search jobs, housing, services, and ads...',
     searchBtn: 'Search',
+    clearSearch: 'Clear search',
     advertiseBtn: 'Advertise',
     contactBtn: 'Questions? Contact us!',
     loginRegisterBtn: 'Sign In / Register',
@@ -565,43 +570,41 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<LanguageCode>('pl')
+const DEFAULT_LANGUAGE: LanguageCode = 'pl'
 
-  useEffect(() => {
-    // Check localStorage. If no language was saved, DEFAULT to 'pl' (Polish)
-    const saved = localStorage.getItem('polasve_lang') as LanguageCode
-    if (saved && TRANSLATIONS[saved]) {
-      setLangState(saved)
-    } else {
-      // Always start with PL if no preference stored
-      setLangState('pl')
-      localStorage.setItem('polasve_lang', 'pl')
-    }
+function getStoredLanguage(): LanguageCode {
+  if (typeof window === 'undefined') return DEFAULT_LANGUAGE
+  const saved = localStorage.getItem('polasve_lang')
+  return saved && Object.prototype.hasOwnProperty.call(TRANSLATIONS, saved)
+    ? saved as LanguageCode
+    : DEFAULT_LANGUAGE
+}
 
-    const handleLangChange = () => {
-      const updated = localStorage.getItem('polasve_lang') as LanguageCode
-      if (updated && TRANSLATIONS[updated]) {
-        setLangState(updated)
-      }
-    }
-
-    window.addEventListener('polasve_lang_changed', handleLangChange)
-    return () => window.removeEventListener('polasve_lang_changed', handleLangChange)
-  }, [])
-
-  const setLang = (code: LanguageCode) => {
-    if (TRANSLATIONS[code]) {
-      setLangState(code)
-      localStorage.setItem('polasve_lang', code)
-      window.dispatchEvent(new Event('polasve_lang_changed'))
-    }
+function subscribeToLanguageChanges(onChange: () => void) {
+  window.addEventListener('polasve_lang_changed', onChange)
+  window.addEventListener('storage', onChange)
+  return () => {
+    window.removeEventListener('polasve_lang_changed', onChange)
+    window.removeEventListener('storage', onChange)
   }
+}
 
-  const t = TRANSLATIONS[lang] || TRANSLATIONS.pl
+function setStoredLanguage(code: LanguageCode) {
+  if (!(code in TRANSLATIONS)) return
+  localStorage.setItem('polasve_lang', code)
+  window.dispatchEvent(new Event('polasve_lang_changed'))
+}
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const lang = useSyncExternalStore(
+    subscribeToLanguageChanges,
+    getStoredLanguage,
+    () => DEFAULT_LANGUAGE,
+  )
+  const t = TRANSLATIONS[lang]
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t }}>
+    <LanguageContext.Provider value={{ lang, setLang: setStoredLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   )
@@ -610,29 +613,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 export function useTranslation() {
   const context = useContext(LanguageContext)
   if (!context) {
-    // Fallback if component is outside LanguageProvider
-    const [fallbackLang, setFallbackLang] = useState<LanguageCode>('pl')
-
-    useEffect(() => {
-      const saved = localStorage.getItem('polasve_lang') as LanguageCode
-      if (saved && TRANSLATIONS[saved]) {
-        setFallbackLang(saved)
-      }
-    }, [])
-
-    const setLang = (code: LanguageCode) => {
-      if (TRANSLATIONS[code]) {
-        setFallbackLang(code)
-        localStorage.setItem('polasve_lang', code)
-        window.dispatchEvent(new Event('polasve_lang_changed'))
-      }
-    }
-
-    return {
-      lang: fallbackLang,
-      setLang,
-      t: TRANSLATIONS[fallbackLang] || TRANSLATIONS.pl,
-    }
+    throw new Error('useTranslation must be used within a LanguageProvider')
   }
   return context
 }

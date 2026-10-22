@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import HomeHero from "@/components/HomeHero";
 import InfoBar from "@/components/layout/InfoBar";
@@ -14,6 +14,12 @@ import Link from "next/link";
 import { useTranslation } from "@/utils/translations";
 import { getMenuPageCopy } from "@/utils/menu-page-copy";
 
+interface NewsItem {
+  id: string
+  title: string
+  image_url: string | null
+}
+
 function StodOssContent() {
   const { lang } = useTranslation()
   const { donation: copy } = getMenuPageCopy(lang)
@@ -23,8 +29,8 @@ function StodOssContent() {
   const [verifiedDonation, setVerifiedDonation] = useState<{ sessionId: string; amount: number } | null>(null)
   const verifiedAmount = verifiedDonation?.sessionId === sessionId ? verifiedDonation.amount : null
 
-  const [news, setNews] = useState<any[]>([])
-  const supabase = createClient()
+  const [news, setNews] = useState<NewsItem[]>([])
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     if (!sessionId || !isSuccess) return
@@ -56,7 +62,7 @@ function StodOssContent() {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(4)
-      if (data) setNews(data)
+      if (data) setNews(data as NewsItem[])
     }
     fetchNews()
   }, [supabase])

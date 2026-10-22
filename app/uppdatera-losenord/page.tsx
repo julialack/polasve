@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, Loader2 } from "lucide-react";
@@ -14,22 +14,26 @@ export default function UppdateraLosenordPage() {
   const [loading, setLoading] = useState(false);
   const [sessionError, setSessionError] = useState("");
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const { lang } = useTranslation();
   const copy = getMenuPageCopy(lang).account;
 
   useEffect(() => {
+    let cancelled = false
     const verifySession = async () => {
       // Wäit for Supabase to process the reset link
       await new Promise(resolve => setTimeout(resolve, 500));
       
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      if (!cancelled && !session) {
         setSessionError(copy.expiredSession);
       }
     };
-    verifySession();
-  }, [supabase.auth]);
+    void verifySession();
+    return () => {
+      cancelled = true
+    }
+  }, [copy.expiredSession, supabase]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();

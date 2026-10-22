@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, Suspense } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
@@ -26,6 +26,7 @@ interface Ad {
   price: string | null
   created_at: string
   is_premium: boolean
+  edited?: boolean
   status?: 'active' | 'sold' | 'finished'
 }
 
@@ -50,37 +51,42 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-
-    // Build Query for main ads - prioritize premium
-    let query = supabase
-      .from('ads')
-      .select('*')
-      .eq('payment_status', 'paid')
-      .order('is_premium', { ascending: false })
-      .order('created_at', { ascending: false })
-
-    // Apply category filter
-    if (Array.isArray(categoryFilter)) {
-        query = query.in('category', categoryFilter)
-    } else {
-        query = query.eq('category', categoryFilter)
-    }
-
-    // Apply location filter (from the map)
-    if (locationFilter) {
-      query = query.ilike('location', `%${locationFilter}%`)
-    }
-
-    const { data } = await query
-    if (data) setAds(data)
-    setLoading(false)
-  }, [categoryFilter, locationFilter, supabase])
-
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    let isCurrent = true
+
+    const fetchData = async () => {
+      // Build Query for main ads - prioritize premium
+      let query = supabase
+        .from('ads')
+        .select('*')
+        .eq('payment_status', 'paid')
+        .order('is_premium', { ascending: false })
+        .order('created_at', { ascending: false })
+
+      if (Array.isArray(categoryFilter)) {
+        query = query.in('category', categoryFilter)
+      } else {
+        query = query.eq('category', categoryFilter)
+      }
+
+      if (locationFilter) {
+        query = query.ilike('location', `%${locationFilter}%`)
+      }
+
+      const { data, error } = await query
+      if (error) {
+        console.error('Error fetching category ads:', error)
+      }
+      if (!isCurrent) return
+      if (data) setAds(data)
+      setLoading(false)
+    }
+
+    void fetchData()
+    return () => {
+      isCurrent = false
+    }
+  }, [categoryFilter, locationFilter, supabase])
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fa] font-sans">
@@ -195,7 +201,7 @@ function LandingContent({ title, description, categoryFilter, icon }: CategoryLa
                                   <span className="text-zinc-300">•</span>
                                   <span className="text-zinc-400 font-bold flex items-center gap-1">
                                     {new Date(ad.created_at).toLocaleDateString()}
-                                    {(ad as any).edited && <span className="italic font-normal lowercase tracking-normal text-zinc-400">{ui.edited}</span>}
+                                    {ad.edited && <span className="italic font-normal lowercase tracking-normal text-zinc-400">{ui.edited}</span>}
                                   </span>
                                 </div>
 

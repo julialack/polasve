@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { ChevronLeft, ChevronRight, Maximize2, X, ShieldCheck } from 'lucide-react'
 
 interface AdImageGalleryProps {
@@ -75,16 +76,22 @@ export default function AdImageGallery({
           onClick={() => setFullscreen(true)}
         >
           {/* Ambient blurred background */}
-          <img
+          <Image
             src={currentImage}
             alt=""
+            fill
+            sizes="100vw"
+            unoptimized
             className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-110 pointer-events-none transition-all duration-500"
           />
 
           {/* Main Image */}
-          <img
+          <Image
             src={currentImage}
             alt={title}
+            fill
+            sizes="100vw"
+            unoptimized
             className="relative z-10 max-w-full max-h-full object-contain mx-auto shadow-2xl p-2 transition-transform duration-300"
           />
 
@@ -146,7 +153,7 @@ export default function AdImageGallery({
                     : 'border-white/20 opacity-60 hover:opacity-100 hover:border-white/50'
                 }`}
               >
-                <img src={img} alt="" className="w-full h-full object-cover" />
+                <Image src={img} alt="" fill sizes="64px" unoptimized className="w-full h-full object-cover" />
               </button>
             ))}
           </div>
@@ -175,9 +182,12 @@ export default function AdImageGallery({
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            <img
+            <Image
               src={currentImage}
               alt=""
+              fill
+              sizes="100vw"
+              unoptimized
               className="max-w-full max-h-full object-contain mx-auto shadow-2xl rounded-sm"
             />
 
@@ -206,11 +216,11 @@ export default function AdImageGallery({
                 <button
                   key={idx}
                   onClick={() => setCurrentIndex(idx)}
-                  className={`w-12 h-12 rounded-sm overflow-hidden border-2 transition-all ${
+                  className={`relative w-12 h-12 rounded-sm overflow-hidden border-2 transition-all ${
                     currentIndex === idx ? 'border-red-500 scale-110 opacity-100' : 'border-white/20 opacity-50'
                   }`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <Image src={img} alt="" fill sizes="48px" unoptimized className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>

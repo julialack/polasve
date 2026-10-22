@@ -27,10 +27,15 @@ import {
 } from "lucide-react";
 import ContactModal from "@/components/modals/ContactModal";
 
+interface FeaturedAd {
+  id: string;
+  title: string;
+}
+
 export default function SidebarNav() {
   const { t } = useTranslation();
   const pathname = usePathname();
-  const [featuredAd, setFeaturedAd] = useState<any>(null);
+  const [featuredAd, setFeaturedAd] = useState<FeaturedAd | null>(null);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const supabase = createClient();
 
@@ -125,7 +130,7 @@ export default function SidebarNav() {
 
       {/* Sidebar Header */}
       <section className="bg-white shadow-sm overflow-hidden border border-zinc-200 rounded-sm">
-        <div className="bg-sve-blue text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">{t.navigationHeader}</div>
+        <div className="bg-sve-blue text-white px-4 py-2 text-xs font-bold uppercase tracking-wider">{t.menuTitle}</div>
       </section>
 
       {/* Navigation Sections */}
